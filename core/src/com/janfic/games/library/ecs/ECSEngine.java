@@ -11,14 +11,11 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.components.*;
 import com.janfic.games.library.ecs.systems.RenderSystem;
-import com.janfic.games.library.graphics.shaders.PixelShader;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
 

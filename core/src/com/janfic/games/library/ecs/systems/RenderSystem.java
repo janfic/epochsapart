@@ -1,10 +1,8 @@
 package com.janfic.games.library.ecs.systems;
 
 import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
@@ -13,12 +11,8 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.*;
-import com.janfic.games.library.graphics.shaders.PixelPostProcessShader;
 import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.ZComparator;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class RenderSystem extends EntitySystem implements EntityListener {
 
