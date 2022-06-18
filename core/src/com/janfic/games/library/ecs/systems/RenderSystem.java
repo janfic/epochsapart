@@ -3,18 +3,18 @@ package com.janfic.games.library.ecs.systems;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.*;
 import com.janfic.games.library.graphics.shaders.PixelPostProcessShader;
+import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.ZComparator;
 
 import java.nio.ByteBuffer;
@@ -30,8 +30,9 @@ public class RenderSystem extends EntitySystem implements EntityListener {
     private ZComparator zComparator;
 
     OrthographicCamera camera;
-    PixelPostProcessShader shader;
     CameraInputController camController;
+
+    RenderContext context;
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -43,9 +44,7 @@ public class RenderSystem extends EntitySystem implements EntityListener {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0);
         camera.update();
-        shader = new PixelPostProcessShader();
-        shader.init();
-
+        context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
     }
 
     @Override
@@ -60,6 +59,7 @@ public class RenderSystem extends EntitySystem implements EntityListener {
             ModelBatchComponent modelBatchComponent = Mapper.modelBatchComponentMapper.get(rendererEntity);
             SpriteBatchComponent spriteBatchComponent = Mapper.spriteBatchComponentMapper.get(rendererEntity);
             FrameBufferComponent frameBufferComponent = Mapper.frameBufferComponentMapper.get(rendererEntity);
+            PostProcessorsComponent postProcessorsComponent = Mapper.postProcessComponentMapper.get(rendererEntity);
 
             zComparator.setCameraComponent(cameraComponent);
             renderableEntities.sort(zComparator);
@@ -68,9 +68,11 @@ public class RenderSystem extends EntitySystem implements EntityListener {
                 camController = new CameraInputController(cameraComponent.camera);
                 Gdx.input.setInputProcessor(camController);
             }
-
+            context.begin();
             frameBufferComponent.frameBuffer.begin();
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+            Gdx.gl.glEnable(GL30.GL_BLEND);
+            Gdx.gl.glEnable(GL30.GL_DEPTH_TEST);
+            Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
             for (Entity renderableEntity : renderableEntities) {
                 PositionComponent positionComponent = Mapper.positionComponentMapper.get(renderableEntity);
@@ -80,18 +82,6 @@ public class RenderSystem extends EntitySystem implements EntityListener {
                 ShaderComponent shaderComponent = Mapper.shaderComponentMapper.get(renderableEntity);
                 EnvironmentComponent environmentComponent = Mapper.environmentComponentMapper.get(renderableEntity);
                 ShaderProgram.pedantic = false;
-
-//                spriteBatchComponent.spriteBatch.setProjectionMatrix(cameraComponent.camera.combined);
-//                spriteBatchComponent.spriteBatch.begin();
-//                spriteBatchComponent.spriteBatch.enableBlending();
-//
-//                if(textureComponent != null) {
-//                    spriteBatchComponent.spriteBatch.draw(textureComponent.texture, positionComponent.position.x, positionComponent.position.y);
-//                }
-//                if(textureRegionComponent != null) {
-//                    spriteBatchComponent.spriteBatch.draw(textureRegionComponent.textureRegion, positionComponent.position.x, positionComponent.position.y);
-//                }
-//                spriteBatchComponent.spriteBatch.end();
 
                 modelBatchComponent.modelBatch.begin(cameraComponent.camera);
                 if(modelInstanceComponent != null && environmentComponent != null && shaderComponent != null) {
@@ -109,13 +99,21 @@ public class RenderSystem extends EntitySystem implements EntityListener {
                 modelBatchComponent.modelBatch.end();
             }
             frameBufferComponent.frameBuffer.end();
+            context.end();
+
+            Texture colorTexture = frameBufferComponent.frameBuffer.getTextureAttachments().get(FrameBufferComponent.DIFFUSE_ATTACHMENT);
+            if(postProcessorsComponent != null && postProcessorsComponent.processors != null) {
+                FrameBuffer current = frameBufferComponent.frameBuffer;
+                for (PostProcess processor : postProcessorsComponent.processors) {
+                    processor.render(current, camera, context);
+                    current = processor.getFrameBuffer();
+                    colorTexture = current.getTextureAttachments().get(FrameBufferComponent.DIFFUSE_ATTACHMENT);
+                }
+            }
 
             spriteBatchComponent.spriteBatch.begin();
-            spriteBatchComponent.spriteBatch.setShader(shader.getProgram());
-            shader.getProgram().setUniformi("u_depth_buffer", frameBufferComponent.frameBuffer.getDepthBufferHandle());
-            spriteBatchComponent.spriteBatch.disableBlending();
             spriteBatchComponent.spriteBatch.setProjectionMatrix(camera.combined);
-            spriteBatchComponent.spriteBatch.draw(frameBufferComponent.frameBuffer.getColorBufferTexture(), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0,0,1, 1);
+            spriteBatchComponent.spriteBatch.draw(colorTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0,0,1, 1);
             spriteBatchComponent.spriteBatch.end();
         }
     }

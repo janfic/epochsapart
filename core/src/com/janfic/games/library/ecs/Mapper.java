@@ -14,8 +14,7 @@ public class Mapper {
     public static final ComponentMapper<EnvironmentComponent>     environmentComponentMapper = ComponentMapper.getFor(EnvironmentComponent.class);
     public static final ComponentMapper<FrameBufferComponent>     frameBufferComponentMapper = ComponentMapper.getFor(FrameBufferComponent.class);
     public static final ComponentMapper<ModelBatchComponent>      modelBatchComponentMapper = ComponentMapper.getFor(ModelBatchComponent.class);
-    public static final ComponentMapper<PostProcessComponent>     postProcessComponentMapper = ComponentMapper.getFor(PostProcessComponent.class);
-    public static final ComponentMapper<RendererComponent>        rendererComponentMapper = ComponentMapper.getFor(RendererComponent.class);
+    public static final ComponentMapper<PostProcessorsComponent>     postProcessComponentMapper = ComponentMapper.getFor(PostProcessorsComponent.class);
     public static final ComponentMapper<SpriteBatchComponent>     spriteBatchComponentMapper = ComponentMapper.getFor(SpriteBatchComponent.class);
     public static final ComponentMapper<ShaderComponent>          shaderComponentMapper = ComponentMapper.getFor(ShaderComponent.class);
 

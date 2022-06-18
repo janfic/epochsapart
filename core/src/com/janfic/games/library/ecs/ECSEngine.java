@@ -10,13 +10,19 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.components.*;
 import com.janfic.games.library.ecs.systems.RenderSystem;
 import com.janfic.games.library.graphics.shaders.PixelShader;
+import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
+
+import java.util.ArrayList;
 
 public class ECSEngine extends Engine {
     public ECSEngine() {
@@ -29,11 +35,11 @@ public class ECSEngine extends Engine {
         // Entities
         Entity rendererEntity = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
-        cameraComponent.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cameraComponent.camera.position.set(2,2,2);
+        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cameraComponent.camera.position.set(100,100,400);
         cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
-        cameraComponent.camera.far = 300f;
+        cameraComponent.camera.far = 1000f;
         cameraComponent.camera.update();
 
         SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();
@@ -42,13 +48,22 @@ public class ECSEngine extends Engine {
         ModelBatchComponent modelBatchComponent = new ModelBatchComponent();
         modelBatchComponent.modelBatch = new ModelBatch();
 
+        GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        frameBufferBuilder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
+        frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
         FrameBufferComponent frameBufferComponent = new FrameBufferComponent();
-        frameBufferComponent.frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        frameBufferComponent.frameBuffer = frameBufferBuilder.build();
+
+        PostProcessorsComponent postProcessesComponent = new PostProcessorsComponent();
+        postProcessesComponent.processors = new ArrayList<>();
+        postProcessesComponent.processors.add(new DitherPostProcess(5));
+        postProcessesComponent.processors.add(new PixelizePostProcess(5));
 
         rendererEntity.add(cameraComponent);
         rendererEntity.add(spriteBatchComponent);
         rendererEntity.add(modelBatchComponent);
         rendererEntity.add(frameBufferComponent);
+        rendererEntity.add(postProcessesComponent);
 
         // Sphere Entity
         Entity sphere = new Entity();
@@ -57,8 +72,8 @@ public class ECSEngine extends Engine {
 
         ModelComponent modelComponent = new ModelComponent();
         //modelComponent.model = new ModelBuilder().createSphere(1, 1,1, 100, 100, new Material(), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
-        modelComponent.model = new ModelBuilder().createBox(1, 1,1,
-                new Material(ColorAttribute.createDiffuse(Color.RED)),
+        modelComponent.model = new ModelBuilder().createBox(200, 200,200,
+                new Material(ColorAttribute.createDiffuse(Color.WHITE)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
         );
 
@@ -68,11 +83,7 @@ public class ECSEngine extends Engine {
         EnvironmentComponent environmentComponent = new EnvironmentComponent();
         environmentComponent.environment = new Environment();
         environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-        //environmentComponent.environment.add(new PointLight().set(Color.GREEN, new Vector3(2f,3,0), 10f));
-
-        ShaderComponent shaderComponent = new ShaderComponent();
-        shaderComponent.shader = new PixelShader();
-        shaderComponent.shader.init();
+        environmentComponent.environment.add(new DirectionalLight().set(0.4f, 0.4f, 0.4f, -0.1f, -0.8f, -0.2f));
 
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.texture = new Texture("badlogic.jpg");
@@ -81,8 +92,6 @@ public class ECSEngine extends Engine {
         sphere.add(modelComponent);
         sphere.add(modelInstanceComponent);
         sphere.add(environmentComponent);
-        //sphere.add(textureComponent);
-        //sphere.add(shaderComponent);
 
         addEntity(rendererEntity);
         addEntity(sphere);
