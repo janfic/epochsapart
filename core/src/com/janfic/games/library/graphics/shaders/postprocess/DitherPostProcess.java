@@ -2,12 +2,13 @@ package com.janfic.games.library.graphics.shaders.postprocess;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 import java.util.Arrays;
 
 public class DitherPostProcess extends PostProcess{
-    int pixelSize;
+    public int pixelSize;
     final int u_pixelSize;
 
     public DitherPostProcess(int pixelSize) {
@@ -17,8 +18,8 @@ public class DitherPostProcess extends PostProcess{
     }
 
     @Override
-    protected void setUniforms(Camera camera) {
-        super.setUniforms(camera);
+    protected void setUniforms(Camera camera, RenderContext renderContext) {
+        super.setUniforms(camera, renderContext);
         getProgram().setUniformf(u_pixelSize, (float)pixelSize);
     }
 }

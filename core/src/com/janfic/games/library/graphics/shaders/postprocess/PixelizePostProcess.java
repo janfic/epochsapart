@@ -2,12 +2,13 @@ package com.janfic.games.library.graphics.shaders.postprocess;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 
 public class PixelizePostProcess extends PostProcess{
 
-    int pixelSize;
+    public int pixelSize;
     final int u_pixelSize, u_screenSize;
 
     public PixelizePostProcess(int pixelSize) {
@@ -18,8 +19,8 @@ public class PixelizePostProcess extends PostProcess{
     }
 
     @Override
-    protected void setUniforms(Camera camera) {
-        super.setUniforms(camera);
+    protected void setUniforms(Camera camera, RenderContext renderContext) {
+        super.setUniforms(camera, renderContext);
         getProgram().setUniformf(u_pixelSize, (float)pixelSize);
         getProgram().setUniformf(u_screenSize, new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     }

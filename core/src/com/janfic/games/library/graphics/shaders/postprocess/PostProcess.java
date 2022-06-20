@@ -23,6 +23,11 @@ public class PostProcess {
 
     public PostProcess(ShaderProgram program) {
         this.program = program;
+
+        if(program.getLog() != null) {
+            System.out.println(program.getLog());
+        }
+
         GLFrameBuffer.FrameBufferBuilder builder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         builder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
         builder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
@@ -61,13 +66,13 @@ public class PostProcess {
         program.setUniformi(u_texture, context.textureBinder.bind(fbo.getTextureAttachments().get(DIFFUSE_TEXTURE)));
         program.setUniformi(u_depth_buffer, context.textureBinder.bind(fbo.getTextureAttachments().get(DEPTH_TEXTURE)));
         program.setUniformMatrix(u_projTrans, camera.combined);
-        setUniforms(camera);
+        setUniforms(camera, context);
         mesh.render(program, GL20.GL_TRIANGLES);
         frameBuffer.end();
         context.end();
     }
 
-    protected void setUniforms(Camera camera) {
+    protected void setUniforms(Camera camera, RenderContext renderContext) {
     }
 
     public ShaderProgram getProgram() {
