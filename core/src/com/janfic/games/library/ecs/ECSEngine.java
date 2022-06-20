@@ -11,17 +11,22 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.components.*;
 import com.janfic.games.library.ecs.systems.RenderSystem;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.Palette;
+import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
 
 import java.util.ArrayList;
 
 public class ECSEngine extends Engine {
+
+    public PostProcessorsComponent postProcessesComponent;
     public ECSEngine() {
 
         // Systems
@@ -51,10 +56,9 @@ public class ECSEngine extends Engine {
         FrameBufferComponent frameBufferComponent = new FrameBufferComponent();
         frameBufferComponent.frameBuffer = frameBufferBuilder.build();
 
-        PostProcessorsComponent postProcessesComponent = new PostProcessorsComponent();
+        postProcessesComponent = new PostProcessorsComponent();
         postProcessesComponent.processors = new ArrayList<>();
-        postProcessesComponent.processors.add(new DitherPostProcess(5));
-        postProcessesComponent.processors.add(new PixelizePostProcess(5));
+
 
         rendererEntity.add(cameraComponent);
         rendererEntity.add(spriteBatchComponent);
@@ -68,11 +72,13 @@ public class ECSEngine extends Engine {
         positionComponent.position = new Vector3();
 
         ModelComponent modelComponent = new ModelComponent();
-        //modelComponent.model = new ModelBuilder().createSphere(1, 1,1, 100, 100, new Material(), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
-        modelComponent.model = new ModelBuilder().createBox(200, 200,200,
-                new Material(ColorAttribute.createDiffuse(Color.WHITE)),
-                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
-        );
+        modelComponent.model = new ModelBuilder().createSphere(200, 200,200, 100, 100,
+                new Material(ColorAttribute.createDiffuse(Color.RED), ColorAttribute.createSpecular(Color.WHITE)),
+                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
+//        modelComponent.model = new ModelBuilder().createBox(200, 200,200,
+//                new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+//                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
+//        );
 
         ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
         modelInstanceComponent.instance = new ModelInstance(modelComponent.model);
@@ -80,7 +86,8 @@ public class ECSEngine extends Engine {
         EnvironmentComponent environmentComponent = new EnvironmentComponent();
         environmentComponent.environment = new Environment();
         environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-        environmentComponent.environment.add(new DirectionalLight().set(0.4f, 0.4f, 0.4f, -0.1f, -0.8f, -0.2f));
+        //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
+        environmentComponent.environment.add(new DirectionalLight().set(1, 1, 1f, -0.5f, -0.8f, -0.2f));
 
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.texture = new Texture("badlogic.jpg");
