@@ -5,10 +5,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.Camera;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.CameraComponent;
-import com.janfic.games.library.ecs.components.PositionComponent;
+import com.janfic.games.library.ecs.components.rendering.CameraComponent;
+import com.janfic.games.library.ecs.components.physics.PositionComponent;
 
 public class CameraPositionSystem extends EntitySystem {
 

@@ -6,9 +6,9 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.AccelerationComponent;
-import com.janfic.games.library.ecs.components.PositionComponent;
-import com.janfic.games.library.ecs.components.VelocityComponent;
+import com.janfic.games.library.ecs.components.physics.AccelerationComponent;
+import com.janfic.games.library.ecs.components.physics.PositionComponent;
+import com.janfic.games.library.ecs.components.physics.VelocityComponent;
 
 public class PhysicsSystem extends EntitySystem {
 

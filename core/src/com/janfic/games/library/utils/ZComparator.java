@@ -2,8 +2,8 @@ package com.janfic.games.library.utils;
 
 import com.badlogic.ashley.core.Entity;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.CameraComponent;
-import com.janfic.games.library.ecs.components.PositionComponent;
+import com.janfic.games.library.ecs.components.rendering.CameraComponent;
+import com.janfic.games.library.ecs.components.physics.PositionComponent;
 
 import java.util.Comparator;
 

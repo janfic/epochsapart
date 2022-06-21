@@ -37,7 +37,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 			blackWhite.addColor(new Color(i, i, i, 1f));
 		}
 		palettePostProcess = new PalettePostProcess(aap64, false);
-		System.out.println(ColorUtils.xyzToCIELab(ColorUtils.rgbToXYZ(new Vector3(0.56f, 0.23f, 0.4f))));
 	}
 
 	@Override

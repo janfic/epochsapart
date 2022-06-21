@@ -10,11 +10,12 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.*;
+import com.janfic.games.library.ecs.components.physics.PositionComponent;
+import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.ZComparator;
 
-public class RenderSystem extends EntitySystem implements EntityListener {
+public class GameRenderSystem extends EntitySystem implements EntityListener {
 
     private Array<Entity> renderableEntities, rendererEntities;
 
@@ -24,15 +25,20 @@ public class RenderSystem extends EntitySystem implements EntityListener {
     private ZComparator zComparator;
 
     OrthographicCamera camera;
-    CameraInputController camController;
 
     RenderContext context;
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        renderableEntities = new Array<>(engine.getEntitiesFor(renderableFamily).toArray());
-        rendererEntities = new Array<>(engine.getEntitiesFor(rendererFamily).toArray());
+        renderableEntities = new Array<>();
+        rendererEntities = new Array<>();
+        for (Entity entity : engine.getEntitiesFor(renderableFamily)) {
+            renderableEntities.add(entity);
+        }
+        for (Entity entity : engine.getEntitiesFor(rendererFamily)) {
+            rendererEntities.add(entity);
+        }
         zComparator = new ZComparator();
         renderableEntities.sort(zComparator);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -58,10 +64,6 @@ public class RenderSystem extends EntitySystem implements EntityListener {
             zComparator.setCameraComponent(cameraComponent);
             renderableEntities.sort(zComparator);
 
-            if(camController == null) {
-                camController = new CameraInputController(cameraComponent.camera);
-                Gdx.input.setInputProcessor(camController);
-            }
             context.begin();
             frameBufferComponent.frameBuffer.begin();
             Gdx.gl.glEnable(GL30.GL_BLEND);

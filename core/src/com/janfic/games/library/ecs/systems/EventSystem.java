@@ -3,9 +3,10 @@ package com.janfic.games.library.ecs.systems;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.EventAddComponentComponent;
-import com.janfic.games.library.ecs.components.EventQueueComponent;
-import com.janfic.games.library.ecs.components.EventRemoveComponentsComponent;
+import com.janfic.games.library.ecs.components.events.EventComponentChangeComponent;
+import com.janfic.games.library.ecs.components.events.EventEntityAddComponentComponent;
+import com.janfic.games.library.ecs.components.events.EventQueueComponent;
+import com.janfic.games.library.ecs.components.events.EventEntityRemoveComponentsComponent;
 
 /**
  * Processes events. Events in ECS are when components are added or removed to entities. These events are put into a
@@ -16,7 +17,7 @@ public class EventSystem extends EntitySystem {
     private ImmutableArray<Entity> eventQueueEntities, eventsEntities;
 
     private final static Family queueFamily = Family.all(EventQueueComponent.class).get();
-    private final static Family eventsFamily = Family.one(EventAddComponentComponent.class, EventRemoveComponentsComponent.class).get();
+    private final static Family eventsFamily = Family.one(EventEntityAddComponentComponent.class, EventEntityRemoveComponentsComponent.class, EventComponentChangeComponent.class).get();
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -33,30 +34,40 @@ public class EventSystem extends EntitySystem {
 
             // Queue Events
             for (Entity eventsEntity : eventsEntities) {
-                EventAddComponentComponent addComponent = Mapper.eventAddComponentComponentMapper.get(eventsEntity);
-                EventRemoveComponentsComponent removeComponent = Mapper.eventRemoveComponentsComponentMapper.get(eventsEntity);
+                EventComponentChangeComponent changeComponent = Mapper.eventComponentChangeComponentMapper.get(eventsEntity);
+                EventEntityAddComponentComponent addComponent = Mapper.eventAddComponentComponentMapper.get(eventsEntity);
+                EventEntityRemoveComponentsComponent removeComponent = Mapper.eventRemoveComponentsComponentMapper.get(eventsEntity);
+
+                if(changeComponent != null) {
+                    eventQueueComponent.events.add(changeComponent);
+                    eventsEntity.remove(EventComponentChangeComponent.class);
+                }
 
                 if(addComponent != null) {
                     eventQueueComponent.events.add(addComponent);
-                    eventsEntity.remove(EventAddComponentComponent.class);
+                    eventsEntity.remove(EventEntityAddComponentComponent.class);
                 }
 
                 if(removeComponent != null) {
                     eventQueueComponent.events.add(removeComponent);
-                    eventsEntity.remove(EventRemoveComponentsComponent.class);
+                    eventsEntity.remove(EventEntityRemoveComponentsComponent.class);
                 }
             }
 
             // Process Events
             Component event = eventQueueComponent.events.poll();
-            if(event instanceof EventAddComponentComponent) {
-                EventAddComponentComponent addComponent = (EventAddComponentComponent) event;
+            if(event instanceof EventComponentChangeComponent) {
+                EventComponentChangeComponent changeComponent = (EventComponentChangeComponent) event;
+                changeComponent.componentConsumer.accept(changeComponent.component);
+            }
+            if(event instanceof EventEntityAddComponentComponent) {
+                EventEntityAddComponentComponent addComponent = (EventEntityAddComponentComponent) event;
                 for (Component component : addComponent.components) {
                     addComponent.entity.add(component);
                 }
             }
-            else if(event instanceof EventRemoveComponentsComponent) {
-                EventRemoveComponentsComponent removeComponent = (EventRemoveComponentsComponent) event;
+            else if(event instanceof EventEntityRemoveComponentsComponent) {
+                EventEntityRemoveComponentsComponent removeComponent = (EventEntityRemoveComponentsComponent) event;
                 for (Class<? extends Component> componentType : removeComponent.componentTypes) {
                     removeComponent.entity.remove(componentType);
                 }

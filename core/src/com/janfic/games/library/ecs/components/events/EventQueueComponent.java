@@ -1,4 +1,4 @@
-package com.janfic.games.library.ecs.components;
+package com.janfic.games.library.ecs.components.events;
 
 import com.badlogic.ashley.core.Component;
 
