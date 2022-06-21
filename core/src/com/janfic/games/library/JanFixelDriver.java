@@ -44,25 +44,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
-		batch.begin();
-		Texture p = palettePostProcess.palette.getTexture();
-		batch.draw(p, 0, 0, p.getWidth() * 5, p.getHeight() * 5);
-		batch.end();
-		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-			if(engine.postProcessesComponent.processors.size() == 0) {
-				engine.postProcessesComponent.processors.add(palettePostProcess);
-			}
-			else if (engine.postProcessesComponent.processors.size() == 1 ) {
-				engine.postProcessesComponent.processors.add(this.ditherPostProcess);
-			}
-			else if(engine.postProcessesComponent.processors.size() == 2) {
-				engine.postProcessesComponent.processors.add(this.pixelizePostProcess);
-			}
-			else if(engine.postProcessesComponent.processors.size() == 3) {
-				engine.postProcessesComponent.processors.clear();
-			}
-		}
-
 		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			this.ditherPostProcess.pixelSize += 2;
 			this.pixelizePostProcess.pixelSize += 2;

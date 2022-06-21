@@ -52,5 +52,7 @@ public class Mapper {
     public static final ComponentMapper<EventEntityAddComponentComponent> eventAddComponentComponentMapper = ComponentMapper.getFor(EventEntityAddComponentComponent.class);
     public static final ComponentMapper<EventEntityRemoveComponentsComponent> eventRemoveComponentsComponentMapper = ComponentMapper.getFor(EventEntityRemoveComponentsComponent.class);
     public static final ComponentMapper<EventComponentChangeComponent> eventComponentChangeComponentMapper = ComponentMapper.getFor(EventComponentChangeComponent.class);
+    public static final ComponentMapper<EventFamilyAddComponentsComponent> eventFamilyAddComponentsComponentMapper = ComponentMapper.getFor(EventFamilyAddComponentsComponent.class);
+    public static final ComponentMapper<EventFamilyRemoveComponentsComponent> eventFamilyRemoveComponentsComponentMapper = ComponentMapper.getFor(EventFamilyRemoveComponentsComponent.class);
 
 }
