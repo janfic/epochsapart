@@ -5,11 +5,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.ECSEngine;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.Palette;
 import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
+import com.janfic.games.library.utils.ColorUtils;
 
 public class JanFixelDriver extends ApplicationAdapter {
 
@@ -21,6 +23,7 @@ public class JanFixelDriver extends ApplicationAdapter {
 	PalettePostProcess palettePostProcess;
 	DitherPostProcess ditherPostProcess;
 	PixelizePostProcess pixelizePostProcess;
+	Palette aap64, blackWhite;
 
 	@Override
 	public void create () {
@@ -28,7 +31,13 @@ public class JanFixelDriver extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		ditherPostProcess = new DitherPostProcess(5);
 		pixelizePostProcess = new PixelizePostProcess(5);
-		palettePostProcess = new PalettePostProcess(new Palette("AAP-64", Gdx.files.local("aap-64.gpl")), true);
+		aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
+		blackWhite = new Palette("black/white");
+		for (float i = 0; i <= 1; i+= 0.1f) {
+			blackWhite.addColor(new Color(i, i, i, 1f));
+		}
+		palettePostProcess = new PalettePostProcess(aap64, false);
+		System.out.println(ColorUtils.xyzToCIELab(ColorUtils.rgbToXYZ(new Vector3(0.56f, 0.23f, 0.4f))));
 	}
 
 	@Override
@@ -36,6 +45,10 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
+		batch.begin();
+		Texture p = palettePostProcess.palette.getTexture();
+		batch.draw(p, 0, 0, p.getWidth() * 5, p.getHeight() * 5);
+		batch.end();
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
 			if(engine.postProcessesComponent.processors.size() == 0) {
 				engine.postProcessesComponent.processors.add(palettePostProcess);
@@ -66,6 +79,10 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
 			palettePostProcess.useHSL = !palettePostProcess.useHSL;
+		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+			palettePostProcess.palette = palettePostProcess.palette == blackWhite ? aap64 : blackWhite;
 		}
 	}
 

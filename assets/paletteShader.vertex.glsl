@@ -6,7 +6,8 @@ uniform mat4 u_projTrans;
 uniform vec2 u_screenSize;
 uniform sampler2D u_texture;
 uniform sampler2D u_depth_buffer;
-uniform sampler2D u_palette_texture;
+uniform sampler2D u_rgb_palette_texture;
+uniform sampler2D u_hsl_palette_texture;
 uniform int u_palette_size;
 
 varying vec4 v_color;

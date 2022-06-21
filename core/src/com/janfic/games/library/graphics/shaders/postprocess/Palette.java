@@ -2,13 +2,13 @@ package com.janfic.games.library.graphics.shaders.postprocess;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector3;
+import com.janfic.games.library.utils.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Scanner;
 
 /**
@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class Palette {
     private String name;
     private ArrayList<Color> colors;
-    private Texture paletteTexture;
+    private Texture rgbTexture, hslTexture;
 
     public Palette() {
         this.name = "Default Palette";
@@ -35,7 +35,9 @@ public class Palette {
                 Color.MAGENTA,
                 Color.BROWN,
                 Color.WHITE));
-        paletteTexture = createTexture();
+        Texture[] textures = createTextures();
+        rgbTexture = textures[0];
+        hslTexture = textures[1];
     }
 
     public Palette(String name) {
@@ -60,23 +62,37 @@ public class Palette {
             Color color = new Color(r / 255f, g / 255f, b / 255f, 1f);
             colors.add(color);
         }
-        paletteTexture = createTexture();
+        Texture[] textures = createTextures();
+        rgbTexture = textures[0];
+        hslTexture = textures[1];
     }
 
     public ArrayList<Color> getColors() {
         return colors;
     }
 
+    public Texture[] createTextures() {
+        Texture[] textures = new Texture[2];
+        ArrayList<Vector3> rgbs = new ArrayList<>();
+        for (Color color : colors) {
+            Vector3 rgb = ColorUtils.colorToRGBVector(color);
+            rgbs.add(rgb);
+        }
+        ArrayList<Vector3> hsls = ColorUtils.convertRGBPaletteToHSL(colors);
+        textures[0] = createTexture(rgbs);
+        textures[1] = createTexture(hsls);
+        return textures;
+    }
+
     /**
      * Creates a texture with all colors. Size ( width ) is determined by colors in palette.
      * @return
      */
-    public Texture createTexture() {
+    public Texture createTexture(ArrayList<Vector3> colors) {
         Pixmap pixmap = new Pixmap(colors.size(), 1, Pixmap.Format.RGBA8888);
         pixmap.setBlending(Pixmap.Blending.None);
-
         for (int i = 0; i < colors.size(); i++) {
-            pixmap.setColor(colors.get(i));
+            pixmap.setColor(colors.get(i).x, colors.get(i).y, colors.get(i).z, 1);
             pixmap.fillRectangle(i , 0, 1, 1);
         }
 
@@ -91,7 +107,15 @@ public class Palette {
      * @return
      */
     public Texture getTexture() {
-        return paletteTexture;
+        return rgbTexture;
+    }
+
+    public Texture getHSLTexture() {
+        return hslTexture;
+    }
+
+    public Texture getRGBTexture() {
+        return rgbTexture;
     }
 
     public int size() {
@@ -102,5 +126,10 @@ public class Palette {
         return name;
     }
 
-
+    public void addColor(Color color) {
+        colors.add(color);
+        Texture[] textures = createTextures();
+        rgbTexture = textures[0];
+        hslTexture = textures[1];
+    }
 }

@@ -11,16 +11,11 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.components.*;
 import com.janfic.games.library.ecs.systems.RenderSystem;
-import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
-import com.janfic.games.library.graphics.shaders.postprocess.Palette;
-import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
-import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
 
 import java.util.ArrayList;
 
@@ -73,7 +68,7 @@ public class ECSEngine extends Engine {
 
         ModelComponent modelComponent = new ModelComponent();
         modelComponent.model = new ModelBuilder().createSphere(200, 200,200, 100, 100,
-                new Material(ColorAttribute.createDiffuse(Color.RED), ColorAttribute.createSpecular(Color.WHITE)),
+                new Material(ColorAttribute.createDiffuse(Color.RED), ColorAttribute.createSpecular(Color.GREEN)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 //        modelComponent.model = new ModelBuilder().createBox(200, 200,200,
 //                new Material(ColorAttribute.createDiffuse(Color.WHITE)),
@@ -85,7 +80,7 @@ public class ECSEngine extends Engine {
 
         EnvironmentComponent environmentComponent = new EnvironmentComponent();
         environmentComponent.environment = new Environment();
-        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
         environmentComponent.environment.add(new DirectionalLight().set(1, 1, 1f, -0.5f, -0.8f, -0.2f));
 
