@@ -36,4 +36,10 @@ public class Mapper {
 
     // Input
     public static final ComponentMapper<InputProcessorComponent> inputProcessorComponentMapper = ComponentMapper.getFor(InputProcessorComponent.class);
+
+    // Events
+    public static final ComponentMapper<EventQueueComponent> eventQueueComponentMapper = ComponentMapper.getFor(EventQueueComponent.class);
+    public static final ComponentMapper<EventAddComponentComponent> eventAddComponentComponentMapper = ComponentMapper.getFor(EventAddComponentComponent.class);
+    public static final ComponentMapper<EventRemoveComponentsComponent> eventRemoveComponentsComponentMapper = ComponentMapper.getFor(EventRemoveComponentsComponent.class);
+
 }
