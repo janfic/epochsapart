@@ -81,7 +81,11 @@ public class WorldGenerationSystem extends EntitySystem {
 
                         PositionComponent positionComponent = new PositionComponent();
                         positionComponent.position = new Vector3();
-                        positionComponent.position.set(x,y,z);
+                        positionComponent.position.set(
+                                (x - worldComponent.centerX) * tileBounds.getWidth(),
+                                (y - worldComponent.centerY) * tileBounds.getHeight(),
+                                (z - worldComponent.centerZ) * tileBounds.getDepth()
+                        );
 
                         tileEntity.add(modelInstanceComponent);
                         tileEntity.add(positionComponent);

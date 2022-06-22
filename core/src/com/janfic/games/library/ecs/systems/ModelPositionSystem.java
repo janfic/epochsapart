@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.CameraComponent;
+import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
 import com.janfic.games.library.ecs.components.rendering.ModelBatchComponent;
 import com.janfic.games.library.ecs.components.rendering.ModelInstanceComponent;
 
@@ -17,7 +18,7 @@ public class ModelPositionSystem extends EntitySystem {
 
     private ImmutableArray<Entity> entities, rendererEntities;
 
-    private static final Family rendererEntity = Family.all(CameraComponent.class, ModelBatchComponent.class).get();
+    private static final Family rendererEntity = Family.all(CameraComponent.class, ModelBatchComponent.class, FrameBufferComponent.class).get();
     private static final Family entityFamily = Family.all(PositionComponent.class, ModelInstanceComponent.class).get();
 
     @Override
@@ -38,9 +39,7 @@ public class ModelPositionSystem extends EntitySystem {
         for (Entity entity : entities) {
             PositionComponent positionComponent = Mapper.positionComponentMapper.get(entity);
             ModelInstanceComponent modelInstanceComponent = Mapper.modelInstanceComponentMapper.get(entity);
-
-            //modelInstanceComponent.instance.transform.set(cameraComponent.camera.combined);
-            //modelInstanceComponent.instance.transform.translate(positionComponent.position);
+            modelInstanceComponent.instance.transform.setToTranslation(positionComponent.position);
         }
     }
 }
