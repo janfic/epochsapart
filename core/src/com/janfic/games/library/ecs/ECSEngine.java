@@ -56,8 +56,8 @@ public class ECSEngine extends Engine {
     public ECSEngine() {
 
         Palette aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
-        ditherPostProcess = new DitherPostProcess(5);
-        pixelizePostProcess = new PixelizePostProcess(5);
+        ditherPostProcess = new DitherPostProcess(3);
+        pixelizePostProcess = new PixelizePostProcess(3);
         palettePostProcess = new PalettePostProcess(aap64, false);
 
         Entity gameEntity = new Entity();
@@ -103,7 +103,17 @@ public class ECSEngine extends Engine {
         modelRenderer = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
         cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80, Gdx.graphics.getHeight() / 80);
-        cameraComponent.camera.position.set(-100,(float) (100f * Math.sqrt(2)) / 2,100);
+        float camX = -100;
+        float camZ = 100;
+
+        float tLength = (float) Math.sqrt(camX * camX + camZ * camZ);
+        float targetAngle = (float) Math.toRadians(90 - 35.264);
+
+        float camY = (float) (Math.cos(targetAngle) * tLength);
+
+        System.out.println(camY);
+
+        cameraComponent.camera.position.set(camX,camY,camZ);
         cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
@@ -114,7 +124,7 @@ public class ECSEngine extends Engine {
         environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
         light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
-        light.set(1, 1, 1f, -0.5f, -0.8f, -0.2f);
+        light.set(1, 1, 1f, 0.5f, -1f, -0.2f);
         environmentComponent.environment.add(light);
 
         SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();

@@ -6,10 +6,12 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -22,6 +24,7 @@ import com.janfic.games.library.ecs.components.rendering.ModelInstanceComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.components.world.TileComponent;
 import com.janfic.games.library.ecs.components.world.WorldComponent;
+import org.w3c.dom.Text;
 
 public class WorldGenerationSystem extends EntitySystem {
 
@@ -41,6 +44,11 @@ public class WorldGenerationSystem extends EntitySystem {
         assets.finishLoading();
 
         model = assets.get("base_cube.obj", Model.class);
+        Texture grassTexture = new Texture("grass.png");
+        grassTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        TextureAttribute attribute = TextureAttribute.createDiffuse(grassTexture);
+        model.materials.get(0).set(attribute);
         tileBounds = new BoundingBox();
         tileBounds = model.calculateBoundingBox(tileBounds);
     }
