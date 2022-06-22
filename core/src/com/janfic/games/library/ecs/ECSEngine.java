@@ -30,10 +30,8 @@ import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
-import com.janfic.games.library.ecs.systems.EventSystem;
-import com.janfic.games.library.ecs.systems.GameRenderSystem;
-import com.janfic.games.library.ecs.systems.InputSystem;
-import com.janfic.games.library.ecs.systems.UserInterfaceSystem;
+import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
+import com.janfic.games.library.ecs.systems.*;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.Palette;
 import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
@@ -74,14 +72,81 @@ public class ECSEngine extends Engine {
         UserInterfaceSystem userInterfaceSystem = new UserInterfaceSystem();
         InputSystem inputSystem = new InputSystem();
         EventSystem eventSystem = new EventSystem();
+        ModelPositionSystem positionSystem = new ModelPositionSystem();
+        WorldGenerationSystem worldGenerationSystem = new WorldGenerationSystem();
         addEntityListener(gameRenderSystem);
         addSystem(gameRenderSystem);
+        addSystem(positionSystem);
+        addSystem(worldGenerationSystem);
         addSystem(userInterfaceSystem);
         addSystem(inputSystem);
         addSystem(eventSystem);
 
-        makeGameEntities();
+        makeRenderer();
+        //makeGameEntities();
+        makeWorld();
         makeUISystem();
+    }
+
+    private void makeWorld() {
+        Entity entity = new Entity();
+        GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
+        generateWorldComponent.height = 1;
+        generateWorldComponent.width = 5;
+        generateWorldComponent.length = 5;
+        entity.add(generateWorldComponent);
+        addEntity(entity);
+    }
+
+    private void makeRenderer() {
+// Entities
+        modelRenderer = createEntity();
+        CameraComponent cameraComponent = new CameraComponent();
+        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80, Gdx.graphics.getHeight() / 80);
+        cameraComponent.camera.position.set(-100,(float) (100f * Math.sqrt(2)) / 2,100);
+        cameraComponent.camera.lookAt(0,0,0);
+        cameraComponent.camera.near = 1;
+        cameraComponent.camera.far = 1000f;
+        cameraComponent.camera.update();
+
+        EnvironmentComponent environmentComponent = new EnvironmentComponent();
+        environmentComponent.environment = new Environment();
+        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
+        //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
+        light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
+        light.set(1, 1, 1f, -0.5f, -0.8f, -0.2f);
+        environmentComponent.environment.add(light);
+
+        SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();
+        spriteBatchComponent.spriteBatch = new SpriteBatch();
+
+        ModelBatchComponent modelBatchComponent = new ModelBatchComponent();
+        modelBatchComponent.modelBatch = new ModelBatch();
+
+        GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        frameBufferBuilder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
+        frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
+        FrameBufferComponent frameBufferComponent = new FrameBufferComponent();
+        frameBufferComponent.frameBuffer = frameBufferBuilder.build();
+
+        postProcessesComponent = new PostProcessorsComponent();
+        postProcessesComponent.processors = new ArrayList<>();
+
+        modelRenderer.add(cameraComponent);
+        modelRenderer.add(spriteBatchComponent);
+        modelRenderer.add(modelBatchComponent);
+        modelRenderer.add(frameBufferComponent);
+        modelRenderer.add(environmentComponent);
+        modelRenderer.add(postProcessesComponent);
+
+        CameraInputController camController = new CameraInputController(cameraComponent.camera);
+        InputProcessorComponent inputProcessorComponent = new InputProcessorComponent();
+        inputProcessorComponent.inputProcessor = camController;
+        inputProcessorComponent.priority = 2;
+
+        modelRenderer.add(inputProcessorComponent);
+
+        addEntity(modelRenderer);
     }
 
     private void makeUISystem() {
@@ -163,44 +228,6 @@ public class ECSEngine extends Engine {
         assets.load("color_block2.obj", Model.class);
         assets.finishLoading();
 
-        // Entities
-        modelRenderer = createEntity();
-        CameraComponent cameraComponent = new CameraComponent();
-        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80, Gdx.graphics.getHeight() / 80);
-        cameraComponent.camera.position.set(-100,(float) (100f * Math.sqrt(2)) / 2,100);
-        cameraComponent.camera.lookAt(0,0,0);
-        cameraComponent.camera.near = 1;
-        cameraComponent.camera.far = 1000f;
-        cameraComponent.camera.update();
-
-        SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();
-        spriteBatchComponent.spriteBatch = new SpriteBatch();
-
-        ModelBatchComponent modelBatchComponent = new ModelBatchComponent();
-        modelBatchComponent.modelBatch = new ModelBatch();
-
-        GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        frameBufferBuilder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
-        frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
-        FrameBufferComponent frameBufferComponent = new FrameBufferComponent();
-        frameBufferComponent.frameBuffer = frameBufferBuilder.build();
-
-        postProcessesComponent = new PostProcessorsComponent();
-        postProcessesComponent.processors = new ArrayList<>();
-
-        modelRenderer.add(cameraComponent);
-        modelRenderer.add(spriteBatchComponent);
-        modelRenderer.add(modelBatchComponent);
-        modelRenderer.add(frameBufferComponent);
-        modelRenderer.add(postProcessesComponent);
-
-        CameraInputController camController = new CameraInputController(cameraComponent.camera);
-        InputProcessorComponent inputProcessorComponent = new InputProcessorComponent();
-        inputProcessorComponent.inputProcessor = camController;
-        inputProcessorComponent.priority = 2;
-
-        modelRenderer.add(inputProcessorComponent);
-
         // Sphere Entity
         Entity sphere = new Entity();
         PositionComponent positionComponent = new PositionComponent();
@@ -221,13 +248,7 @@ public class ECSEngine extends Engine {
         modelInstanceComponent.instance = new ModelInstance(modelComponent.model);
         //modelInstanceComponent.instance.transform.scale(20, 20, 20);
 
-        EnvironmentComponent environmentComponent = new EnvironmentComponent();
-        environmentComponent.environment = new Environment();
-        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
-        //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
-        light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
-        light.set(1, 1, 1f, -0.5f, -0.8f, -0.2f);
-        environmentComponent.environment.add(light);
+
 
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.texture = new Texture("badlogic.jpg");
@@ -235,9 +256,7 @@ public class ECSEngine extends Engine {
         sphere.add(positionComponent);
         sphere.add(modelComponent);
         sphere.add(modelInstanceComponent);
-        sphere.add(environmentComponent);
 
-        addEntity(modelRenderer);
         addEntity(sphere);
     }
 }

@@ -7,6 +7,9 @@ import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.ActorComponent;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
+import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
+import com.janfic.games.library.ecs.components.world.TileComponent;
+import com.janfic.games.library.ecs.components.world.WorldComponent;
 
 public class Mapper {
     // Physics
@@ -37,8 +40,12 @@ public class Mapper {
     public static final ComponentMapper<ActorComponent>           actorComponentMapper = ComponentMapper.getFor(ActorComponent.class);
 
     // World
+    public static final ComponentMapper<WorldComponent> worldComponentMapper = ComponentMapper.getFor(WorldComponent.class);
+    public static final ComponentMapper<TileComponent> tileComponentMapper = ComponentMapper.getFor(TileComponent.class);
 
     // World Generation
+    public static final ComponentMapper<GenerateWorldComponent> generateWorldComponentMapper = ComponentMapper.getFor(GenerateWorldComponent.class);
+
 
     // Game State
 

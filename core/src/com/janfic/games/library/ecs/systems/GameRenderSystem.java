@@ -25,7 +25,12 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
     private Array<Entity> renderableEntities, rendererEntities;
 
     private Family renderableFamily = Family.all(PositionComponent.class).one(ModelInstanceComponent.class, TextureComponent.class, TextureRegionComponent.class).get();
-    private Family rendererFamily = Family.all(CameraComponent.class, SpriteBatchComponent.class, ModelBatchComponent.class, FrameBufferComponent.class).get();
+    private Family rendererFamily = Family.all(
+            CameraComponent.class,
+            SpriteBatchComponent.class,
+            ModelBatchComponent.class,
+            FrameBufferComponent.class,
+            EnvironmentComponent.class).get();
 
     private ZComparator zComparator;
 
@@ -68,6 +73,7 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
             SpriteBatchComponent spriteBatchComponent = Mapper.spriteBatchComponentMapper.get(rendererEntity);
             FrameBufferComponent frameBufferComponent = Mapper.frameBufferComponentMapper.get(rendererEntity);
             PostProcessorsComponent postProcessorsComponent = Mapper.postProcessComponentMapper.get(rendererEntity);
+            EnvironmentComponent environmentComponent = Mapper.environmentComponentMapper.get(rendererEntity);
 
             zComparator.setCameraComponent(cameraComponent);
             renderableEntities.sort(zComparator);
@@ -90,7 +96,6 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
                 TextureComponent textureComponent = Mapper.textureComponentMapper.get(renderableEntity);
                 TextureRegionComponent textureRegionComponent = Mapper.textureRegionComponentMapper.get(renderableEntity);
                 ShaderComponent shaderComponent = Mapper.shaderComponentMapper.get(renderableEntity);
-                EnvironmentComponent environmentComponent = Mapper.environmentComponentMapper.get(renderableEntity);
                 ShaderProgram.pedantic = false;
 
 
