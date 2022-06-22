@@ -8,8 +8,9 @@ import com.janfic.games.library.ecs.components.events.*;
 import java.util.function.Supplier;
 
 /**
- * Processes events. Events in ECS are when components are added or removed to entities. These events are put into a
- * queue and one is processes per tick. Add Events can also be used as updating a component ( used in serialization ).
+ * Processes events. Events in ECS are when components are added or removed an entity, or family of entities. These
+ * events are put into a queue and one is processes per tick. Add Events can also be used as updating a component
+ * ( used in serialization ).
  */
 public class EventSystem extends EntitySystem {
 

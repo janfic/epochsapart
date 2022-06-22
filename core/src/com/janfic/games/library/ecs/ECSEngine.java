@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -48,9 +50,11 @@ public class ECSEngine extends Engine {
 
     Entity modelRenderer;
 
-    PalettePostProcess palettePostProcess;
-    DitherPostProcess ditherPostProcess;
-    PixelizePostProcess pixelizePostProcess;
+    public DirectionalShadowLight  light;
+
+    public PalettePostProcess palettePostProcess;
+    public DitherPostProcess ditherPostProcess;
+    public PixelizePostProcess pixelizePostProcess;
     public ECSEngine() {
 
         Palette aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
@@ -156,14 +160,14 @@ public class ECSEngine extends Engine {
 
     public void makeGameEntities() {
         AssetManager assets = new AssetManager();
-        assets.load("untitled.obj", Model.class);
+        assets.load("color_block2.obj", Model.class);
         assets.finishLoading();
 
         // Entities
         modelRenderer = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
         cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80, Gdx.graphics.getHeight() / 80);
-        cameraComponent.camera.position.set(100,100,400);
+        cameraComponent.camera.position.set(-100,(float) (100f * Math.sqrt(2)) / 2,100);
         cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
@@ -203,9 +207,9 @@ public class ECSEngine extends Engine {
         positionComponent.position = new Vector3();
 
         ModelComponent modelComponent = new ModelComponent();
-        modelComponent.model = assets.get("untitled.obj", Model.class);
-        modelComponent.model.materials.add(new Material(ColorAttribute.createDiffuse(Color.RED)));
-//        modelComponent.model = new ModelBuilder().createSphere(200, 200,200, 100, 100,
+        modelComponent.model = assets.get("color_block2.obj", Model.class);
+       // modelComponent.model.materials.add(new Material(ColorAttribute.createDiffuse(Color.RED)));
+//        modelComponent.model = new ModelBuilder().createSphere(2, 2,2, 100, 100,
 //                new Material(ColorAttribute.createDiffuse(Color.RED), ColorAttribute.createSpecular(Color.GREEN)),
 //                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.ColorPacked);
 //        modelComponent.model = new ModelBuilder().createBox(200, 200,200,
@@ -219,9 +223,11 @@ public class ECSEngine extends Engine {
 
         EnvironmentComponent environmentComponent = new EnvironmentComponent();
         environmentComponent.environment = new Environment();
-        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
+        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
-        environmentComponent.environment.add(new DirectionalLight().set(1, 1, 1f, -0.5f, -0.8f, -0.2f));
+        light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
+        light.set(1, 1, 1f, -0.5f, -0.8f, -0.2f);
+        environmentComponent.environment.add(light);
 
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.texture = new Texture("badlogic.jpg");

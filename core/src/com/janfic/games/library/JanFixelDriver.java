@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.ECSEngine;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
@@ -18,25 +19,27 @@ public class JanFixelDriver extends ApplicationAdapter {
 	ECSEngine engine;
 
 	SpriteBatch batch;
-	Palette p;
 
 	PalettePostProcess palettePostProcess;
 	DitherPostProcess ditherPostProcess;
 	PixelizePostProcess pixelizePostProcess;
 	Palette aap64, blackWhite;
 
+	DirectionalLight light;
+
 	@Override
 	public void create () {
 		engine = new ECSEngine();
 		batch = new SpriteBatch();
-		ditherPostProcess = new DitherPostProcess(5);
-		pixelizePostProcess = new PixelizePostProcess(5);
 		aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
 		blackWhite = new Palette("black/white");
 		for (float i = 0; i <= 1; i+= 0.1f) {
 			blackWhite.addColor(new Color(i, i, i, 1f));
 		}
-		palettePostProcess = new PalettePostProcess(aap64, false);
+		palettePostProcess = engine.palettePostProcess;
+		ditherPostProcess = engine.ditherPostProcess;
+		pixelizePostProcess = engine.pixelizePostProcess;
+		light = engine.light;
 	}
 
 	@Override
@@ -63,6 +66,34 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
 			palettePostProcess.palette = palettePostProcess.palette == blackWhite ? aap64 : blackWhite;
+		}
+
+		if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+			light.setDirection(light.direction.x, light.direction.y - 0.01f, light.direction.z);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+			light.setDirection(light.direction.x, light.direction.y + 0.01f, light.direction.z);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+			light.setDirection(light.direction.x + 0.01f, light.direction.y, light.direction.z);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+			light.setDirection(light.direction.x - 0.01f, light.direction.y, light.direction.z);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+			light.setDirection(light.direction.x , light.direction.y, light.direction.z + 0.01f);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+			light.setDirection(light.direction.x , light.direction.y, light.direction.z - 0.01f);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
+			light.setDirection(0, light.direction.y, light.direction.z);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.X)) {
+			light.setDirection(light.direction.x , 0, light.direction.z );
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+			light.setDirection(light.direction.x , light.direction.y, 0 );
 		}
 	}
 
