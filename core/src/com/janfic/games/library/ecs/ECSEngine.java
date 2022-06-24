@@ -55,7 +55,7 @@ public class ECSEngine extends Engine {
     public PixelizePostProcess pixelizePostProcess;
     public ECSEngine() {
 
-        Palette aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
+        Palette aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
         ditherPostProcess = new DitherPostProcess(3);
         pixelizePostProcess = new PixelizePostProcess(3);
         palettePostProcess = new PalettePostProcess(aap64, false);
@@ -91,9 +91,9 @@ public class ECSEngine extends Engine {
     private void makeWorld() {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
-        generateWorldComponent.height = 1;
-        generateWorldComponent.width = 5;
-        generateWorldComponent.length = 5;
+        generateWorldComponent.height = 2;
+        generateWorldComponent.width = 10;
+        generateWorldComponent.length = 10;
         entity.add(generateWorldComponent);
         addEntity(entity);
     }
@@ -102,7 +102,7 @@ public class ECSEngine extends Engine {
 // Entities
         modelRenderer = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
-        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80, Gdx.graphics.getHeight() / 80);
+        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 40, Gdx.graphics.getHeight() / 40);
         float camX = -100;
         float camZ = 100;
 
@@ -124,7 +124,7 @@ public class ECSEngine extends Engine {
         environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
         light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
-        light.set(1, 1, 1f, 0.5f, -1f, -0.2f);
+        light.set(1, 1, 1f, 0.5f, -1f, 0.4f);
         environmentComponent.environment.add(light);
 
         SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();
@@ -188,7 +188,7 @@ public class ECSEngine extends Engine {
         inputProcessorComponent.inputProcessor = stageComponent.stage;
         inputProcessorComponent.priority = 0;
 
-        Skin skin = new Skin(Gdx.files.local("spaceSkin.json"));
+        Skin skin = new Skin(Gdx.files.local("skins/spacejunk/spaceSkin.json"));
 
         Table table = new Table();
         table.setFillParent(true);

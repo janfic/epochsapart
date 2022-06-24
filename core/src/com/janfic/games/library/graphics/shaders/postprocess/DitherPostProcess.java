@@ -12,7 +12,7 @@ public class DitherPostProcess extends PostProcess{
     final int u_pixelSize;
 
     public DitherPostProcess(int pixelSize) {
-        super(new ShaderProgram(Gdx.files.local("ditherShader.vertex.glsl"), Gdx.files.local("ditherShader.fragment.glsl")));
+        super(new ShaderProgram(Gdx.files.local("shaders/ditherShader.vertex.glsl"), Gdx.files.local("shaders/ditherShader.fragment.glsl")));
         this.pixelSize = pixelSize;
         u_pixelSize = getProgram().getUniformLocation("u_pixelSize");
     }

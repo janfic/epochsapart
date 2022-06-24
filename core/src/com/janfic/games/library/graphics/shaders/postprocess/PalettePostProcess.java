@@ -12,7 +12,7 @@ public class PalettePostProcess extends PostProcess {
     private int u_rgb_palette_texture, u_hsl_palette_texture, u_palette_size, u_useHSL, u_enableDithering;
 
     public PalettePostProcess(Palette palette, boolean useHSL) {
-        super(new ShaderProgram(Gdx.files.local("paletteShader.vertex.glsl"), Gdx.files.local("paletteShader.fragment.glsl")));
+        super(new ShaderProgram(Gdx.files.local("shaders/paletteShader.vertex.glsl"), Gdx.files.local("shaders/paletteShader.fragment.glsl")));
         this.palette = palette;
         this.useHSL = useHSL;
         u_palette_size = getProgram().getUniformLocation("u_palette_size");

@@ -5,10 +5,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
+import com.janfic.games.library.ecs.components.physics.RotationComponent;
 import com.janfic.games.library.ecs.components.rendering.CameraComponent;
 import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
 import com.janfic.games.library.ecs.components.rendering.ModelBatchComponent;
@@ -38,8 +37,12 @@ public class ModelPositionSystem extends EntitySystem {
 
         for (Entity entity : entities) {
             PositionComponent positionComponent = Mapper.positionComponentMapper.get(entity);
+            RotationComponent rotationComponent = Mapper.rotationComponentMapper.get(entity);
             ModelInstanceComponent modelInstanceComponent = Mapper.modelInstanceComponentMapper.get(entity);
             modelInstanceComponent.instance.transform.setToTranslation(positionComponent.position);
+            if(rotationComponent != null) {
+                modelInstanceComponent.instance.transform.rotate(rotationComponent.axis, rotationComponent.angle);
+            }
         }
     }
 }

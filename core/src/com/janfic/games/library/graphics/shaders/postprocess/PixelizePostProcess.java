@@ -12,7 +12,7 @@ public class PixelizePostProcess extends PostProcess{
     final int u_pixelSize, u_screenSize;
 
     public PixelizePostProcess(int pixelSize) {
-        super(new ShaderProgram(Gdx.files.local("pixelShader.vertex.glsl"), Gdx.files.local("pixelShader.fragment.glsl")));
+        super(new ShaderProgram(Gdx.files.local("shaders/pixelShader.vertex.glsl"), Gdx.files.local("shaders/pixelShader.fragment.glsl")));
         this.pixelSize = pixelSize;
         u_pixelSize = getProgram().getUniformLocation("u_pixelSize");
         u_screenSize = getProgram().getUniformLocation("u_screenSize");

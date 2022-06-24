@@ -5,8 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
+import com.github.czyzby.noise4j.map.Grid;
+import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
+import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.janfic.games.library.ecs.ECSEngine;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.Palette;
@@ -27,11 +31,13 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 	DirectionalLight light;
 
+	Texture noiseTexture;
+
 	@Override
 	public void create () {
 		engine = new ECSEngine();
 		batch = new SpriteBatch();
-		aap64 = new Palette("AAP-64", Gdx.files.local("aap-64.gpl"));
+		aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
 		blackWhite = new Palette("black/white");
 		for (float i = 0; i <= 1; i+= 0.1f) {
 			blackWhite.addColor(new Color(i, i, i, 1f));
@@ -40,6 +46,40 @@ public class JanFixelDriver extends ApplicationAdapter {
 		ditherPostProcess = engine.ditherPostProcess;
 		pixelizePostProcess = engine.pixelizePostProcess;
 		light = engine.light;
+
+		final Pixmap pixMap = new Pixmap(512, 512, Pixmap.Format.RGBA8888);
+
+		final NoiseGenerator noiseGenerator = new NoiseGenerator();
+		final Grid grid = new Grid(512);
+
+		noiseStage(grid, noiseGenerator, 32, 1f / 2f);
+		noiseStage(grid, noiseGenerator, 16, 1f / 4f);
+		noiseStage(grid, noiseGenerator, 8, 1f / 8f);
+		noiseStage(grid, noiseGenerator, 4, 1f / 16f);
+		noiseStage(grid, noiseGenerator, 2, 1f / 32f);
+		//noiseStage(grid, noiseGenerator, 1, 1f / 32f);
+
+
+		for (int x = 0; x < 512; x++) {
+			for (int y = 0; y < 512; y++) {
+				float c = grid.get(x,y);
+				c = c * 16;
+				c = (float) Math.floor(c);
+				c = c / 16;
+				if( grid.get(x,y) >= 1) System.out.println( grid.get(x,y));
+				pixMap.setColor(new Color(c,c,c, 1));
+				pixMap.drawPixel(x,y);
+			}
+		}
+
+		noiseTexture = new Texture(pixMap);
+	}
+
+	private static void noiseStage(Grid grid, NoiseGenerator noiseGenerator, int radius, float modifier) {
+		noiseGenerator.setRadius(radius);
+		noiseGenerator.setModifier(modifier);
+		noiseGenerator.setSeed(Generators.rollSeed());
+		noiseGenerator.generate(grid);
 	}
 
 	@Override
@@ -47,6 +87,9 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
+		batch.begin();
+		//batch.draw(noiseTexture, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.end();
 		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			this.ditherPostProcess.pixelSize += 2;
 			this.pixelizePostProcess.pixelSize += 2;
