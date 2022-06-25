@@ -50,7 +50,8 @@ public class JanFixelDriver extends ApplicationAdapter {
 		final Pixmap pixMap = new Pixmap(512, 512, Pixmap.Format.RGBA8888);
 
 		final NoiseGenerator noiseGenerator = new NoiseGenerator();
-		final Grid grid = new Grid(512);
+		int size = 64;
+		final Grid grid = new Grid(size);
 
 		noiseStage(grid, noiseGenerator, 32, 1f / 2f);
 		noiseStage(grid, noiseGenerator, 16, 1f / 4f);
@@ -60,12 +61,9 @@ public class JanFixelDriver extends ApplicationAdapter {
 		//noiseStage(grid, noiseGenerator, 1, 1f / 32f);
 
 
-		for (int x = 0; x < 512; x++) {
-			for (int y = 0; y < 512; y++) {
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
 				float c = grid.get(x,y);
-				c = c * 16;
-				c = (float) Math.floor(c);
-				c = c / 16;
 				if( grid.get(x,y) >= 1) System.out.println( grid.get(x,y));
 				pixMap.setColor(new Color(c,c,c, 1));
 				pixMap.drawPixel(x,y);
@@ -88,7 +86,7 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
 		batch.begin();
-		//batch.draw(noiseTexture, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.draw(noiseTexture, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch.end();
 		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			this.ditherPostProcess.pixelSize += 2;
@@ -137,6 +135,17 @@ public class JanFixelDriver extends ApplicationAdapter {
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.C)) {
 			light.setDirection(light.direction.x , light.direction.y, 0 );
+		}
+
+		if(Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
+			engine.camera.viewportWidth *= 0.99f;
+			engine.camera.viewportHeight *= 0.99f;
+			engine.camera.update();
+		}
+		if(Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+			engine.camera.viewportWidth *= 1.01f;
+			engine.camera.viewportHeight *= 1.01f;
+			engine.camera.update();
 		}
 	}
 

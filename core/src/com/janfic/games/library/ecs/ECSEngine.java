@@ -53,6 +53,9 @@ public class ECSEngine extends Engine {
     public PalettePostProcess palettePostProcess;
     public DitherPostProcess ditherPostProcess;
     public PixelizePostProcess pixelizePostProcess;
+
+    public OrthographicCamera camera;
+
     public ECSEngine() {
 
         Palette aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
@@ -74,7 +77,7 @@ public class ECSEngine extends Engine {
         EventSystem eventSystem = new EventSystem();
         ModelPositionSystem positionSystem = new ModelPositionSystem();
         WorldGenerationSystem worldGenerationSystem = new WorldGenerationSystem();
-        addEntityListener(gameRenderSystem);
+        //addEntityListener(gameRenderSystem);
         addSystem(gameRenderSystem);
         addSystem(positionSystem);
         addSystem(worldGenerationSystem);
@@ -91,9 +94,10 @@ public class ECSEngine extends Engine {
     private void makeWorld() {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
-        generateWorldComponent.height = 2;
-        generateWorldComponent.width = 10;
-        generateWorldComponent.length = 10;
+        generateWorldComponent.height = 50;
+        generateWorldComponent.width = 512;
+        generateWorldComponent.length = 512;
+        generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
         entity.add(generateWorldComponent);
         addEntity(entity);
     }
@@ -102,7 +106,8 @@ public class ECSEngine extends Engine {
 // Entities
         modelRenderer = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
-        cameraComponent.camera = new OrthographicCamera(Gdx.graphics.getWidth() / 40, Gdx.graphics.getHeight() / 40);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 10, Gdx.graphics.getHeight() / 10);
+        cameraComponent.camera = camera;
         float camX = -100;
         float camZ = 100;
 
@@ -124,7 +129,7 @@ public class ECSEngine extends Engine {
         environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
         light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
-        light.set(1, 1, 1f, 0.5f, -1f, 0.4f);
+        light.set(1, 1, 1f, 0.5f, -2f, 0.4f);
         environmentComponent.environment.add(light);
 
         SpriteBatchComponent spriteBatchComponent = new SpriteBatchComponent();

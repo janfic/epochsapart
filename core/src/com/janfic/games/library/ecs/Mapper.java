@@ -27,6 +27,7 @@ public class Mapper {
     public static final ComponentMapper<SpriteBatchComponent>     spriteBatchComponentMapper = ComponentMapper.getFor(SpriteBatchComponent.class);
     public static final ComponentMapper<ShaderComponent>          shaderComponentMapper = ComponentMapper.getFor(ShaderComponent.class);
     public static final ComponentMapper<ViewportComponent>        viewportComponentMapper = ComponentMapper.getFor(ViewportComponent.class);
+    public static final ComponentMapper<RenderableProviderComponent>        renderableProviderComponentMapper = ComponentMapper.getFor(RenderableProviderComponent.class);
 
     // 2D Graphics
     public static final ComponentMapper<TextureComponent>         textureComponentMapper = ComponentMapper.getFor(TextureComponent.class);

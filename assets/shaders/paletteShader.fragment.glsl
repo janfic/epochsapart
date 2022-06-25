@@ -36,11 +36,7 @@ vec4 colorToPalette(vec4 color) {
             c = secondClosest;
         }
     }
-    else if (secondClosestDistance - closestDistance < 0.08) {
-        if((mod(floor(scrPos.y), 4.0) == 2.0 && mod(floor(scrPos.x), 4.0) == 2.0) || (mod(floor(scrPos.y), 4.0) == 0.0 && mod(floor(scrPos.x), 4.0) == 0.0)) {
-                    c = secondClosest;
-        }
-    }
+
     return vec4(c, color.a);
 }
 
@@ -52,3 +48,4 @@ void main() {
     gl_FragColor = colorToPalette(color);
     gl_FragDepth = depth.r;
 }
+

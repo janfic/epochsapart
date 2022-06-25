@@ -1,10 +1,13 @@
 package com.janfic.games.library.ecs.systems;
 
 import com.badlogic.ashley.core.*;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
@@ -20,19 +23,17 @@ import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.ZComparator;
 
-public class GameRenderSystem extends EntitySystem implements EntityListener {
+public class GameRenderSystem extends EntitySystem {
 
-    private Array<Entity> renderableEntities, rendererEntities;
+    private ImmutableArray<Entity> renderableEntities, rendererEntities;
 
-    private Family renderableFamily = Family.all(PositionComponent.class).one(ModelInstanceComponent.class, TextureComponent.class, TextureRegionComponent.class).get();
+    private Family renderableFamily = Family.all(PositionComponent.class).one(RenderableProviderComponent.class, ModelInstanceComponent.class, TextureComponent.class, TextureRegionComponent.class).get();
     private Family rendererFamily = Family.all(
             CameraComponent.class,
             SpriteBatchComponent.class,
             ModelBatchComponent.class,
             FrameBufferComponent.class,
             EnvironmentComponent.class).get();
-
-    private ZComparator zComparator;
 
     OrthographicCamera camera;
 
@@ -43,16 +44,8 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        renderableEntities = new Array<>();
-        rendererEntities = new Array<>();
-        for (Entity entity : engine.getEntitiesFor(renderableFamily)) {
-            renderableEntities.add(entity);
-        }
-        for (Entity entity : engine.getEntitiesFor(rendererFamily)) {
-            rendererEntities.add(entity);
-        }
-        zComparator = new ZComparator();
-        renderableEntities.sort(zComparator);
+        renderableEntities = engine.getEntitiesFor(renderableFamily);
+        rendererEntities = engine.getEntitiesFor(rendererFamily);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0);
         camera.update();
@@ -75,8 +68,7 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
             PostProcessorsComponent postProcessorsComponent = Mapper.postProcessComponentMapper.get(rendererEntity);
             EnvironmentComponent environmentComponent = Mapper.environmentComponentMapper.get(rendererEntity);
 
-            zComparator.setCameraComponent(cameraComponent);
-            renderableEntities.sort(zComparator);
+            //zComparator.setCameraComponent(cameraComponent);
 
             context.begin();
             frameBufferComponent.frameBuffer.begin();
@@ -88,25 +80,35 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
             DirectionalShadowLight shadowLight = e.light;
 
             modelBatchComponent.modelBatch.begin(cameraComponent.camera);
+            Gdx.gl30.glEnable(GL30.GL_DEPTH_TEST);
             Gdx.gl30.glClearColor(0, 0, 0, 1);
+            Gdx.gl30.glEnable(GL30.GL_CULL_FACE);
+            Gdx.gl30.glCullFace(GL30.GL_BACK);
             Gdx.gl30.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
             for (Entity renderableEntity : renderableEntities) {
                 PositionComponent positionComponent = Mapper.positionComponentMapper.get(renderableEntity);
                 ModelInstanceComponent modelInstanceComponent = Mapper.modelInstanceComponentMapper.get(renderableEntity);
+                RenderableProviderComponent renderableProviderComponent = Mapper.renderableProviderComponentMapper.get(renderableEntity);
                 TextureComponent textureComponent = Mapper.textureComponentMapper.get(renderableEntity);
                 TextureRegionComponent textureRegionComponent = Mapper.textureRegionComponentMapper.get(renderableEntity);
                 ShaderComponent shaderComponent = Mapper.shaderComponentMapper.get(renderableEntity);
                 ShaderProgram.pedantic = false;
 
-
-                if (modelInstanceComponent != null && environmentComponent != null && shaderComponent != null) {
-                    modelBatchComponent.modelBatch.render(modelInstanceComponent.instance, environmentComponent.environment, shaderComponent.shader);
-                } else if (modelInstanceComponent != null && environmentComponent != null) {
-                    modelBatchComponent.modelBatch.render(modelInstanceComponent.instance, environmentComponent.environment);
-                } else if (modelInstanceComponent != null && shaderComponent != null) {
-                    modelBatchComponent.modelBatch.render(modelInstanceComponent.instance, shaderComponent.shader);
-                } else if (modelInstanceComponent != null) {
-                    modelBatchComponent.modelBatch.render(modelInstanceComponent.instance);
+                RenderableProvider provider = null;
+                if(renderableProviderComponent != null) {
+                    provider = renderableProviderComponent.renderableProvider;
+                }
+                else if (modelInstanceComponent != null) {
+                    provider = modelInstanceComponent.instance;
+                }
+                if (provider != null && environmentComponent != null && shaderComponent != null) {
+                    modelBatchComponent.modelBatch.render(provider, environmentComponent.environment, shaderComponent.shader);
+                } else if (provider != null && environmentComponent != null) {
+                    modelBatchComponent.modelBatch.render(provider, environmentComponent.environment);
+                } else if (provider != null && shaderComponent != null) {
+                    modelBatchComponent.modelBatch.render(provider, shaderComponent.shader);
+                } else if (provider != null) {
+                    modelBatchComponent.modelBatch.render(provider);
                 }
             }
             modelBatchComponent.modelBatch.end();
@@ -128,26 +130,6 @@ public class GameRenderSystem extends EntitySystem implements EntityListener {
             spriteBatchComponent.spriteBatch.setProjectionMatrix(camera.combined);
             spriteBatchComponent.spriteBatch.draw(colorTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
             spriteBatchComponent.spriteBatch.end();
-        }
-    }
-
-    @Override
-    public void entityAdded(Entity entity) {
-        if (renderableFamily.matches(entity)) {
-            renderableEntities.add(entity);
-        }
-        if (rendererFamily.matches(entity)) {
-            rendererEntities.add(entity);
-        }
-    }
-
-    @Override
-    public void entityRemoved(Entity entity) {
-        if (renderableFamily.matches(entity)) {
-            renderableEntities.removeValue(entity, true);
-        }
-        if (rendererFamily.matches(entity)) {
-            rendererEntities.removeValue(entity, true);
         }
     }
 }
