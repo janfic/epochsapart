@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -23,12 +24,14 @@ public class VoxelWorld implements RenderableProvider {
     public final int voxelsX, voxelsY, voxelsZ;
     public final int chunksX, chunksY, chunksZ;
 
+    public final Texture[] tiles;
+
     public VoxelWorld(Texture[] tiles, int chunksX, int chunksY, int chunksZ) {
         this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
         this.meshes = new Mesh[chunksX * chunksY * chunksZ];
         this.dirty = new boolean[chunksX * chunksY * chunksZ];
         this.numVertices = new int[chunksX * chunksY * chunksZ];
-        this.materials = new Material[chunksX * chunksY * chunksZ];
+        this.materials = new Material[tiles.length];
         this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z];
         this.voxelsX = chunksX * CHUNK_SIZE_X;
         this.voxelsY = chunksX * CHUNK_SIZE_Y;
@@ -36,6 +39,7 @@ public class VoxelWorld implements RenderableProvider {
         this.chunksX = chunksX;
         this.chunksY = chunksX;
         this.chunksZ = chunksX;
+        this.tiles = tiles;
 
         // Make Chunks
         int i = 0;
@@ -65,7 +69,8 @@ public class VoxelWorld implements RenderableProvider {
             meshes[i] = new Mesh(true, CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 6 * 4,
                     CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z * 36 / 3,
                     VertexAttribute.Position(),
-                    VertexAttribute.Normal()
+                    VertexAttribute.Normal(),
+                    VertexAttribute.TexCoords(0)
                     );
             meshes[i].setIndices(indices);
         }
@@ -81,8 +86,7 @@ public class VoxelWorld implements RenderableProvider {
         }
 
         for (i = 0; i < materials.length; i++) {
-            materials[i] = new Material(new ColorAttribute(ColorAttribute.Diffuse, MathUtils.random(0.25f, 1f),
-                    MathUtils.random(0.25f, 1f), MathUtils.random(0.25f, 1f), 1));
+            materials[i] = new Material(TextureAttribute.createDiffuse(tiles[i]));
         }
     }
 
@@ -127,7 +131,7 @@ public class VoxelWorld implements RenderableProvider {
             }
             if(numVertices[i] == 0) continue;;
             Renderable renderable = pool.obtain();
-            renderable.material = materials[i];
+            renderable.material = materials[0];
             renderable.meshPart.mesh = mesh;
             renderable.meshPart.offset = 0;
             renderable.meshPart.size = numVertices[i];

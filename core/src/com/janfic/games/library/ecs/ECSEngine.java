@@ -94,7 +94,7 @@ public class ECSEngine extends Engine {
     private void makeWorld() {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
-        generateWorldComponent.height = 50;
+        generateWorldComponent.height = 100;
         generateWorldComponent.width = 512;
         generateWorldComponent.length = 512;
         generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
@@ -106,7 +106,7 @@ public class ECSEngine extends Engine {
 // Entities
         modelRenderer = createEntity();
         CameraComponent cameraComponent = new CameraComponent();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 10, Gdx.graphics.getHeight() / 10);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cameraComponent.camera = camera;
         float camX = -100;
         float camZ = 100;
@@ -118,15 +118,15 @@ public class ECSEngine extends Engine {
 
         System.out.println(camY);
 
-        cameraComponent.camera.position.set(camX,camY,camZ);
-        cameraComponent.camera.lookAt(0,0,0);
+        cameraComponent.camera.position.set((camX * 3) + 512 / 2,camY * 3,(camZ * 3) + 512 / 2);
+        cameraComponent.camera.lookAt(512 / 2,0,512 / 2);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
         cameraComponent.camera.update();
 
         EnvironmentComponent environmentComponent = new EnvironmentComponent();
         environmentComponent.environment = new Environment();
-        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.6f, 1f));
+        environmentComponent.environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         //environmentComponent.environment.add(new PointLight().set(1f, 1f, 1f, 300, 200, 200, 20000));
         light = new DirectionalShadowLight(1024, 1024, 60f, 60f, .1f, 50f);
         light.set(1, 1, 1f, 0.5f, -2f, 0.4f);

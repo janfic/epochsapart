@@ -33,6 +33,9 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 	Texture noiseTexture;
 
+	boolean sunSim = false;
+	float time = 0;
+
 	@Override
 	public void create () {
 		engine = new ECSEngine();
@@ -137,15 +140,37 @@ public class JanFixelDriver extends ApplicationAdapter {
 			light.setDirection(light.direction.x , light.direction.y, 0 );
 		}
 
-		if(Gdx.input.isKeyPressed(Input.Keys.NUM_8)) {
+		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
 			engine.camera.viewportWidth *= 0.99f;
 			engine.camera.viewportHeight *= 0.99f;
 			engine.camera.update();
 		}
-		if(Gdx.input.isKeyPressed(Input.Keys.NUM_2)) {
+		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
 			engine.camera.viewportWidth *= 1.01f;
 			engine.camera.viewportHeight *= 1.01f;
 			engine.camera.update();
+		}
+
+		if(!sunSim && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+			sunSim = true;
+			time = 0;
+		}
+
+		if(sunSim) {
+			time += Gdx.graphics.getDeltaTime();
+			// 24 seconds = 24 in game hours
+			float x = (float) Math.cos(Math.PI * 2 * ((time - 12) / 12));
+			float y = (float) Math.sin(Math.PI * 2 * ((time - 12) / 12));
+			light.setDirection(x, y, 0.8f);
+			if(Math.abs(y) < 0.4) {
+				light.setColor(Color.ORANGE);
+			}
+			else if (y > 0) {
+				light.setColor(Color.WHITE);
+			}
+			else if( y < 0 ) {
+				light.setColor(Color.LIGHT_GRAY);
+			}
 		}
 	}
 
