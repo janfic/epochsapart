@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -118,8 +119,8 @@ public class ECSEngine extends Engine {
 
         System.out.println(camY);
 
-        cameraComponent.camera.position.set((camX * 3) + 512 / 2,camY * 3,(camZ * 3) + 512 / 2);
-        cameraComponent.camera.lookAt(512 / 2,0,512 / 2);
+        cameraComponent.camera.position.set((camX * 3) ,camY * 3,(camZ * 3));
+        cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
         cameraComponent.camera.update();
@@ -154,9 +155,50 @@ public class ECSEngine extends Engine {
         modelRenderer.add(environmentComponent);
         modelRenderer.add(postProcessesComponent);
 
-        CameraInputController camController = new CameraInputController(cameraComponent.camera);
+        //CameraInputController camController = new CameraInputController(cameraComponent.camera);
         InputProcessorComponent inputProcessorComponent = new InputProcessorComponent();
-        inputProcessorComponent.inputProcessor = camController;
+        inputProcessorComponent.inputProcessor = new InputProcessor() {
+            @Override
+            public boolean keyDown(int keycode) {
+
+                return false;
+            }
+
+            @Override
+            public boolean keyUp(int keycode) {
+                return false;
+            }
+
+            @Override
+            public boolean keyTyped(char character) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                return false;
+            }
+
+            @Override
+            public boolean mouseMoved(int screenX, int screenY) {
+                return false;
+            }
+
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                return false;
+            }
+        };
         inputProcessorComponent.priority = 2;
 
         modelRenderer.add(inputProcessorComponent);

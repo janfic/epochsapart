@@ -92,7 +92,8 @@ public class WorldGenerationSystem extends EntitySystem {
                 for (int z = 0; z < length; z++) {
                     int h = (int) (grid.get(x,z) * height);
                     for (int y = 0; y <= h; y++) {
-                        world.set(x,y,z,(byte) ((y==h) ? 3 : 2));
+                        world.set(x,y,z,(byte) ((y == h) ? 3 : 2));
+                        if(y == height / 2 - 1) world.set(x,y,z,(byte) (5));
                     }
                     for (h = h + 1; h < height / 2; h++) {
                         world.set(x,h,z,(byte) 4);

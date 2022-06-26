@@ -31,8 +31,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 	DirectionalLight light;
 
-	Texture noiseTexture;
-
 	boolean sunSim = false;
 	float time = 0;
 
@@ -50,30 +48,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 		pixelizePostProcess = engine.pixelizePostProcess;
 		light = engine.light;
 
-		final Pixmap pixMap = new Pixmap(512, 512, Pixmap.Format.RGBA8888);
-
-		final NoiseGenerator noiseGenerator = new NoiseGenerator();
-		int size = 64;
-		final Grid grid = new Grid(size);
-
-		noiseStage(grid, noiseGenerator, 32, 1f / 2f);
-		noiseStage(grid, noiseGenerator, 16, 1f / 4f);
-		noiseStage(grid, noiseGenerator, 8, 1f / 8f);
-		noiseStage(grid, noiseGenerator, 4, 1f / 16f);
-		noiseStage(grid, noiseGenerator, 2, 1f / 32f);
-		//noiseStage(grid, noiseGenerator, 1, 1f / 32f);
-
-
-		for (int x = 0; x < size; x++) {
-			for (int y = 0; y < size; y++) {
-				float c = grid.get(x,y);
-				if( grid.get(x,y) >= 1) System.out.println( grid.get(x,y));
-				pixMap.setColor(new Color(c,c,c, 1));
-				pixMap.drawPixel(x,y);
-			}
-		}
-
-		noiseTexture = new Texture(pixMap);
 	}
 
 	private static void noiseStage(Grid grid, NoiseGenerator noiseGenerator, int radius, float modifier) {
@@ -88,9 +62,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
-		batch.begin();
-		batch.draw(noiseTexture, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		batch.end();
 		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			this.ditherPostProcess.pixelSize += 2;
 			this.pixelizePostProcess.pixelSize += 2;

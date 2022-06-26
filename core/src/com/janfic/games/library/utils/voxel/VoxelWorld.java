@@ -47,7 +47,7 @@ public class VoxelWorld implements RenderableProvider {
             for (int z = 0; z < chunksZ; z++) {
                 for (int x = 0; x < chunksX; x++) {
                     VoxelChunk chunk = new VoxelChunk();
-                    chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
+                    chunk.offset.set((x - chunksX / 2) * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, (z - chunksZ / 2 ) * CHUNK_SIZE_Z);
                     chunks[i++] = chunk;
                 }
             }

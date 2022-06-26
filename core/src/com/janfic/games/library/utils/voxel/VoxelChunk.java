@@ -7,13 +7,22 @@ public class VoxelChunk {
     public static int CHUNK_SIZE_X = 16, CHUNK_SIZE_Y = 16, CHUNK_SIZE_Z = 16;
     public final Vector3 offset = new Vector3();
 
+    public Voxel[] voxelData;
     public final byte[] voxels;
     public final int topOffset, bottomOffset, leftOffset, rightOffset, frontOffset, backOffset;
 
     public final int widthTimeHeight;
 
     public final static int textureSizeWidth = 128 * 3;
-    public final static int textureSizeHeight = 128 * 4;
+    public final static int textureSizeHeight = 128 * 5;
+
+    /*
+
+        Voxel Bytes Calculation
+
+        RRRR
+
+     */
 
     public VoxelChunk() {
         voxels = new byte[CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_X];
@@ -49,6 +58,8 @@ public class VoxelChunk {
          voxels[x + z * CHUNK_SIZE_X + y * CHUNK_SIZE_X * CHUNK_SIZE_Y] = voxel;
     }
 
+        CubeVoxel cubeVoxel = new CubeVoxel();
+        boolean[] neighbors = new boolean[6];
     public int calculateVertices (float[] vertices) {
         int i = 0;
         int vertexOffset = 0;
@@ -57,36 +68,13 @@ public class VoxelChunk {
                 for (int x = 0; x < CHUNK_SIZE_X; x++, i++) {
                     byte voxel = voxels[i];
                     if (voxel == 0) continue;
-                    if (y < CHUNK_SIZE_Y - 1) {
-                        if (voxels[i + topOffset] == 0) vertexOffset = createTop(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    } else {
-                        vertexOffset = createTop(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    }
-                    if (y > 0) {
-                        if (voxels[i + bottomOffset] == 0) vertexOffset = createBottom(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    } else {
-                        vertexOffset = createBottom(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    }
-                    if (x > 0) {
-                        if (voxels[i + leftOffset] == 0) vertexOffset = createLeft(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    } else {
-                        vertexOffset = createLeft(offset, x, y, z, vertices,vertexOffset, voxel - 1);
-                    }
-                    if (x < CHUNK_SIZE_X - 1) {
-                        if (voxels[i + rightOffset] == 0) vertexOffset = createRight(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    } else {
-                        vertexOffset = createRight(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    }
-                    if (z > 0) {
-                        if (voxels[i + frontOffset] == 0) vertexOffset = createBack(offset, x, y, z, vertices, vertexOffset,voxel - 1);
-                    } else {
-                        vertexOffset = createBack(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    }
-                    if (z < CHUNK_SIZE_Z - 1) {
-                        if (voxels[i + backOffset] == 0) vertexOffset = createFront(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    } else {
-                        vertexOffset = createFront(offset, x, y, z, vertices, vertexOffset, voxel - 1);
-                    }
+                    neighbors[0] = y >= CHUNK_SIZE_Y - 1 || (voxels[i + topOffset] == 0);
+                    neighbors[1] = y <= 0 || (voxels[i + bottomOffset] == 0);
+                    neighbors[2] = x >= 0 || (voxels[i + leftOffset] == 0);
+                    neighbors[3] = x >= CHUNK_SIZE_X - 1 || (voxels[i + rightOffset] == 0);
+                    neighbors[4] = z >= CHUNK_SIZE_Z - 1 || (voxels[i + backOffset] == 0);
+                    neighbors[5] = z <= 0 || (voxels[i + frontOffset] == 0);
+                    vertexOffset = cubeVoxel.create(offset, x, y, z, vertices, vertexOffset, neighbors, (byte) (voxel - 1));
                 }
             }
         }
