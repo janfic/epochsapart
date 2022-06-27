@@ -27,7 +27,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 	PalettePostProcess palettePostProcess;
 	DitherPostProcess ditherPostProcess;
 	PixelizePostProcess pixelizePostProcess;
-	Palette aap64, blackWhite;
 
 	DirectionalLight light;
 
@@ -38,16 +37,10 @@ public class JanFixelDriver extends ApplicationAdapter {
 	public void create () {
 		engine = new ECSEngine();
 		batch = new SpriteBatch();
-		aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
-		blackWhite = new Palette("black/white");
-		for (float i = 0; i <= 1; i+= 0.1f) {
-			blackWhite.addColor(new Color(i, i, i, 1f));
-		}
 		palettePostProcess = engine.palettePostProcess;
 		ditherPostProcess = engine.ditherPostProcess;
 		pixelizePostProcess = engine.pixelizePostProcess;
 		light = engine.light;
-
 	}
 
 	private static void noiseStage(Grid grid, NoiseGenerator noiseGenerator, int radius, float modifier) {
@@ -62,87 +55,53 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
-		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-			this.ditherPostProcess.pixelSize += 2;
-			this.pixelizePostProcess.pixelSize += 2;
-		}
-		if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-			this.ditherPostProcess.pixelSize -= 2;
-			this.pixelizePostProcess.pixelSize -= 2;
-			if(this.ditherPostProcess.pixelSize <= 0 || this.pixelizePostProcess.pixelSize <= 0) {
-				this.ditherPostProcess.pixelSize = 1;
-				this.pixelizePostProcess.pixelSize = 1;
-			}
-		}
-
-		if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-			palettePostProcess.useHSL = !palettePostProcess.useHSL;
-		}
-
-		if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-			palettePostProcess.palette = palettePostProcess.palette == blackWhite ? aap64 : blackWhite;
-		}
-
-		if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-			light.setDirection(light.direction.x, light.direction.y - 0.01f, light.direction.z);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-			light.setDirection(light.direction.x, light.direction.y + 0.01f, light.direction.z);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-			light.setDirection(light.direction.x + 0.01f, light.direction.y, light.direction.z);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-			light.setDirection(light.direction.x - 0.01f, light.direction.y, light.direction.z);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-			light.setDirection(light.direction.x , light.direction.y, light.direction.z + 0.01f);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-			light.setDirection(light.direction.x , light.direction.y, light.direction.z - 0.01f);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-			light.setDirection(0, light.direction.y, light.direction.z);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.X)) {
-			light.setDirection(light.direction.x , 0, light.direction.z );
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.C)) {
-			light.setDirection(light.direction.x , light.direction.y, 0 );
-		}
-
-		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
-			engine.camera.viewportWidth *= 0.99f;
-			engine.camera.viewportHeight *= 0.99f;
-			engine.camera.update();
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
-			engine.camera.viewportWidth *= 1.01f;
-			engine.camera.viewportHeight *= 1.01f;
-			engine.camera.update();
-		}
-
-		if(!sunSim && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-			sunSim = true;
-			time = 0;
-		}
-
-		if(sunSim) {
-			time += Gdx.graphics.getDeltaTime();
-			// 24 seconds = 24 in game hours
-			float x = (float) Math.cos(Math.PI * 2 * ((time - 12) / 12));
-			float y = (float) Math.sin(Math.PI * 2 * ((time - 12) / 12));
-			light.setDirection(x, y, 0.8f);
-			if(Math.abs(y) < 0.4) {
-				light.setColor(Color.ORANGE);
-			}
-			else if (y > 0) {
-				light.setColor(Color.WHITE);
-			}
-			else if( y < 0 ) {
-				light.setColor(Color.LIGHT_GRAY);
-			}
-		}
+//		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+//			this.ditherPostProcess.pixelSize += 2;
+//			this.pixelizePostProcess.pixelSize += 2;
+//		}
+//		if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+//			this.ditherPostProcess.pixelSize -= 2;
+//			this.pixelizePostProcess.pixelSize -= 2;
+//			if(this.ditherPostProcess.pixelSize <= 0 || this.pixelizePostProcess.pixelSize <= 0) {
+//				this.ditherPostProcess.pixelSize = 1;
+//				this.pixelizePostProcess.pixelSize = 1;
+//			}
+//		}
+//
+//		if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//			light.setDirection(light.direction.x, light.direction.y - 0.01f, light.direction.z);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//			light.setDirection(light.direction.x, light.direction.y + 0.01f, light.direction.z);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//			light.setDirection(light.direction.x + 0.01f, light.direction.y, light.direction.z);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//			light.setDirection(light.direction.x - 0.01f, light.direction.y, light.direction.z);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+//			light.setDirection(light.direction.x , light.direction.y, light.direction.z + 0.01f);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+//			light.setDirection(light.direction.x , light.direction.y, light.direction.z - 0.01f);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
+//			light.setDirection(0, light.direction.y, light.direction.z);
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.X)) {
+//			light.setDirection(light.direction.x , 0, light.direction.z );
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+//			light.setDirection(light.direction.x , light.direction.y, 0 );
+//		}
+//
+//
+//
+//		if(!sunSim && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+//			sunSim = true;
+//			time = 0;
+//		}
 	}
 
 	@Override

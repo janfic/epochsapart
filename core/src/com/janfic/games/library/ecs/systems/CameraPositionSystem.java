@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.rendering.CameraComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
@@ -28,6 +29,8 @@ public class CameraPositionSystem extends EntitySystem {
             CameraComponent cameraComponent = Mapper.cameraComponentMapper.get(entity);
 
             cameraComponent.camera.position.set(positionComponent.position);
+            cameraComponent.camera.up.set(Vector3.Y);
+            cameraComponent.camera.lookAt(0,0,0);
             cameraComponent.camera.update();
         }
     }

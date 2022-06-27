@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.*;
@@ -28,6 +29,7 @@ import com.janfic.games.library.ecs.components.events.EventComponentChangeCompon
 import com.janfic.games.library.ecs.components.events.EventEntityAddComponentComponent;
 import com.janfic.games.library.ecs.components.events.EventQueueComponent;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
+import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
@@ -85,6 +87,9 @@ public class ECSEngine extends Engine {
         addSystem(userInterfaceSystem);
         addSystem(inputSystem);
         addSystem(eventSystem);
+        addSystem(new IsometricCameraSystem());
+        addSystem(new CameraPositionSystem());
+        addSystem(new CameraFollowSystem());
 
         makeRenderer();
         //makeGameEntities();
@@ -104,23 +109,21 @@ public class ECSEngine extends Engine {
     }
 
     private void makeRenderer() {
-// Entities
+
+        Entity follow = new Entity();
+        PositionComponent pos = new PositionComponent();
+        pos.position = new Vector3(0, 60, 0);
+        CameraFollowComponent cameraFollowComponent = new CameraFollowComponent();
+        follow.add(pos);
+        follow.add(cameraFollowComponent);
+        addEntity(follow);
+
         modelRenderer = createEntity();
+        CameraFollowComponent cameraCanFollowComponent = new CameraFollowComponent();
         CameraComponent cameraComponent = new CameraComponent();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 20f, Gdx.graphics.getHeight() / 20f);
         cameraComponent.camera = camera;
-        float camX = -100;
-        float camZ = 100;
 
-        float tLength = (float) Math.sqrt(camX * camX + camZ * camZ);
-        float targetAngle = (float) Math.toRadians(90 - 35.264);
-
-        float camY = (float) (Math.cos(targetAngle) * tLength);
-
-        System.out.println(camY);
-
-        cameraComponent.camera.position.set((camX * 3) ,camY * 3,(camZ * 3));
-        cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
         cameraComponent.camera.update();
@@ -148,20 +151,48 @@ public class ECSEngine extends Engine {
         postProcessesComponent = new PostProcessorsComponent();
         postProcessesComponent.processors = new ArrayList<>();
 
+        PositionComponent positionComponent = new PositionComponent();
+        positionComponent.position = new Vector3();
+
+        IsometricCameraComponent isometricCameraComponent = new IsometricCameraComponent();
+        isometricCameraComponent.snapAngle = 90;
+        isometricCameraComponent.angle = 180;
+        isometricCameraComponent.distance = 300;
+        isometricCameraComponent.offset = 45;
+        isometricCameraComponent.target = 180;
+
         modelRenderer.add(cameraComponent);
         modelRenderer.add(spriteBatchComponent);
         modelRenderer.add(modelBatchComponent);
+        modelRenderer.add(cameraCanFollowComponent);
         modelRenderer.add(frameBufferComponent);
         modelRenderer.add(environmentComponent);
+        modelRenderer.add(positionComponent);
+        modelRenderer.add(isometricCameraComponent);
         modelRenderer.add(postProcessesComponent);
 
-        //CameraInputController camController = new CameraInputController(cameraComponent.camera);
         InputProcessorComponent inputProcessorComponent = new InputProcessorComponent();
         inputProcessorComponent.inputProcessor = new InputProcessor() {
+
             @Override
             public boolean keyDown(int keycode) {
-
-                return false;
+                if(keycode == Input.Keys.UP) {
+                    cameraComponent.camera.viewportWidth *= 0.99f;
+                    cameraComponent.camera.viewportHeight *= 0.99f;
+                    cameraComponent.camera.update();
+		        }
+		        if(keycode == Input.Keys.DOWN) {
+                    cameraComponent.camera.viewportWidth *= 1.01f;
+                    cameraComponent.camera.viewportHeight *= 1.01f;
+                    cameraComponent.camera.update();
+		        }
+                if(keycode == Input.Keys.LEFT) {
+                    isometricCameraComponent.target += isometricCameraComponent.snapAngle;
+                }
+                if(keycode == Input.Keys.RIGHT) {
+                    isometricCameraComponent.target -= isometricCameraComponent.snapAngle;
+                }
+                return true;
             }
 
             @Override

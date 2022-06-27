@@ -3,6 +3,7 @@ package com.janfic.games.library.ecs;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.janfic.games.library.ecs.components.events.*;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
+import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.ActorComponent;
@@ -63,5 +64,8 @@ public class Mapper {
     public static final ComponentMapper<EventComponentChangeComponent> eventComponentChangeComponentMapper = ComponentMapper.getFor(EventComponentChangeComponent.class);
     public static final ComponentMapper<EventFamilyAddComponentsComponent> eventFamilyAddComponentsComponentMapper = ComponentMapper.getFor(EventFamilyAddComponentsComponent.class);
     public static final ComponentMapper<EventFamilyRemoveComponentsComponent> eventFamilyRemoveComponentsComponentMapper = ComponentMapper.getFor(EventFamilyRemoveComponentsComponent.class);
+
+    // Isometric Rules
+    public static final ComponentMapper<IsometricCameraComponent> isometricCameraComponentMapper = ComponentMapper.getFor(IsometricCameraComponent.class);
 
 }
