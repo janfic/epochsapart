@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Vector3;
@@ -32,11 +33,13 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 	boolean sunSim = false;
 	float time = 0;
+	private ModelBatch modelBatch;
 
 	@Override
 	public void create () {
 		engine = new ECSEngine();
 		batch = new SpriteBatch();
+		modelBatch = new ModelBatch();
 		palettePostProcess = engine.palettePostProcess;
 		ditherPostProcess = engine.ditherPostProcess;
 		pixelizePostProcess = engine.pixelizePostProcess;
@@ -55,53 +58,8 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
-//		if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-//			this.ditherPostProcess.pixelSize += 2;
-//			this.pixelizePostProcess.pixelSize += 2;
-//		}
-//		if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-//			this.ditherPostProcess.pixelSize -= 2;
-//			this.pixelizePostProcess.pixelSize -= 2;
-//			if(this.ditherPostProcess.pixelSize <= 0 || this.pixelizePostProcess.pixelSize <= 0) {
-//				this.ditherPostProcess.pixelSize = 1;
-//				this.pixelizePostProcess.pixelSize = 1;
-//			}
-//		}
-//
-//		if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-//			light.setDirection(light.direction.x, light.direction.y - 0.01f, light.direction.z);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-//			light.setDirection(light.direction.x, light.direction.y + 0.01f, light.direction.z);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-//			light.setDirection(light.direction.x + 0.01f, light.direction.y, light.direction.z);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-//			light.setDirection(light.direction.x - 0.01f, light.direction.y, light.direction.z);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-//			light.setDirection(light.direction.x , light.direction.y, light.direction.z + 0.01f);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-//			light.setDirection(light.direction.x , light.direction.y, light.direction.z - 0.01f);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-//			light.setDirection(0, light.direction.y, light.direction.z);
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.X)) {
-//			light.setDirection(light.direction.x , 0, light.direction.z );
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.C)) {
-//			light.setDirection(light.direction.x , light.direction.y, 0 );
-//		}
-//
-//
-//
-//		if(!sunSim && Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-//			sunSim = true;
-//			time = 0;
-//		}
+
+
 	}
 
 	@Override

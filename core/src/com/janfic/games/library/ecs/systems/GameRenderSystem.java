@@ -20,8 +20,11 @@ import com.janfic.games.library.ecs.ECSEngine;
 import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.*;
+import com.janfic.games.library.graphics.shaders.BorderShader;
 import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.ZComparator;
+
+import javax.swing.border.Border;
 
 public class GameRenderSystem extends EntitySystem {
 
@@ -94,6 +97,8 @@ public class GameRenderSystem extends EntitySystem {
                 ShaderComponent shaderComponent = Mapper.shaderComponentMapper.get(renderableEntity);
                 ShaderProgram.pedantic = false;
 
+                modelBatchComponent.modelBatch.setCamera(cameraComponent.camera);
+
                 RenderableProvider provider = null;
                 if(renderableProviderComponent != null) {
                     provider = renderableProviderComponent.renderableProvider;
@@ -102,7 +107,20 @@ public class GameRenderSystem extends EntitySystem {
                     provider = modelInstanceComponent.instance;
                 }
                 if (provider != null && environmentComponent != null && shaderComponent != null) {
-                    modelBatchComponent.modelBatch.render(provider, environmentComponent.environment, shaderComponent.shader);
+                    if(shaderComponent.shader instanceof BorderShader) {
+                        float scale = 1 + ((cameraComponent.camera.viewportWidth * 80 ) / Gdx.graphics.getWidth()) / 10;
+                        modelInstanceComponent.instance.transform.scale(scale,scale,scale);
+                        modelBatchComponent.modelBatch.render( modelInstanceComponent.instance, environmentComponent.environment, shaderComponent.shader);
+                        modelBatchComponent.modelBatch.flush();
+                        Gdx.gl30.glDisable(GL30.GL_DEPTH_TEST);
+                        modelInstanceComponent.instance.transform.scale(1 / scale,1 / scale,1 / scale);
+                    }
+
+                    modelBatchComponent.modelBatch.render( modelInstanceComponent.instance, environmentComponent.environment);
+                    if(shaderComponent.shader instanceof BorderShader) {
+                        modelBatchComponent.modelBatch.flush();
+                        Gdx.gl30.glEnable(GL30.GL_DEPTH_TEST);
+                    }
                 } else if (provider != null && environmentComponent != null) {
                     modelBatchComponent.modelBatch.render(provider, environmentComponent.environment);
                 } else if (provider != null && shaderComponent != null) {

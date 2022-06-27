@@ -43,12 +43,14 @@ public class Palette {
     public Palette(String name) {
         this.name = name;
         this.colors = new ArrayList<>();
+        this.colors.add(Color.BLACK);
     }
 
     public Palette(String name, FileHandle handle) {
         Scanner scanner = new Scanner(handle.readString());
         this.name = name;
         this.colors = new ArrayList<>();
+        this.colors.add(Color.BLACK);
         while(scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if(line.startsWith("#")) continue;;
@@ -132,4 +134,12 @@ public class Palette {
         rgbTexture = textures[0];
         hslTexture = textures[1];
     }
+
+//    public Texture transformTextureClosest(Texture texture) {
+//
+//    }
+
+//    public Texture transformTextureIndexed(Texture texture) {
+//
+//    }
 }

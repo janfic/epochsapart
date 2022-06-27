@@ -2,15 +2,16 @@ package com.janfic.games.library.ecs;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.janfic.games.library.ecs.components.events.*;
+import com.janfic.games.library.ecs.components.input.ClickableComponent;
+import com.janfic.games.library.ecs.components.input.HitBoxComponent;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
+import com.janfic.games.library.ecs.components.inventory.*;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.ActorComponent;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
-import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
-import com.janfic.games.library.ecs.components.world.TileComponent;
-import com.janfic.games.library.ecs.components.world.WorldComponent;
+import com.janfic.games.library.ecs.components.world.*;
 
 public class Mapper {
     // Physics
@@ -18,6 +19,7 @@ public class Mapper {
     public static final ComponentMapper<VelocityComponent>        velocityComponentMapper = ComponentMapper.getFor(VelocityComponent.class);
     public static final ComponentMapper<AccelerationComponent>    accelerationComponentMapper = ComponentMapper.getFor(AccelerationComponent.class);
     public static final ComponentMapper<RotationComponent>        rotationComponentMapper = ComponentMapper.getFor(RotationComponent.class);
+    public static final ComponentMapper<WeightComponent>          weightComponentMapper = ComponentMapper.getFor(WeightComponent.class);
 
     // General Rendering
     public static final ComponentMapper<CameraComponent>          cameraComponentMapper = ComponentMapper.getFor(CameraComponent.class);
@@ -56,6 +58,9 @@ public class Mapper {
 
     // Input
     public static final ComponentMapper<InputProcessorComponent> inputProcessorComponentMapper = ComponentMapper.getFor(InputProcessorComponent.class);
+    public static final ComponentMapper<HitBoxComponent> hitBoxComponentMapper = ComponentMapper.getFor(HitBoxComponent.class);
+    public static final ComponentMapper<ClickableComponent> clickableComponentMapper = ComponentMapper.getFor(ClickableComponent.class);
+
 
     // Events
     public static final ComponentMapper<EventQueueComponent> eventQueueComponentMapper = ComponentMapper.getFor(EventQueueComponent.class);
@@ -67,5 +72,11 @@ public class Mapper {
 
     // Isometric Rules
     public static final ComponentMapper<IsometricCameraComponent> isometricCameraComponentMapper = ComponentMapper.getFor(IsometricCameraComponent.class);
+
+    // Inventory
+    public static final ComponentMapper<InventoryComponent> inventoryComponentMapper = ComponentMapper.getFor(InventoryComponent.class);
+    public static final ComponentMapper<ItemComponent> itemComponentMapper = ComponentMapper.getFor(ItemComponent.class);
+    public static final ComponentMapper<ItemFilterComponent> itemFilterComponentMapper = ComponentMapper.getFor(ItemFilterComponent.class);
+    public static final ComponentMapper<ItemPropertyComponent> itemPropertyComponentMapper = ComponentMapper.getFor(ItemPropertyComponent.class);
 
 }

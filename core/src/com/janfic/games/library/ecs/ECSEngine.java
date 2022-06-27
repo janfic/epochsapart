@@ -1,6 +1,5 @@
 package com.janfic.games.library.ecs;
 
-import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -11,11 +10,10 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -26,8 +24,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.janfic.games.library.ecs.components.events.EventComponent;
 import com.janfic.games.library.ecs.components.events.EventComponentChangeComponent;
-import com.janfic.games.library.ecs.components.events.EventEntityAddComponentComponent;
 import com.janfic.games.library.ecs.components.events.EventQueueComponent;
+import com.janfic.games.library.ecs.components.input.ClickableComponent;
+import com.janfic.games.library.ecs.components.input.HitBoxComponent;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
@@ -35,15 +34,12 @@ import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.systems.*;
-import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
-import com.janfic.games.library.graphics.shaders.postprocess.Palette;
-import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
-import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
+import com.janfic.games.library.graphics.shaders.BorderShader;
+import com.janfic.games.library.graphics.shaders.postprocess.*;
 import com.janfic.games.library.utils.ECSClickListener;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.function.Consumer;
 
 public class ECSEngine extends Engine {
 
@@ -90,7 +86,9 @@ public class ECSEngine extends Engine {
         addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
         addSystem(new CameraFollowSystem());
+        addSystem(new ModelClickSystem());
 
+        makePlayer();
         makeRenderer();
         //makeGameEntities();
         makeWorld();
@@ -108,20 +106,72 @@ public class ECSEngine extends Engine {
         addEntity(entity);
     }
 
+    public void makePlayer() {
+        Entity player = createEntity();
+
+        ShaderComponent shaderComponent = new ShaderComponent();
+        shaderComponent.shader = new BorderShader(Color.BLACK);
+        shaderComponent.shader.init();
+
+        player.add(shaderComponent);
+
+        PositionComponent pos = new PositionComponent();
+        pos.position = new Vector3(0.5f, 60.5f, 0.5f);
+
+        ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
+        modelInstanceComponent.instance = new ModelInstance(new ModelBuilder().createSphere(1,1,1, 50, 50,
+                new Material(ColorAttribute.createDiffuse(Color.RED)),
+                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates));
+
+        CameraFollowComponent cameraFollowComponent = new CameraFollowComponent();
+
+        ClickableComponent clickableComponent = new ClickableComponent();
+        clickableComponent.listener = new ECSClickListener(this) {
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                ((BorderShader)(shaderComponent.shader)).setColor(Color.WHITE);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                super.exit(event, x, y, pointer, toActor);
+                ((BorderShader)(shaderComponent.shader)).setColor(Color.CLEAR);
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+                System.out.println("clicked");
+            }
+
+            @Override
+            public EventComponent getEvent() {
+                return null;
+            }
+        };
+
+        HitBoxComponent hitBoxComponent = new HitBoxComponent();
+        hitBoxComponent.hitBox = new Rectangle(0,0, 1, 1);
+
+        player.add(pos);
+        player.add(modelInstanceComponent);
+        player.add(cameraFollowComponent);
+        player.add(clickableComponent);
+        player.add(hitBoxComponent);
+
+        addEntity(player);
+    }
+
     private void makeRenderer() {
 
-        Entity follow = new Entity();
-        PositionComponent pos = new PositionComponent();
-        pos.position = new Vector3(0, 60, 0);
-        CameraFollowComponent cameraFollowComponent = new CameraFollowComponent();
-        follow.add(pos);
-        follow.add(cameraFollowComponent);
-        addEntity(follow);
+
 
         modelRenderer = createEntity();
         CameraFollowComponent cameraCanFollowComponent = new CameraFollowComponent();
         CameraComponent cameraComponent = new CameraComponent();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 20f, Gdx.graphics.getHeight() / 20f);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80f, Gdx.graphics.getHeight() / 80f);
         cameraComponent.camera = camera;
 
         cameraComponent.camera.near = 1;
@@ -177,13 +227,13 @@ public class ECSEngine extends Engine {
             @Override
             public boolean keyDown(int keycode) {
                 if(keycode == Input.Keys.UP) {
-                    cameraComponent.camera.viewportWidth *= 0.99f;
-                    cameraComponent.camera.viewportHeight *= 0.99f;
+                    cameraComponent.camera.viewportWidth *= 0.5f;
+                    cameraComponent.camera.viewportHeight *= 0.5f;
                     cameraComponent.camera.update();
 		        }
 		        if(keycode == Input.Keys.DOWN) {
-                    cameraComponent.camera.viewportWidth *= 1.01f;
-                    cameraComponent.camera.viewportHeight *= 1.01f;
+                    cameraComponent.camera.viewportWidth *= 2f;
+                    cameraComponent.camera.viewportHeight *= 2f;
                     cameraComponent.camera.update();
 		        }
                 if(keycode == Input.Keys.LEFT) {
@@ -287,9 +337,9 @@ public class ECSEngine extends Engine {
                         component.processors.add(palettePostProcess);
                     }
                     else if (component.processors.size() == 1 ) {
+                        component.processors.clear();
                         component.processors.add(ditherPostProcess);
-                    }
-                    else if(component.processors.size() == 2) {
+                        component.processors.add(palettePostProcess);
                         component.processors.add(pixelizePostProcess);
                     }
                     else if(component.processors.size() == 3) {
@@ -299,7 +349,7 @@ public class ECSEngine extends Engine {
                 return event;
             }
         };
-        Actor actor = new TextButton("NEXT", skin);
+        Actor actor = new TextButton("CHANGE POST PROCESS", skin);
         actor.addListener(ecsInputListener);
 
         table.add(actor).growX().expandY().bottom();
