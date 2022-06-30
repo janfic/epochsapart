@@ -20,6 +20,7 @@ public class Mapper {
     public static final ComponentMapper<AccelerationComponent>    accelerationComponentMapper = ComponentMapper.getFor(AccelerationComponent.class);
     public static final ComponentMapper<RotationComponent>        rotationComponentMapper = ComponentMapper.getFor(RotationComponent.class);
     public static final ComponentMapper<WeightComponent>          weightComponentMapper = ComponentMapper.getFor(WeightComponent.class);
+    public static final ComponentMapper<BoundingBoxComponent>     boundingBoxComponentMapper = ComponentMapper.getFor(BoundingBoxComponent.class);
 
     // General Rendering
     public static final ComponentMapper<CameraComponent>          cameraComponentMapper = ComponentMapper.getFor(CameraComponent.class);

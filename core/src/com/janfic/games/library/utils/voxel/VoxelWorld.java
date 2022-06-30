@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -47,7 +48,7 @@ public class VoxelWorld implements RenderableProvider {
             for (int z = 0; z < chunksZ; z++) {
                 for (int x = 0; x < chunksX; x++) {
                     VoxelChunk chunk = new VoxelChunk();
-                    chunk.offset.set((x - chunksX / 2) * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, (z - chunksZ / 2 ) * CHUNK_SIZE_Z);
+                    chunk.offset.set((x - chunksX / 2f) * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, (z - chunksZ / 2f) * CHUNK_SIZE_Z);
                     chunks[i++] = chunk;
                 }
             }
@@ -136,6 +137,7 @@ public class VoxelWorld implements RenderableProvider {
             renderable.meshPart.offset = 0;
             renderable.meshPart.size = numVertices[i];
             renderable.meshPart.primitiveType = GL30.GL_TRIANGLES;
+            renderable.worldTransform.setToTranslation(Vector3.Zero);
             renderables.add(renderable);
             renderedChunks++;
         }

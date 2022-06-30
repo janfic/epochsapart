@@ -13,8 +13,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -29,6 +31,7 @@ import com.janfic.games.library.ecs.components.input.ClickableComponent;
 import com.janfic.games.library.ecs.components.input.HitBoxComponent;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
+import com.janfic.games.library.ecs.components.physics.BoundingBoxComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
@@ -39,6 +42,7 @@ import com.janfic.games.library.graphics.shaders.postprocess.*;
 import com.janfic.games.library.utils.ECSClickListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ECSEngine extends Engine {
@@ -56,6 +60,8 @@ public class ECSEngine extends Engine {
     public OrthographicCamera camera;
 
     public ECSEngine() {
+
+        ShaderProgram.pedantic = false;
 
         Palette aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
         ditherPostProcess = new DitherPostProcess(3);
@@ -77,20 +83,21 @@ public class ECSEngine extends Engine {
         ModelPositionSystem positionSystem = new ModelPositionSystem();
         WorldGenerationSystem worldGenerationSystem = new WorldGenerationSystem();
         //addEntityListener(gameRenderSystem);
-        addSystem(gameRenderSystem);
         addSystem(positionSystem);
         addSystem(worldGenerationSystem);
-        addSystem(userInterfaceSystem);
         addSystem(inputSystem);
         addSystem(eventSystem);
         addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
         addSystem(new CameraFollowSystem());
         addSystem(new ModelClickSystem());
+        addSystem(new BoundingBoxSystem());
+        addSystem(gameRenderSystem);
+        addSystem(userInterfaceSystem);
 
         makePlayer();
         makeRenderer();
-        //makeGameEntities();
+//        makeGameEntities();
         makeWorld();
         makeUISystem();
     }
@@ -113,10 +120,12 @@ public class ECSEngine extends Engine {
         shaderComponent.shader = new BorderShader(Color.BLACK);
         shaderComponent.shader.init();
 
-        player.add(shaderComponent);
+        //player.add(shaderComponent);
+
+
 
         PositionComponent pos = new PositionComponent();
-        pos.position = new Vector3(0.5f, 60.5f, 0.5f);
+        pos.position = new Vector3(0.5f, 70.5f, 0.5f);
 
         ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
         modelInstanceComponent.instance = new ModelInstance(new ModelBuilder().createSphere(1,1,1, 50, 50,
@@ -124,6 +133,10 @@ public class ECSEngine extends Engine {
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates));
 
         CameraFollowComponent cameraFollowComponent = new CameraFollowComponent();
+
+        BoundingBoxComponent boundingBoxComponent = new BoundingBoxComponent();
+        BoundingBox box = new BoundingBox();
+        boundingBoxComponent.boundingBox = modelInstanceComponent.instance.calculateBoundingBox(box);
 
         ClickableComponent clickableComponent = new ClickableComponent();
         clickableComponent.listener = new ECSClickListener(this) {
@@ -143,7 +156,10 @@ public class ECSEngine extends Engine {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                System.out.println("clicked");
+                System.out.println(event.getButton());
+                if(event.getButton() == Input.Buttons.RIGHT) {
+                    System.out.println("clicked");
+                }
             }
 
             @Override
@@ -158,8 +174,9 @@ public class ECSEngine extends Engine {
         player.add(pos);
         player.add(modelInstanceComponent);
         player.add(cameraFollowComponent);
-        player.add(clickableComponent);
-        player.add(hitBoxComponent);
+        //player.add(clickableComponent);
+        //player.add(hitBoxComponent);
+        //player.add(boundingBoxComponent);
 
         addEntity(player);
     }
@@ -174,6 +191,8 @@ public class ECSEngine extends Engine {
         camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80f, Gdx.graphics.getHeight() / 80f);
         cameraComponent.camera = camera;
 
+        cameraComponent.camera.position.set(100,100, 200);
+        cameraComponent.camera.lookAt(0,0,0);
         cameraComponent.camera.near = 1;
         cameraComponent.camera.far = 1000f;
         cameraComponent.camera.update();
@@ -202,7 +221,7 @@ public class ECSEngine extends Engine {
         postProcessesComponent.processors = new ArrayList<>();
 
         PositionComponent positionComponent = new PositionComponent();
-        positionComponent.position = new Vector3();
+        positionComponent.position = new Vector3(100, 100, 100);
 
         IsometricCameraComponent isometricCameraComponent = new IsometricCameraComponent();
         isometricCameraComponent.snapAngle = 90;

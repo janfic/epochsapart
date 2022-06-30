@@ -2,12 +2,14 @@ package com.janfic.games.library.utils.voxel;
 
 import com.badlogic.gdx.math.Vector3;
 
+import javax.swing.text.html.parser.Entity;
+
 public class VoxelChunk {
     public static final int VERTEX_SIZE = 8;
     public static int CHUNK_SIZE_X = 16, CHUNK_SIZE_Y = 16, CHUNK_SIZE_Z = 16;
     public final Vector3 offset = new Vector3();
 
-    public Voxel[] voxelData;
+    public Entity[] voxelData;
     public final byte[] voxels;
     public final int topOffset, bottomOffset, leftOffset, rightOffset, frontOffset, backOffset;
 
@@ -15,14 +17,6 @@ public class VoxelChunk {
 
     public final static int textureSizeWidth = 128 * 3;
     public final static int textureSizeHeight = 128 * 5;
-
-    /*
-
-        Voxel Bytes Calculation
-
-        RRRR
-
-     */
 
     public VoxelChunk() {
         voxels = new byte[CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_X];

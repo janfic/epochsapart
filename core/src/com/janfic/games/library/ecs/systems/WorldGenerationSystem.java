@@ -12,12 +12,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.janfic.games.library.ecs.Mapper;
+import com.janfic.games.library.ecs.components.events.EventComponent;
+import com.janfic.games.library.ecs.components.input.ClickableComponent;
+import com.janfic.games.library.ecs.components.physics.BoundingBoxComponent;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.physics.RotationComponent;
 import com.janfic.games.library.ecs.components.rendering.ModelInstanceComponent;
@@ -25,6 +30,7 @@ import com.janfic.games.library.ecs.components.rendering.RenderableProviderCompo
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.components.world.TileComponent;
 import com.janfic.games.library.ecs.components.world.WorldComponent;
+import com.janfic.games.library.utils.ECSClickListener;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 import com.janfic.games.library.utils.voxel.VoxelWorld;
 import jdk.internal.icu.text.NormalizerBase;
@@ -88,6 +94,8 @@ public class WorldGenerationSystem extends EntitySystem {
             VoxelWorld world = new VoxelWorld(tiles, (int) Math.ceil(width / (float)VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
             renderableProviderComponent.renderableProvider = world;
 
+            System.out.println("Making World");
+
             for (int x = 0; x < width; x++) {
                 for (int z = 0; z < length; z++) {
                     int h = (int) (grid.get(x,z) * height);
@@ -100,6 +108,7 @@ public class WorldGenerationSystem extends EntitySystem {
                     }
                 }
             }
+            System.out.println("Finished World");
 
             PositionComponent positionComponent = new PositionComponent();
             positionComponent.position = new Vector3(worldComponent.centerX, worldComponent.centerY, worldComponent.centerZ);
