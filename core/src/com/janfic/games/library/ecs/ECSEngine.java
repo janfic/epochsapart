@@ -31,8 +31,7 @@ import com.janfic.games.library.ecs.components.input.ClickableComponent;
 import com.janfic.games.library.ecs.components.input.HitBoxComponent;
 import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
-import com.janfic.games.library.ecs.components.physics.BoundingBoxComponent;
-import com.janfic.games.library.ecs.components.physics.PositionComponent;
+import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
@@ -40,7 +39,9 @@ import com.janfic.games.library.ecs.systems.*;
 import com.janfic.games.library.ecs.systems.input.InputSystem;
 import com.janfic.games.library.ecs.systems.input.ModelClickSystem;
 import com.janfic.games.library.ecs.systems.physics.BoundingBoxSystem;
+import com.janfic.games.library.ecs.systems.physics.GravitySystem;
 import com.janfic.games.library.ecs.systems.physics.ModelPositionSystem;
+import com.janfic.games.library.ecs.systems.physics.PhysicsSystem;
 import com.janfic.games.library.ecs.systems.rendering.*;
 import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
 import com.janfic.games.library.graphics.shaders.BorderShader;
@@ -91,6 +92,8 @@ public class ECSEngine extends Engine {
         addSystem(positionSystem);
         addSystem(worldGenerationSystem);
         addSystem(inputSystem);
+        addSystem(new PhysicsSystem());
+        addSystem(new GravitySystem());
         addSystem(eventSystem);
         addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
@@ -125,12 +128,18 @@ public class ECSEngine extends Engine {
         shaderComponent.shader = new BorderShader(Color.BLACK);
         shaderComponent.shader.init();
 
-        //player.add(shaderComponent);
-
-
 
         PositionComponent pos = new PositionComponent();
-        pos.position = new Vector3(0.5f, 70.5f, 0.5f);
+        pos.position = new Vector3(0.5f, 100.5f, 0.5f);
+
+        VelocityComponent velocityComponent = new VelocityComponent();
+        velocityComponent.velocity = new Vector3();
+
+        AccelerationComponent accelerationComponent = new AccelerationComponent();
+        accelerationComponent.acceleration = new Vector3();
+
+        GravityComponent gravityComponent = new GravityComponent();
+        gravityComponent.gravity = new Vector3(0, -1f, 0);
 
         ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
         modelInstanceComponent.instance = new ModelInstance(new ModelBuilder().createSphere(1,1,1, 50, 50,
@@ -179,9 +188,13 @@ public class ECSEngine extends Engine {
         player.add(pos);
         player.add(modelInstanceComponent);
         player.add(cameraFollowComponent);
-        //player.add(clickableComponent);
-        //player.add(hitBoxComponent);
-        //player.add(boundingBoxComponent);
+        player.add(shaderComponent);
+        player.add(clickableComponent);
+        player.add(hitBoxComponent);
+        player.add(boundingBoxComponent);
+        player.add(velocityComponent);
+        player.add(accelerationComponent);
+        player.add(gravityComponent);
 
         addEntity(player);
     }

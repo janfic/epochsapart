@@ -25,7 +25,6 @@ import com.janfic.games.library.graphics.shaders.postprocess.Palette;
 import com.janfic.games.library.graphics.shaders.postprocess.PalettePostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
 import com.janfic.games.library.utils.ColorUtils;
-import com.janfic.games.library.utils.quests.*;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 import com.janfic.games.library.utils.voxel.VoxelWorld;
 
