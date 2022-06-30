@@ -1,4 +1,4 @@
-package com.janfic.games.library.ecs.systems;
+package com.janfic.games.library.ecs.systems.input;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.SortedIteratingSystem;

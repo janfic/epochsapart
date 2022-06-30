@@ -1,4 +1,4 @@
-package com.janfic.games.library.ecs.systems;
+package com.janfic.games.library.ecs.systems.rendering;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;

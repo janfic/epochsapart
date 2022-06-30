@@ -37,12 +37,17 @@ import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.systems.*;
+import com.janfic.games.library.ecs.systems.input.InputSystem;
+import com.janfic.games.library.ecs.systems.input.ModelClickSystem;
+import com.janfic.games.library.ecs.systems.physics.BoundingBoxSystem;
+import com.janfic.games.library.ecs.systems.physics.ModelPositionSystem;
+import com.janfic.games.library.ecs.systems.rendering.*;
+import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
 import com.janfic.games.library.graphics.shaders.BorderShader;
 import com.janfic.games.library.graphics.shaders.postprocess.*;
 import com.janfic.games.library.utils.ECSClickListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ECSEngine extends Engine {
