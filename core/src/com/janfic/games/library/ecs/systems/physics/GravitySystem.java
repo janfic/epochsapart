@@ -6,17 +6,14 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.janfic.games.library.ecs.Mapper;
-import com.janfic.games.library.ecs.components.physics.AccelerationComponent;
-import com.janfic.games.library.ecs.components.physics.GravityComponent;
-import com.janfic.games.library.ecs.components.physics.PositionComponent;
-import com.janfic.games.library.ecs.components.physics.VelocityComponent;
+import com.janfic.games.library.ecs.components.physics.*;
 
 import java.util.Map;
 
 public class GravitySystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
 
-    private static final Family family = Family.all(AccelerationComponent.class, GravityComponent.class).get();
+    private static final Family family = Family.all(ForceComponent.class, GravityComponent.class).get();
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -28,10 +25,12 @@ public class GravitySystem extends EntitySystem {
     public void update(float deltaTime) {
         super.update(deltaTime);
         for (Entity entity : entities) {
-            AccelerationComponent accelerationComponent = Mapper.accelerationComponentMapper.get(entity);
+            ForceComponent forceComponent = Mapper.forceComponentMapper.get(entity);
             GravityComponent gravityComponent = Mapper.gravityComponentMapper.get(entity);
 
-            accelerationComponent.acceleration = gravityComponent.gravity;
+            if(!forceComponent.forces.contains(gravityComponent.gravity)) {
+                forceComponent.forces.add(gravityComponent.gravity);
+            }
         }
     }
 }

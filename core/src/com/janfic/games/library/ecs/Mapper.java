@@ -23,6 +23,7 @@ public class Mapper {
     public static final ComponentMapper<BoundingBoxComponent>     boundingBoxComponentMapper = ComponentMapper.getFor(BoundingBoxComponent.class);
     public static final ComponentMapper<CollideableComponent>     collideableComponentMapper = ComponentMapper.getFor(CollideableComponent.class);
     public static final ComponentMapper<GravityComponent>         gravityComponentMapper = ComponentMapper.getFor(GravityComponent.class);
+    public static final ComponentMapper<ForceComponent>           forceComponentMapper = ComponentMapper.getFor(ForceComponent.class);
 
     // General Rendering
     public static final ComponentMapper<CameraComponent>          cameraComponentMapper = ComponentMapper.getFor(CameraComponent.class);

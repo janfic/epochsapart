@@ -43,6 +43,7 @@ import com.janfic.games.library.ecs.systems.physics.GravitySystem;
 import com.janfic.games.library.ecs.systems.physics.ModelPositionSystem;
 import com.janfic.games.library.ecs.systems.physics.PhysicsSystem;
 import com.janfic.games.library.ecs.systems.rendering.*;
+import com.janfic.games.library.ecs.systems.world.WorldCollisionSystem;
 import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
 import com.janfic.games.library.graphics.shaders.BorderShader;
 import com.janfic.games.library.graphics.shaders.postprocess.*;
@@ -92,8 +93,9 @@ public class ECSEngine extends Engine {
         addSystem(positionSystem);
         addSystem(worldGenerationSystem);
         addSystem(inputSystem);
-        addSystem(new PhysicsSystem());
         addSystem(new GravitySystem());
+        addSystem(new WorldCollisionSystem());
+        addSystem(new PhysicsSystem());
         addSystem(eventSystem);
         addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
@@ -114,8 +116,8 @@ public class ECSEngine extends Engine {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
         generateWorldComponent.height = 100;
-        generateWorldComponent.width = 512;
-        generateWorldComponent.length = 512;
+        generateWorldComponent.width = 256;
+        generateWorldComponent.length = 256;
         generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
         entity.add(generateWorldComponent);
         addEntity(entity);
@@ -140,6 +142,9 @@ public class ECSEngine extends Engine {
 
         GravityComponent gravityComponent = new GravityComponent();
         gravityComponent.gravity = new Vector3(0, -1f, 0);
+
+        ForceComponent forceComponent = new ForceComponent();
+        forceComponent.forces = new ArrayList<>();
 
         ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
         modelInstanceComponent.instance = new ModelInstance(new ModelBuilder().createSphere(1,1,1, 50, 50,
@@ -189,6 +194,7 @@ public class ECSEngine extends Engine {
         player.add(modelInstanceComponent);
         player.add(cameraFollowComponent);
         player.add(shaderComponent);
+        player.add(forceComponent);
         player.add(clickableComponent);
         player.add(hitBoxComponent);
         player.add(boundingBoxComponent);

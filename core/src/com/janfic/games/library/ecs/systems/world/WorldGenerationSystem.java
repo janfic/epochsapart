@@ -74,7 +74,6 @@ public class WorldGenerationSystem extends EntitySystem {
             }
 
             WorldComponent worldComponent = new WorldComponent();
-            worldComponent.world = new Entity[width][height][length];
             worldComponent.centerX = width / 2;
             worldComponent.centerY = height / 2;
             worldComponent.centerZ = length / 2;
@@ -92,6 +91,7 @@ public class WorldGenerationSystem extends EntitySystem {
             Texture[] tiles = new Texture[1];
             tiles[0] = new Texture("models/tileTextures/textures.png");
             VoxelWorld world = new VoxelWorld(tiles, (int) Math.ceil(width / (float)VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
+            worldComponent.world = world;
             renderableProviderComponent.renderableProvider = world;
 
             System.out.println("Making World");

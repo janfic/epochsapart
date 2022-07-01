@@ -25,6 +25,8 @@ public class VoxelWorld implements RenderableProvider {
     public final int voxelsX, voxelsY, voxelsZ;
     public final int chunksX, chunksY, chunksZ;
 
+    public int[][] maxHeights;
+
     public final Texture[] tiles;
 
     public VoxelWorld(Texture[] tiles, int chunksX, int chunksY, int chunksZ) {
@@ -41,6 +43,7 @@ public class VoxelWorld implements RenderableProvider {
         this.chunksY = chunksX;
         this.chunksZ = chunksX;
         this.tiles = tiles;
+        this.maxHeights = new int[voxelsX][voxelsZ];
 
         // Make Chunks
         int i = 0;
@@ -116,6 +119,13 @@ public class VoxelWorld implements RenderableProvider {
         if (chunkZ < 0 || chunkZ >= chunksZ) return;
         chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].set(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z, voxel);
         dirty[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
+        if(ix < 0 || ix >= voxelsX) return;
+        if(iz < 0 || iz  >= voxelsZ) return;
+        if(maxHeights[ix][iz ] < iy && voxel != 0) maxHeights[ix][iz ] = iy;
+    }
+
+    public int getMaxHeight(int x, int z) {
+        return maxHeights[x][z];
     }
 
     @Override
