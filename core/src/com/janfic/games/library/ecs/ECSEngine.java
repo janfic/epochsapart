@@ -45,6 +45,7 @@ import com.janfic.games.library.ecs.systems.physics.PhysicsSystem;
 import com.janfic.games.library.ecs.systems.rendering.*;
 import com.janfic.games.library.ecs.systems.world.WorldCollisionSystem;
 import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
+import com.janfic.games.library.ecs.systems.world.WorldSelectSystem;
 import com.janfic.games.library.graphics.shaders.BorderShader;
 import com.janfic.games.library.graphics.shaders.postprocess.*;
 import com.janfic.games.library.utils.ECSClickListener;
@@ -89,11 +90,11 @@ public class ECSEngine extends Engine {
         EventSystem eventSystem = new EventSystem();
         ModelPositionSystem positionSystem = new ModelPositionSystem();
         WorldGenerationSystem worldGenerationSystem = new WorldGenerationSystem();
-        //addEntityListener(gameRenderSystem);
         addSystem(positionSystem);
         addSystem(worldGenerationSystem);
         addSystem(inputSystem);
         addSystem(new GravitySystem());
+        addSystem(new WorldSelectSystem());
         addSystem(new WorldCollisionSystem());
         addSystem(new PhysicsSystem());
         addSystem(eventSystem);
@@ -115,11 +116,12 @@ public class ECSEngine extends Engine {
     private void makeWorld() {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
-        generateWorldComponent.height = 100;
-        generateWorldComponent.width = 256;
-        generateWorldComponent.length = 256;
+        generateWorldComponent.height = 64;
+        generateWorldComponent.width = 64;
+        generateWorldComponent.length = 64;
         generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
         entity.add(generateWorldComponent);
+        entity.add(new ClickableComponent());
         addEntity(entity);
     }
 
@@ -130,9 +132,8 @@ public class ECSEngine extends Engine {
         shaderComponent.shader = new BorderShader(Color.BLACK);
         shaderComponent.shader.init();
 
-
         PositionComponent pos = new PositionComponent();
-        pos.position = new Vector3(0.5f, 100.5f, 0.5f);
+        pos.position = new Vector3(31.5f, 100.5f, 31.5f);
 
         VelocityComponent velocityComponent = new VelocityComponent();
         velocityComponent.velocity = new Vector3();
@@ -212,7 +213,7 @@ public class ECSEngine extends Engine {
         modelRenderer = createEntity();
         CameraFollowComponent cameraCanFollowComponent = new CameraFollowComponent();
         CameraComponent cameraComponent = new CameraComponent();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 80f, Gdx.graphics.getHeight() / 80f);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 20f, Gdx.graphics.getHeight() / 20f);
         cameraComponent.camera = camera;
 
         cameraComponent.camera.position.set(100,100, 200);

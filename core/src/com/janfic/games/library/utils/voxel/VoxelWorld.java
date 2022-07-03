@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -51,7 +52,7 @@ public class VoxelWorld implements RenderableProvider {
             for (int z = 0; z < chunksZ; z++) {
                 for (int x = 0; x < chunksX; x++) {
                     VoxelChunk chunk = new VoxelChunk();
-                    chunk.offset.set((x - chunksX / 2f) * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, (z - chunksZ / 2f) * CHUNK_SIZE_Z);
+                    chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
                     chunks[i++] = chunk;
                 }
             }
@@ -104,7 +105,7 @@ public class VoxelWorld implements RenderableProvider {
         if (chunkY < 0 || chunkY >= chunksY) return 0;
         int chunkZ = iz / CHUNK_SIZE_Z;
         if (chunkZ < 0 || chunkZ >= chunksZ) return 0;
-        return chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz * CHUNK_SIZE_Z);
+        return chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z);
     }
 
     public void set(float x, float y, float z, byte voxel) {
@@ -151,5 +152,91 @@ public class VoxelWorld implements RenderableProvider {
             renderables.add(renderable);
             renderedChunks++;
         }
+    }
+
+    public Vector3 getChunk(Ray ray) {
+
+        float dist = 2000;
+
+        Vector3 traverse = new Vector3();
+
+        traverse.x = (float) Math.floor(ray.origin.x);
+        traverse.y = (float) Math.floor(ray.origin.y);
+        traverse.z = (float) Math.floor(ray.origin.z);
+
+        Vector3 step = new Vector3();
+        Vector3 tMax = new Vector3();
+        Vector3 delta = new Vector3();
+
+        float dx = ray.direction.x;
+        float dy = ray.direction.y;
+        float dz = ray.direction.z;
+
+        step.x = Math.signum(dx);
+        step.y = Math.signum(dy);
+        step.z = Math.signum(dz);
+
+        tMax.x = intbound(ray.origin.x, dx);
+        tMax.y = intbound(ray.origin.y, dy);
+        tMax.z = intbound(ray.origin.z, dz);
+
+        delta.x = step.x / dx;
+        delta.y = step.y / dy;
+        delta.z = step.z / dz;
+
+        if(dx == 0 && dy == 0 && dz == 0) return null;
+
+
+        while(!inBounds(traverse)) {
+            traverse(traverse, step, tMax, delta);
+            if(traverse.dst(ray.origin) >= dist) return null;
+        }
+
+        while(get(traverse.x, traverse.y, traverse.z) == 0) {
+            traverse(traverse, step, tMax, delta);
+            if(traverse.dst(ray.origin) >= dist) return null;
+        }
+        return traverse;
+    }
+
+    private boolean inBounds(Vector3 vector) {
+        return !(vector.x < 0 || vector.x >= voxelsX || vector.y < 0 || vector.y >= voxelsY || vector.z < 0 || vector.z >= voxelsZ);
+    }
+
+    private void traverse(Vector3 traverse, Vector3 step, Vector3 tMax, Vector3 delta) {
+        if(tMax.x < tMax.y) {
+            if(tMax.x < tMax.z) {
+                tMax.x += delta.x;
+                traverse.x += step.x;
+            }
+            else {
+                tMax.z += delta.z;
+                traverse.z += step.z;
+            }
+        }
+        else {
+            if(tMax.y < tMax.z) {
+                tMax.y += delta.y;
+                traverse.y += step.y;
+            }
+            else {
+                tMax.z += delta.z;
+                traverse.z += step.z;
+            }
+        }
+    }
+
+    private float intbound(float s, float ds) {
+        if(ds < 0) {
+            return intbound(-s, -ds);
+        }
+        else {
+            s = mod(s, 1);
+            return (1-s)/ds;
+        }
+    }
+
+    private float mod(float value, float modulus) {
+        return (value % modulus + modulus) % modulus;
     }
 }

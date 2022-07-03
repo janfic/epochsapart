@@ -2,14 +2,11 @@ package com.janfic.games.library.utils.voxel;
 
 import com.badlogic.gdx.math.Vector3;
 
-import javax.swing.text.html.parser.Entity;
-
 public class VoxelChunk {
     public static final int VERTEX_SIZE = 8;
     public static int CHUNK_SIZE_X = 16, CHUNK_SIZE_Y = 16, CHUNK_SIZE_Z = 16;
     public final Vector3 offset = new Vector3();
 
-    public Entity[] voxelData;
     public final byte[] voxels;
     public final int topOffset, bottomOffset, leftOffset, rightOffset, frontOffset, backOffset;
 
@@ -26,12 +23,12 @@ public class VoxelChunk {
         this.rightOffset = 1;
         this.frontOffset = -CHUNK_SIZE_X;
         this.backOffset = CHUNK_SIZE_X;
-        this.widthTimeHeight = CHUNK_SIZE_X * CHUNK_SIZE_Y;
+        this.widthTimeHeight = CHUNK_SIZE_X * CHUNK_SIZE_Z;
 
     }
 
     public byte getFast(int x, int y, int z) {
-        return voxels[x + z * CHUNK_SIZE_X + y * CHUNK_SIZE_X * CHUNK_SIZE_Y];
+        return voxels[x + z * CHUNK_SIZE_X + y * widthTimeHeight];
     }
 
     public byte get(int x, int y, int z) {
@@ -49,7 +46,7 @@ public class VoxelChunk {
     }
 
     public void setFast(int x, int y, int z, byte voxel) {
-         voxels[x + z * CHUNK_SIZE_X + y * CHUNK_SIZE_X * CHUNK_SIZE_Y] = voxel;
+         voxels[x + z * CHUNK_SIZE_X + y * widthTimeHeight] = voxel;
     }
 
         CubeVoxel cubeVoxel = new CubeVoxel();
@@ -74,6 +71,8 @@ public class VoxelChunk {
         }
         return vertexOffset / VERTEX_SIZE;
     }
+
+
 
     public static int createTop (Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset, int texture) {
         vertices[vertexOffset++] = offset.x + x + 1;

@@ -37,7 +37,7 @@ public class WorldCollisionSystem extends EntitySystem {
             ForceComponent forceComponent = Mapper.forceComponentMapper.get(entity);
             BoundingBoxComponent boundingBoxComponent = Mapper.boundingBoxComponentMapper.get(entity);
 
-            int height = worldComponent.world.getMaxHeight((int)(positionComponent.position.x + worldComponent.centerX), (int)(positionComponent.position.z+ worldComponent.centerZ));
+            int height = worldComponent.world.getMaxHeight((int)(positionComponent.position.x), (int)(positionComponent.position.z));
 
             if(positionComponent.position.y + velocityComponent.velocity.y - boundingBoxComponent.boundingBox.getHeight() /2 < height + 1) {
                 positionComponent.position.y = height + boundingBoxComponent.boundingBox.getHeight() / 2 + 1 ;
