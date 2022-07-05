@@ -61,8 +61,8 @@ public class CubeVoxel extends Voxel {
                     vertices[vertexOffset++] = normals[o];
                     vertices[vertexOffset++] = normals[o + 1];
                     vertices[vertexOffset++] = normals[o + 2];
-                    vertices[vertexOffset++] = region.getU() + (uvs[k] + (i * 32))/ region.getTexture().getWidth();
-                    vertices[vertexOffset++] = region.getV() + (uvs[k + 1]) / region.getTexture().getHeight();
+                    vertices[vertexOffset++] = this.region.getU() + (uvs[k] + (i * 32))/ this.region.getTexture().getWidth();
+                    vertices[vertexOffset++] = this.region.getV() + (uvs[k + 1]) / this.region.getTexture().getHeight();
                     k += 2;
                 }
             }
@@ -77,9 +77,10 @@ public class CubeVoxel extends Voxel {
     @Override
     public void setType(String type) {
         super.setType(type);
-        Array<TextureAtlas.AtlasRegion> regionArray = atlas.findRegions(type);
-        for (int i = 0; i < regionArray.size; i++) {
+        this.region = this.atlas.findRegion(type);
+    }
 
-        }
+    public TextureRegion getRegion() {
+        return region;
     }
 }

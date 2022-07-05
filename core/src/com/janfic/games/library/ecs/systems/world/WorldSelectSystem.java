@@ -32,6 +32,8 @@ public class WorldSelectSystem extends EntitySystem {
         renderer = engine.getEntitiesFor(rendererFamily);
     }
 
+    Vector3 lastEntity = null;
+
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
@@ -48,8 +50,22 @@ public class WorldSelectSystem extends EntitySystem {
 
             Vector3 selectedVoxel = worldComponent.world.getChunk(ray);
             if(selectedVoxel != null) {
+                if(lastEntity != null && !selectedVoxel.equals(lastEntity)) {
+                    CubeVoxel last = worldComponent.world.get(lastEntity.x, lastEntity.y, lastEntity.z);
+                    if(last.getType().contains("hover")) {
+                        last.setType(last.getType().replace("hover", ""));
+                    }
+                    worldComponent.world.set(lastEntity.x, lastEntity.y, lastEntity.z, last);
+                }
+
                 CubeVoxel v = worldComponent.world.get(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z);
-                //worldComponent.world.set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, (byte) (v + 8));
+                if(!v.getType().contains("hover")) {
+                    v.setType(v.getType() + "hover");
+                }
+                worldComponent.world.set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, v);
+                lastEntity = selectedVoxel;
+
+
             }
         }
     }

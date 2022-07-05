@@ -18,10 +18,7 @@ public class VoxelChunk {
     public final static int textureSizeWidth = 128 * 3;
     public final static int textureSizeHeight = 128 * 5;
 
-    TextureAtlas atlas;
-    CubeVoxel cubeVoxel;
     public VoxelChunk(TextureAtlas atlas) {
-        cubeVoxel = new CubeVoxel(atlas, "dirt");
         voxels = new CubeVoxel[CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_X];
         this.topOffset = CHUNK_SIZE_X * CHUNK_SIZE_Y;
         this.bottomOffset = -CHUNK_SIZE_X * CHUNK_SIZE_Y;

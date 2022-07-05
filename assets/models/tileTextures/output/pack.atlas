@@ -1,10 +1,17 @@
 
 pack.png
-size: 1024, 32
+size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 dirt
+  rotate: false
+  xy: 0, 32
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+dirthover
   rotate: false
   xy: 0, 0
   size: 192, 32
@@ -13,6 +20,13 @@ dirt
   index: -1
 grass
   rotate: false
+  xy: 192, 32
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+grasshover
+  rotate: false
   xy: 192, 0
   size: 192, 32
   orig: 192, 32
@@ -20,12 +34,26 @@ grass
   index: -1
 sand
   rotate: false
+  xy: 384, 32
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+sandhover
+  rotate: false
   xy: 384, 0
   size: 192, 32
   orig: 192, 32
   offset: 0, 0
   index: -1
 water
+  rotate: false
+  xy: 576, 32
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+waterhover
   rotate: false
   xy: 576, 0
   size: 192, 32
