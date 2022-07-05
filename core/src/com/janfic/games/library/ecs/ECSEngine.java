@@ -130,7 +130,7 @@ public class ECSEngine extends Engine {
         shaderComponent.shader.init();
 
         PositionComponent pos = new PositionComponent();
-        pos.position = new Vector3(31.5f, 100.5f, 31.5f);
+        pos.position = new Vector3(127.5f, 100.5f, 127.5f);
 
         VelocityComponent velocityComponent = new VelocityComponent();
         velocityComponent.velocity = new Vector3();
