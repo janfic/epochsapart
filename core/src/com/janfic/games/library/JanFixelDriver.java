@@ -1,5 +1,8 @@
 package com.janfic.games.library;
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -28,7 +31,6 @@ import com.janfic.games.library.utils.ColorUtils;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 import com.janfic.games.library.utils.voxel.VoxelWorld;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
