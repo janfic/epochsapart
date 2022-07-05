@@ -71,10 +71,7 @@ public class ECSEngine extends Engine {
 
         ShaderProgram.pedantic = false;
 
-        Palette aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
-        ditherPostProcess = new DitherPostProcess(3);
-        pixelizePostProcess = new PixelizePostProcess(3);
-        palettePostProcess = new PalettePostProcess(aap64, false);
+
 
         Entity gameEntity = new Entity();
         EventQueueComponent eventQueueComponent = new EventQueueComponent();
@@ -117,8 +114,8 @@ public class ECSEngine extends Engine {
         Entity entity = new Entity();
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
         generateWorldComponent.height = 64;
-        generateWorldComponent.width = 64;
-        generateWorldComponent.length = 64;
+        generateWorldComponent.width = 256;
+        generateWorldComponent.length = 256;
         generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
         entity.add(generateWorldComponent);
         entity.add(new ClickableComponent());
@@ -207,9 +204,6 @@ public class ECSEngine extends Engine {
     }
 
     private void makeRenderer() {
-
-
-
         modelRenderer = createEntity();
         CameraFollowComponent cameraCanFollowComponent = new CameraFollowComponent();
         CameraComponent cameraComponent = new CameraComponent();
@@ -244,6 +238,10 @@ public class ECSEngine extends Engine {
 
         postProcessesComponent = new PostProcessorsComponent();
         postProcessesComponent.processors = new ArrayList<>();
+        Palette aap64 = new Palette("AAP-64", Gdx.files.local("palettes/aap-64.gpl"));
+        postProcessesComponent.processors.add(new DitherPostProcess(3));
+        postProcessesComponent.processors.add(new PalettePostProcess(aap64, false));
+        postProcessesComponent.processors.add(new PixelizePostProcess(3));
 
         PositionComponent positionComponent = new PositionComponent();
         positionComponent.position = new Vector3(100, 100, 100);

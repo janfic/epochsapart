@@ -13,6 +13,7 @@ import com.janfic.games.library.ecs.components.input.ClickableComponent;
 import com.janfic.games.library.ecs.components.rendering.CameraComponent;
 import com.janfic.games.library.ecs.components.rendering.ModelBatchComponent;
 import com.janfic.games.library.ecs.components.world.WorldComponent;
+import com.janfic.games.library.utils.voxel.CubeVoxel;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 
 import java.util.Map;
@@ -47,7 +48,8 @@ public class WorldSelectSystem extends EntitySystem {
 
             Vector3 selectedVoxel = worldComponent.world.getChunk(ray);
             if(selectedVoxel != null) {
-                worldComponent.world.set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, (byte) 4);
+                CubeVoxel v = worldComponent.world.get(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z);
+                //worldComponent.world.set(selectedVoxel.x, selectedVoxel.y, selectedVoxel.z, (byte) (v + 8));
             }
         }
     }

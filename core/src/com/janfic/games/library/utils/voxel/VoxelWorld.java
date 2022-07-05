@@ -1,6 +1,9 @@
 package com.janfic.games.library.utils.voxel;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -9,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -28,30 +32,36 @@ public class VoxelWorld implements RenderableProvider {
 
     public int[][] maxHeights;
 
-    public final Texture[] tiles;
+    public TextureAtlas atlas;
 
-    public VoxelWorld(Texture[] tiles, int chunksX, int chunksY, int chunksZ) {
+    public VoxelWorld(FileHandle tilesDirectory, int chunksX, int chunksY, int chunksZ) {
         this.chunks = new VoxelChunk[chunksX * chunksY * chunksZ];
         this.meshes = new Mesh[chunksX * chunksY * chunksZ];
         this.dirty = new boolean[chunksX * chunksY * chunksZ];
         this.numVertices = new int[chunksX * chunksY * chunksZ];
-        this.materials = new Material[tiles.length];
+        this.materials = new Material[tilesDirectory.list(".png").length];
         this.vertices = new float[VoxelChunk.VERTEX_SIZE * 6 * CHUNK_SIZE_X * CHUNK_SIZE_Y * CHUNK_SIZE_Z];
         this.voxelsX = chunksX * CHUNK_SIZE_X;
         this.voxelsY = chunksX * CHUNK_SIZE_Y;
         this.voxelsZ = chunksX * CHUNK_SIZE_Z;
         this.chunksX = chunksX;
-        this.chunksY = chunksX;
-        this.chunksZ = chunksX;
-        this.tiles = tiles;
+        this.chunksY = chunksY;
+        this.chunksZ = chunksZ;
         this.maxHeights = new int[voxelsX][voxelsZ];
+
+        TexturePacker.Settings s  = new TexturePacker.Settings();
+        s.edgePadding = false;
+        s.paddingX = 0;
+        s.paddingY = 0;
+        TexturePacker.process(s, "models/tileTextures/test","models/tileTextures/output/","pack");
+        this.atlas = new TextureAtlas(Gdx.files.local("models/tileTextures/output/pack.atlas"));
 
         // Make Chunks
         int i = 0;
         for (int y = 0; y < chunksY; y++) {
             for (int z = 0; z < chunksZ; z++) {
                 for (int x = 0; x < chunksX; x++) {
-                    VoxelChunk chunk = new VoxelChunk();
+                    VoxelChunk chunk = new VoxelChunk(atlas);
                     chunk.offset.set(x * CHUNK_SIZE_X, y * CHUNK_SIZE_Y, z * CHUNK_SIZE_Z);
                     chunks[i++] = chunk;
                 }
@@ -90,25 +100,26 @@ public class VoxelWorld implements RenderableProvider {
             numVertices[i] = 0;
         }
 
+
         for (i = 0; i < materials.length; i++) {
-            materials[i] = new Material(TextureAttribute.createDiffuse(tiles[i]));
+            materials[i] = new Material(TextureAttribute.createDiffuse(atlas.getTextures().first()));
         }
     }
 
-    public byte get(float x, float y, float z) {
+    public CubeVoxel get(float x, float y, float z) {
         int ix = (int)x;
         int iy = (int)y;
         int iz = (int)z;
         int chunkX = ix / CHUNK_SIZE_X;
-        if (chunkX < 0 || chunkX >= chunksX) return 0;
+        if (chunkX < 0 || chunkX >= chunksX) return null;
         int chunkY = iy / CHUNK_SIZE_Y;
-        if (chunkY < 0 || chunkY >= chunksY) return 0;
+        if (chunkY < 0 || chunkY >= chunksY) return null;
         int chunkZ = iz / CHUNK_SIZE_Z;
-        if (chunkZ < 0 || chunkZ >= chunksZ) return 0;
+        if (chunkZ < 0 || chunkZ >= chunksZ) return null;
         return chunks[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ].get(ix % CHUNK_SIZE_X, iy % CHUNK_SIZE_Y, iz % CHUNK_SIZE_Z);
     }
 
-    public void set(float x, float y, float z, byte voxel) {
+    public void set(float x, float y, float z, CubeVoxel voxel) {
         int ix = (int)x;
         int iy = (int)y;
         int iz = (int)z;
@@ -122,7 +133,7 @@ public class VoxelWorld implements RenderableProvider {
         dirty[chunkX + chunkZ * chunksX + chunkY * chunksX * chunksZ] = true;
         if(ix < 0 || ix >= voxelsX) return;
         if(iz < 0 || iz  >= voxelsZ) return;
-        if(maxHeights[ix][iz ] < iy && voxel != 0) maxHeights[ix][iz ] = iy;
+        if(maxHeights[ix][iz ] < iy && voxel != null) maxHeights[ix][iz ] = iy;
     }
 
     public int getMaxHeight(int x, int z) {
@@ -192,7 +203,7 @@ public class VoxelWorld implements RenderableProvider {
             if(traverse.dst(ray.origin) >= dist) return null;
         }
 
-        while(get(traverse.x, traverse.y, traverse.z) == 0) {
+        while(get(traverse.x, traverse.y, traverse.z) == null) {
             traverse(traverse, step, tMax, delta);
             if(traverse.dst(ray.origin) >= dist) return null;
         }

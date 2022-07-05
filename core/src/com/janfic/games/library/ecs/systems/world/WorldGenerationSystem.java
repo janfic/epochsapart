@@ -31,6 +31,7 @@ import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.components.world.TileComponent;
 import com.janfic.games.library.ecs.components.world.WorldComponent;
 import com.janfic.games.library.utils.ECSClickListener;
+import com.janfic.games.library.utils.voxel.CubeVoxel;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 import com.janfic.games.library.utils.voxel.VoxelWorld;
 import jdk.internal.icu.text.NormalizerBase;
@@ -79,18 +80,7 @@ public class WorldGenerationSystem extends EntitySystem {
             worldComponent.centerZ = length / 2;
 
             RenderableProviderComponent renderableProviderComponent = new RenderableProviderComponent();
-            FileHandle tileTexures = Gdx.files.local("models/tileTextures");
-            TextureAtlas atlas = new TextureAtlas();
-            for (FileHandle fileHandle : tileTexures.list()) {
-                if(fileHandle.isDirectory()) {
-                    for (FileHandle handle : fileHandle.list(".png")) {
-                        atlas.addRegion(handle.nameWithoutExtension(), new Texture(handle), 0,0,128,128);
-                    }
-                }
-            }
-            Texture[] tiles = new Texture[1];
-            tiles[0] = new Texture("models/tileTextures/textures.png");
-            VoxelWorld world = new VoxelWorld(tiles, (int) Math.ceil(width / (float)VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
+            VoxelWorld world = new VoxelWorld(Gdx.files.local("models/tileTextures/test"), (int) Math.ceil(width / (float)VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
             worldComponent.world = world;
             renderableProviderComponent.renderableProvider = world;
 
@@ -100,11 +90,11 @@ public class WorldGenerationSystem extends EntitySystem {
                 for (int z = 0; z < length; z++) {
                     int h = (int) (grid.get(x,z) * height);
                     for (int y = 0; y <= h; y++) {
-                        world.set(x,y,z,(byte) ((y == h) ? 3 : 2));
-                        if(y == height / 2 - 1) world.set(x,y,z,(byte) (5));
+                        world.set(x,y,z, new CubeVoxel(world.atlas, y == h && h >= height / 2 ? "grass" : y == h && h < height / 2 ? "sand" : "dirt"));
+                        if(y == height / 2 - 1 && y == h) world.set(x,y,z, new CubeVoxel(world.atlas, "sand"));
                     }
                     for (h = h + 1; h < height / 2; h++) {
-                        world.set(x,h,z,(byte) 4);
+                        world.set(x,h,z, new CubeVoxel(world.atlas, "water"));
                     }
                 }
             }

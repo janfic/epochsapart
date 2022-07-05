@@ -6,6 +6,12 @@ import com.badlogic.gdx.math.Vector3;
 
 public abstract class Voxel {
 
+    protected String type;
+
+    public Voxel(String type) {
+        this.type = type;
+    }
+
     /**
      *
      * @param offset
@@ -17,5 +23,9 @@ public abstract class Voxel {
      * @param neighbors - a length 6 boolean array representing whether neighboring voxels exist.
      * @return
      */
-    public abstract int create(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset, boolean[] neighbors, byte voxel) ;
+    public abstract int create(Vector3 offset, int x, int y, int z, float[] vertices, int vertexOffset, boolean[] neighbors);
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

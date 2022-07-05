@@ -81,12 +81,12 @@ public class JanFixelDriver extends ApplicationAdapter {
 		int length = 32;
 		Texture[] tiles = new Texture[1];
 		tiles[0] = new Texture("models/tileTextures/textures.png");
-		world = new VoxelWorld(tiles, (int) Math.ceil(width / (float) VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
+		//world = new VoxelWorld(tiles, (int) Math.ceil(width / (float) VoxelChunk.CHUNK_SIZE_X),(int) Math.ceil(height / (float)VoxelChunk.CHUNK_SIZE_Y),(int) Math.ceil(length / (float)VoxelChunk.CHUNK_SIZE_Z));
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height/2; y++) {
 				for (int z = 0; z < length; z++) {
-					world.set(x,y,z, (byte)2);
+					//world.set(x,y,z, (byte)2);
 				}
 			}
 		}
