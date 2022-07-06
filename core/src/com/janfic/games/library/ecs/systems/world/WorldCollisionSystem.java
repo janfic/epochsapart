@@ -37,14 +37,24 @@ public class WorldCollisionSystem extends EntitySystem {
             ForceComponent forceComponent = Mapper.forceComponentMapper.get(entity);
             BoundingBoxComponent boundingBoxComponent = Mapper.boundingBoxComponentMapper.get(entity);
 
+            if(!(positionComponent.position.x < worldComponent.world.voxelsX
+                    && positionComponent.position.x >= 0
+                    && positionComponent.position.z >= 0
+                    && positionComponent.position.z <= worldComponent.world.voxelsZ)) continue;
+
             int height = worldComponent.world.getMaxHeight((int)(positionComponent.position.x), (int)(positionComponent.position.z));
 
-            if(positionComponent.position.y + velocityComponent.velocity.y - boundingBoxComponent.boundingBox.getHeight() /2 < height + 1) {
-                positionComponent.position.y = height + boundingBoxComponent.boundingBox.getHeight() / 2 + 1 ;
+            if(positionComponent.position.y + velocityComponent.velocity.y - boundingBoxComponent.boundingBox.getHeight() / 2f < height + 1
+                || positionComponent.position.y == height + boundingBoxComponent.boundingBox.getHeight() / 2f + 1
+            ) {
+                positionComponent.position.y = height + boundingBoxComponent.boundingBox.getHeight() / 2f + 1;
                 velocityComponent.velocity.y = 0;
-                if(!forceComponent.forces.contains(antiGravity)) {
+                if (!forceComponent.forces.contains(antiGravity)) {
                     forceComponent.forces.add(antiGravity);
                 }
+            }
+            else {
+                forceComponent.forces.remove(antiGravity);
             }
         }
     }

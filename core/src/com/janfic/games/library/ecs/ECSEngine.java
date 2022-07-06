@@ -24,6 +24,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.janfic.games.library.actions.actions.WalkAction;
+import com.janfic.games.library.ecs.components.actions.ActionQueueComponent;
+import com.janfic.games.library.ecs.components.actions.ActionsComponent;
 import com.janfic.games.library.ecs.components.events.EventComponent;
 import com.janfic.games.library.ecs.components.events.EventComponentChangeComponent;
 import com.janfic.games.library.ecs.components.events.EventQueueComponent;
@@ -35,7 +38,10 @@ import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
+import com.janfic.games.library.ecs.components.world.WorldInputComponent;
 import com.janfic.games.library.ecs.systems.*;
+import com.janfic.games.library.ecs.systems.actions.ActionControllerSystem;
+import com.janfic.games.library.ecs.systems.actions.ActionSystem;
 import com.janfic.games.library.ecs.systems.input.InputSystem;
 import com.janfic.games.library.ecs.systems.input.ModelClickSystem;
 import com.janfic.games.library.ecs.systems.physics.BoundingBoxSystem;
@@ -45,10 +51,12 @@ import com.janfic.games.library.ecs.systems.physics.PhysicsSystem;
 import com.janfic.games.library.ecs.systems.rendering.*;
 import com.janfic.games.library.ecs.systems.world.WorldCollisionSystem;
 import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
-import com.janfic.games.library.ecs.systems.world.WorldSelectSystem;
+import com.janfic.games.library.ecs.systems.world.WorldInputSystem;
 import com.janfic.games.library.graphics.shaders.BorderShader;
 import com.janfic.games.library.graphics.shaders.postprocess.*;
 import com.janfic.games.library.utils.ECSClickListener;
+import com.janfic.games.library.utils.voxel.CubeVoxel;
+import com.janfic.games.library.utils.voxel.WorldInputListener;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -71,8 +79,6 @@ public class ECSEngine extends Engine {
 
         ShaderProgram.pedantic = false;
 
-
-
         Entity gameEntity = new Entity();
         EventQueueComponent eventQueueComponent = new EventQueueComponent();
         eventQueueComponent.events = new LinkedList<>();
@@ -91,9 +97,11 @@ public class ECSEngine extends Engine {
         addSystem(worldGenerationSystem);
         addSystem(inputSystem);
         addSystem(new GravitySystem());
-        addSystem(new WorldSelectSystem());
+        addSystem(new WorldInputSystem());
         addSystem(new WorldCollisionSystem());
         addSystem(new PhysicsSystem());
+        addSystem(new ActionSystem());
+        addSystem(new ActionControllerSystem());
         addSystem(eventSystem);
         addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
@@ -118,7 +126,37 @@ public class ECSEngine extends Engine {
         generateWorldComponent.length = 256;
         generateWorldComponent.generationSettings = Gdx.files.local("worldGeneration/biomes/plains/plains.json");
         entity.add(generateWorldComponent);
-        entity.add(new ClickableComponent());
+        WorldInputComponent worldInputComponent = new WorldInputComponent();
+        worldInputComponent.listener = new WorldInputListener() {
+
+            Vector3 lastEntity;
+            @Override
+            public boolean mouseMoved(InputEvent event, float x, float y) {
+                if(lastEntity != null && !worldVoxel.equals(lastEntity)) {
+                    CubeVoxel last = world.get(lastEntity.x, lastEntity.y, lastEntity.z);
+                    if(last.getType().contains("hover")) {
+                        last.setType(last.getType().replace("hover", ""));
+                    }
+                    world.set(lastEntity.x, lastEntity.y, lastEntity.z, last);
+                }
+
+                CubeVoxel v = world.get(worldVoxel.x, worldVoxel.y, worldVoxel.z);
+                if(!v.getType().contains("hover")) {
+                    v.setType(v.getType() + "hover");
+                }
+                world.set(worldVoxel.x, worldVoxel.y, worldVoxel.z, v);
+                lastEntity = worldVoxel;
+                return super.mouseMoved(event, x, y);
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                super.clicked(event, x, y);
+                System.out.println("CLICKED " + worldVoxel + " " + event.getButton());
+            }
+        };
+
+        entity.add(worldInputComponent);
         addEntity(entity);
     }
 
@@ -188,6 +226,15 @@ public class ECSEngine extends Engine {
         HitBoxComponent hitBoxComponent = new HitBoxComponent();
         hitBoxComponent.hitBox = new Rectangle(0,0, 1, 1);
 
+        ActionQueueComponent actionQueueComponent = new ActionQueueComponent();
+        actionQueueComponent.actionQueue = new LinkedList<>();
+
+        ActionsComponent actionsComponent = new ActionsComponent();
+        actionsComponent.actions = new ArrayList<>();
+        actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0)));
+
+        actionQueueComponent.actionQueue.add(actionsComponent.actions.get(0));
+
         player.add(pos);
         player.add(modelInstanceComponent);
         player.add(cameraFollowComponent);
@@ -199,6 +246,8 @@ public class ECSEngine extends Engine {
         player.add(velocityComponent);
         player.add(accelerationComponent);
         player.add(gravityComponent);
+        player.add(actionsComponent);
+        player.add(actionQueueComponent);
 
         addEntity(player);
     }
@@ -207,7 +256,7 @@ public class ECSEngine extends Engine {
         modelRenderer = createEntity();
         CameraFollowComponent cameraCanFollowComponent = new CameraFollowComponent();
         CameraComponent cameraComponent = new CameraComponent();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 20f, Gdx.graphics.getHeight() / 20f);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth() / 60f, Gdx.graphics.getHeight() / 60f);
         cameraComponent.camera = camera;
 
         cameraComponent.camera.position.set(100,100, 200);
@@ -367,7 +416,7 @@ public class ECSEngine extends Engine {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                modelRenderer.add(this.getEvent());
+                //modelRenderer.add(this.getEvent());
             }
 
             @Override

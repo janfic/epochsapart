@@ -54,6 +54,7 @@ public class Mapper {
     // World
     public static final ComponentMapper<WorldComponent> worldComponentMapper = ComponentMapper.getFor(WorldComponent.class);
     public static final ComponentMapper<TileComponent> tileComponentMapper = ComponentMapper.getFor(TileComponent.class);
+    public static final ComponentMapper<WorldInputComponent> worldInputComponentMapper = ComponentMapper.getFor(WorldInputComponent.class);
 
     // World Generation
     public static final ComponentMapper<GenerateWorldComponent> generateWorldComponentMapper = ComponentMapper.getFor(GenerateWorldComponent.class);

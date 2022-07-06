@@ -6,5 +6,5 @@ import com.janfic.games.library.actions.Action;
 import java.util.List;
 
 public class ActionsComponent implements Component {
-    List<Action> actions;
+    public List<Action> actions;
 }

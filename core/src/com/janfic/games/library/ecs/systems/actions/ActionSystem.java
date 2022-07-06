@@ -29,7 +29,6 @@ public class ActionSystem extends EntitySystem {
         super.update(deltaTime);
         for (Entity entity : entities) {
             ActionQueueComponent actionQueueComponent = Mapper.actionQueueComponentMapper.get(entity);
-
             Action currentAction = actionQueueComponent.actionQueue.peek();
             if(currentAction == null) continue;;
             if(currentAction.isComplete()) {
@@ -38,8 +37,14 @@ public class ActionSystem extends EntitySystem {
                 currentAction = null;
             }
             else {
-                if(currentAction.isValidTarget(currentAction.getTarget()) && currentAction.isValidOwner(entity))
-                    currentAction.act(deltaTime);
+                if(currentAction.isValidTarget(currentAction.getTarget()) && currentAction.isValidOwner(entity)) {
+                    if(currentAction.getProgress() == 0) {
+                        currentAction.begin();
+                    }
+                    else {
+                        currentAction.act(deltaTime);
+                    }
+                }
                 else {
                     currentAction.cancel();
                     actionQueueComponent.actionQueue.poll();
@@ -51,6 +56,7 @@ public class ActionSystem extends EntitySystem {
                 Action newAction = actionQueueComponent.actionQueue.peek();
                 while(newAction != null) {
                     if(newAction.isValidOwner(entity) && newAction.isValidTarget(newAction.getTarget())) {
+                        System.out.println(newAction);
                         newAction.begin();
                         break;
                     }

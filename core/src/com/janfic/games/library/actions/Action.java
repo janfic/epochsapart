@@ -36,7 +36,7 @@ public abstract class Action {
     /**
      * The Action's current progress.
      */
-    private final float progress;
+    private float progress;
 
     /*
         Used in UI
@@ -131,6 +131,10 @@ public abstract class Action {
         return progress;
     }
 
+    public void setProgress(float progress) {
+        this.progress = progress;
+    }
+
     /**
      * Calculates if the Action is completed
      * @return true if the action is complete, false otherwise.
@@ -138,4 +142,5 @@ public abstract class Action {
     public boolean isComplete() {
         return progress >= 1.0f;
     }
+
 }
