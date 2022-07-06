@@ -25,6 +25,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.janfic.games.library.actions.actions.WalkAction;
+import com.janfic.games.library.actions.controllers.PlayerActionController;
+import com.janfic.games.library.ecs.components.actions.ActionControllerComponent;
 import com.janfic.games.library.ecs.components.actions.ActionQueueComponent;
 import com.janfic.games.library.ecs.components.actions.ActionsComponent;
 import com.janfic.games.library.ecs.components.events.EventComponent;
@@ -145,14 +147,25 @@ public class ECSEngine extends Engine {
                     v.setType(v.getType() + "hover");
                 }
                 world.set(worldVoxel.x, worldVoxel.y, worldVoxel.z, v);
-                lastEntity = worldVoxel;
+                lastEntity = worldVoxel.cpy();
                 return super.mouseMoved(event, x, y);
             }
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                System.out.println("CLICKED " + worldVoxel + " " + event.getButton());
+                System.out.println(worldVoxel);
+                if(event.getButton() == 1) {
+                    Vector3 location = worldVoxel.cpy();
+                    PositionComponent positionComponent = Mapper.positionComponentMapper.get(player);
+                    System.out.println(positionComponent.position);
+                    System.out.println(positionComponent.position.y - (float)Math.floor(positionComponent.position.y));
+                    location.z = worldVoxel.z + (positionComponent.position.z - (float)Math.floor(positionComponent.position.z));
+                    location.x = worldVoxel.x + (positionComponent.position.x - (float)Math.floor(positionComponent.position.x)) ;
+                    location.y = worldVoxel.y + (positionComponent.position.y - (float)Math.floor(positionComponent.position.y)) + 1;
+                    System.out.println(location);
+                    actionQueueComponent.actionQueue.add(new WalkAction(player, player, location, world));
+                }
             }
         };
 
@@ -160,8 +173,11 @@ public class ECSEngine extends Engine {
         addEntity(entity);
     }
 
+    Entity player;
+    ActionQueueComponent actionQueueComponent;
+
     public void makePlayer() {
-        Entity player = createEntity();
+        player = createEntity();
 
         ShaderComponent shaderComponent = new ShaderComponent();
         shaderComponent.shader = new BorderShader(Color.BLACK);
@@ -226,14 +242,15 @@ public class ECSEngine extends Engine {
         HitBoxComponent hitBoxComponent = new HitBoxComponent();
         hitBoxComponent.hitBox = new Rectangle(0,0, 1, 1);
 
-        ActionQueueComponent actionQueueComponent = new ActionQueueComponent();
+        actionQueueComponent = new ActionQueueComponent();
         actionQueueComponent.actionQueue = new LinkedList<>();
 
         ActionsComponent actionsComponent = new ActionsComponent();
         actionsComponent.actions = new ArrayList<>();
-        actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0)));
+        //actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0), world));
 
-        actionQueueComponent.actionQueue.add(actionsComponent.actions.get(0));
+        ActionControllerComponent actionControllerComponent = new ActionControllerComponent();
+        actionControllerComponent.actionController = new PlayerActionController(this);
 
         player.add(pos);
         player.add(modelInstanceComponent);
@@ -248,6 +265,7 @@ public class ECSEngine extends Engine {
         player.add(gravityComponent);
         player.add(actionsComponent);
         player.add(actionQueueComponent);
+        player.add(actionControllerComponent);
 
         addEntity(player);
     }

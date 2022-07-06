@@ -52,7 +52,7 @@ public abstract class Action {
         this.owner = owner;
         this.target = target;
         this.name = name;
-        this.progress = 0;
+        this.progress = -1;
     }
 
     /**

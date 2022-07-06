@@ -38,12 +38,10 @@ public class ActionSystem extends EntitySystem {
             }
             else {
                 if(currentAction.isValidTarget(currentAction.getTarget()) && currentAction.isValidOwner(entity)) {
-                    if(currentAction.getProgress() == 0) {
+                    if(currentAction.getProgress() == -1) {
                         currentAction.begin();
                     }
-                    else {
-                        currentAction.act(deltaTime);
-                    }
+                    currentAction.act(deltaTime);
                 }
                 else {
                     currentAction.cancel();

@@ -48,8 +48,6 @@ public class JanFixelDriver extends ApplicationAdapter {
 
 	PerspectiveCamera camera;
 
-	boolean sunSim = false;
-	float time = 0;
 	private ModelBatch modelBatch;
 
 	VoxelWorld world;
@@ -114,6 +112,9 @@ public class JanFixelDriver extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
+		if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+			Gdx.app.exit();
+		}
 //		instance.transform.translate(0,Gdx.graphics.getDeltaTime() * 1,0);
 //		modelBatch.begin(camera);
 //		modelBatch.render(instance, environmentComponent.environment);
