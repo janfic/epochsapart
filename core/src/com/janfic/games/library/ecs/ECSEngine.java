@@ -18,12 +18,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.janfic.games.library.actions.Action;
+import com.janfic.games.library.actions.actions.PickUpAction;
 import com.janfic.games.library.actions.actions.WalkAction;
 import com.janfic.games.library.actions.controllers.PlayerActionController;
 import com.janfic.games.library.ecs.components.actions.ActionControllerComponent;
@@ -61,7 +63,9 @@ import com.janfic.games.library.utils.voxel.CubeVoxel;
 import com.janfic.games.library.utils.voxel.WorldInputListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class ECSEngine extends Engine {
 
@@ -105,9 +109,9 @@ public class ECSEngine extends Engine {
         addSystem(new ActionSystem());
         addSystem(new ActionControllerSystem());
         addSystem(eventSystem);
-        addSystem(new IsometricCameraSystem());
         addSystem(new CameraPositionSystem());
         addSystem(new CameraFollowSystem());
+        addSystem(new IsometricCameraSystem());
         addSystem(new ModelClickSystem());
         addSystem(new BoundingBoxSystem());
         addSystem(gameRenderSystem);
@@ -154,7 +158,6 @@ public class ECSEngine extends Engine {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                System.out.println(worldVoxel);
                 if(event.getButton() == 1) {
                     Vector3 location = worldVoxel.cpy();
                     PositionComponent positionComponent = Mapper.positionComponentMapper.get(player);
@@ -175,6 +178,8 @@ public class ECSEngine extends Engine {
 
     Entity player;
     ActionQueueComponent actionQueueComponent;
+    ActionsComponent actionsComponent;
+    ActionControllerComponent actionControllerComponent;
 
     public void makePlayer() {
         player = createEntity();
@@ -245,12 +250,16 @@ public class ECSEngine extends Engine {
         actionQueueComponent = new ActionQueueComponent();
         actionQueueComponent.actionQueue = new LinkedList<>();
 
-        ActionsComponent actionsComponent = new ActionsComponent();
+        actionsComponent = new ActionsComponent();
         actionsComponent.actions = new ArrayList<>();
-        //actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0), world));
+        actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0), null));
+        actionsComponent.actions.add(new PickUpAction(player, player));
 
-        ActionControllerComponent actionControllerComponent = new ActionControllerComponent();
-        actionControllerComponent.actionController = new PlayerActionController(this);
+        actionControllerComponent = new ActionControllerComponent();
+        Map<String, Action> keyMap = new HashMap<>();
+        keyMap.put("right_click_icon", actionsComponent.actions.get(0));
+        keyMap.put("left_click_icon", actionsComponent.actions.get(1));
+        actionControllerComponent.actionController = new PlayerActionController(this, keyMap);
 
         player.add(pos);
         player.add(modelInstanceComponent);
@@ -425,10 +434,11 @@ public class ECSEngine extends Engine {
         inputProcessorComponent.inputProcessor = stageComponent.stage;
         inputProcessorComponent.priority = 0;
 
-        Skin skin = new Skin(Gdx.files.local("skins/spacejunk/spaceSkin.json"));
+        Skin skin = new Skin(Gdx.files.local("skins/custom/custom.json"));
 
-        Table table = new Table();
-        table.setFillParent(true);
+
+        Table mainTable = new Table(skin);
+        mainTable.setFillParent(true);
 
         ECSClickListener ecsInputListener = new ECSClickListener(this) {
             @Override
@@ -458,11 +468,70 @@ public class ECSEngine extends Engine {
                 return event;
             }
         };
-        Actor actor = new TextButton("CHANGE POST PROCESS", skin);
-        actor.addListener(ecsInputListener);
 
-        table.add(actor).growX().expandY().bottom();
-        stageComponent.stage.addActor(table);
+        Table actionTable = new Table(skin);
+
+        Table actionQueueTable = new Table(skin) {
+            int size = 0;
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                if(actionQueueComponent.actionQueue.size() != size) {
+                    clear();
+                    for (Action action : actionQueueComponent.actionQueue){
+                        Table table = new Table(skin);
+                        table.setBackground("table");
+                        Image icon = new Image(action.getIcon());
+                        table.add(icon);
+                        add(table);
+                    }
+                    size = actionQueueComponent.actionQueue.size();
+                }
+            }
+        };
+        //actionQueueTable.setBackground("table");
+        actionQueueTable.left();
+
+        ScrollPane pane = new ScrollPane(actionQueueTable);
+        pane.setFillParent(true);
+
+        Table availableActionTable = new Table(skin) {
+            int size = 0;
+
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                PlayerActionController actionController = (PlayerActionController) actionControllerComponent.actionController;
+                if(size != actionController.getKeyMap().size()) {
+                    clear();
+                    size = actionController.getKeyMap().size();
+                    for (String key : actionController.getKeyMap().keySet()) {
+                        Action action = actionController.getKeyMap().get(key);
+                        Table a = new Table(skin);
+                        a.setBackground("table");
+                        Image clickIcon = new Image(new Texture(Gdx.files.local("ui/controls/" + key + ".png")));
+                        Image i = new Image(action.getIcon());
+                        a.add(clickIcon);
+                        a.add().row();
+                        a.add();
+                        a.add(i);
+                        add(a);
+                    }
+                }
+            }
+        };
+        availableActionTable.left();
+        availableActionTable.setBackground("table");
+
+        actionTable.add(actionQueueTable).growX().minHeight(40).row();
+        actionTable.add(availableActionTable).left().minHeight(40).growX().row();
+
+        mainTable.bottom();
+        mainTable.add().expand();
+        mainTable.add(actionTable).maxWidth(stageComponent.stage.getWidth() / 3).growX().bottom();
+        mainTable.add().expand();
+
+        stageComponent.stage.addActor(mainTable);
 
         stageEntity.add(stageComponent);
         stageEntity.add(inputProcessorComponent);
@@ -494,8 +563,6 @@ public class ECSEngine extends Engine {
         ModelInstanceComponent modelInstanceComponent = new ModelInstanceComponent();
         modelInstanceComponent.instance = new ModelInstance(modelComponent.model);
         //modelInstanceComponent.instance.transform.scale(20, 20, 20);
-
-
 
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.texture = new Texture("badlogic.jpg");

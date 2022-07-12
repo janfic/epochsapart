@@ -2,6 +2,9 @@ package com.janfic.games.library.actions.actions;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.actions.Action;
 import com.janfic.games.library.ecs.Mapper;
@@ -11,7 +14,7 @@ import com.janfic.games.library.utils.voxel.VoxelWorld;
 
 public class WalkAction extends Action {
 
-    private final static Family validTarget = Family.all(PositionComponent.class, VelocityComponent.class, AccelerationComponent.class).get();
+    private final static Family validTarget = Family.all(PositionComponent.class, VelocityComponent.class, AccelerationComponent.class, ForceComponent.class).get();
     private static Vector3 jump = new Vector3(0, 3, 0);
     Vector3 location;
     Vector3 snap;
@@ -25,6 +28,7 @@ public class WalkAction extends Action {
         super("Walk", owner, target);
         this.location = location;
         this.world = world;
+        setIcon(new TextureRegion(new Texture(Gdx.files.local("move_icon.png"))));
     }
 
     @Override
@@ -47,19 +51,18 @@ public class WalkAction extends Action {
     public float act(float deltaTime) {
         PositionComponent positionComponent = Mapper.positionComponentMapper.get(getTarget());
         VelocityComponent velocityComponent = Mapper.velocityComponentMapper.get(getTarget());
-        AccelerationComponent accelerationComponent = Mapper.accelerationComponentMapper.get(getTarget());
         ForceComponent forceComponent = Mapper.forceComponentMapper.get(getTarget());
-        BoundingBoxComponent boundingBoxComponent = Mapper.boundingBoxComponentMapper.get(getTarget());
 
         float currentDistance = positionComponent.position.dst(location);
         Vector3 v = location.cpy().sub(positionComponent.position).nor().scl(0.1f);
         v.y = velocityComponent.velocity.y;
 
-        Vector3 noY = v.cpy().nor().scl(1.5f);
+        Vector3 noY = v.cpy();
+        noY = noY.nor().scl(1.5f);
         noY.y = 0;
         Vector3 nextPosition = positionComponent.position.cpy().add(noY);
 
-        if (location.dst2(positionComponent.position) > location.dst2(nextPosition)) {
+        if (location.dst2(positionComponent.position) >= location.dst2(nextPosition)) {
             int height = world.getMaxHeight((int) (nextPosition.x), (int) (nextPosition.z));
             if (nextPosition.y < height + 1) {
                 if (velocityComponent.velocity.y <= 0) {
@@ -69,10 +72,13 @@ public class WalkAction extends Action {
                 forceComponent.forces.remove(jump);
             }
         }
+        else {
+            forceComponent.forces.remove(jump);
+        }
 
         velocityComponent.velocity.set(v);
 
-        this.setProgress(Math.abs(currentDistance) < 0.1f ? 1 : 0);
+        this.setProgress(Math.abs(currentDistance) <= 0.1f ? 1 : 0);
         return this.getProgress();
     }
 

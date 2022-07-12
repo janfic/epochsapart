@@ -1,6 +1,7 @@
 package com.janfic.games.library.actions;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * An abstract Action is a way for entities to perform tasks and change the game state. An Action is performed by its
@@ -41,18 +42,23 @@ public abstract class Action {
     /*
         Used in UI
      */
-    //TextureRegion icon;
+    TextureRegion icon;
 
     /**
      * @param name   the name of the action ( used as a label in the game UI )
      * @param owner  the desired owner of this action
      * @param target the desired target of this action
      */
-    public Action(String name, Entity owner, Entity target) {
+    public Action(String name,  Entity owner, Entity target) {
         this.owner = owner;
         this.target = target;
         this.name = name;
         this.progress = -1;
+    }
+
+    public Action(String name,  TextureRegion icon, Entity owner, Entity target) {
+        this(name, owner, target);
+        this.icon = icon;
     }
 
     /**
@@ -143,4 +149,15 @@ public abstract class Action {
         return progress >= 1.0f;
     }
 
+    /**
+     * Icon Getter
+     * @return the actions icon ( for UI )
+     */
+    public TextureRegion getIcon() {
+        return icon;
+    }
+
+    public void setIcon(TextureRegion icon) {
+        this.icon = icon;
+    }
 }
