@@ -12,6 +12,8 @@ import com.janfic.games.library.ecs.components.inventory.*;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
+import com.janfic.games.library.ecs.components.time.CooldownComponent;
+import com.janfic.games.library.ecs.components.time.TimeComponent;
 import com.janfic.games.library.ecs.components.ui.ActorComponent;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.*;
@@ -92,4 +94,7 @@ public class Mapper {
     public static final ComponentMapper<ActionsComponent> actionsComponentMapper = ComponentMapper.getFor(ActionsComponent.class);
     public static final ComponentMapper<ActionControllerComponent> actionControllerComponentMapper = ComponentMapper.getFor(ActionControllerComponent.class);
 
+    // Time
+    public static final ComponentMapper<TimeComponent> timeComponentMapper = ComponentMapper.getFor(TimeComponent.class);
+    public static final ComponentMapper<CooldownComponent> cooldownComponentMapper = ComponentMapper.getFor(CooldownComponent.class);
 }

@@ -40,6 +40,7 @@ import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.*;
 import com.janfic.games.library.ecs.components.rendering.*;
+import com.janfic.games.library.ecs.components.time.TimeComponent;
 import com.janfic.games.library.ecs.components.ui.StageComponent;
 import com.janfic.games.library.ecs.components.world.GenerateWorldComponent;
 import com.janfic.games.library.ecs.components.world.WorldInputComponent;
@@ -53,6 +54,7 @@ import com.janfic.games.library.ecs.systems.physics.GravitySystem;
 import com.janfic.games.library.ecs.systems.physics.ModelPositionSystem;
 import com.janfic.games.library.ecs.systems.physics.PhysicsSystem;
 import com.janfic.games.library.ecs.systems.rendering.*;
+import com.janfic.games.library.ecs.systems.time.TimeSystem;
 import com.janfic.games.library.ecs.systems.world.WorldCollisionSystem;
 import com.janfic.games.library.ecs.systems.world.WorldGenerationSystem;
 import com.janfic.games.library.ecs.systems.world.WorldInputSystem;
@@ -114,6 +116,7 @@ public class ECSEngine extends Engine {
         addSystem(new IsometricCameraSystem());
         addSystem(new ModelClickSystem());
         addSystem(new BoundingBoxSystem());
+        addSystem(new TimeSystem());
         addSystem(gameRenderSystem);
         addSystem(userInterfaceSystem);
 
@@ -126,6 +129,10 @@ public class ECSEngine extends Engine {
 
     private void makeWorld() {
         Entity entity = new Entity();
+        TimeComponent timeComponent = new TimeComponent();
+        timeComponent.minutesPerRealSecond = 1 / 5f;
+        entity.add(timeComponent);
+
         GenerateWorldComponent generateWorldComponent = new GenerateWorldComponent();
         generateWorldComponent.height = 64;
         generateWorldComponent.width = 256;
