@@ -54,6 +54,7 @@ public class WalkAction extends Action {
         ForceComponent forceComponent = Mapper.forceComponentMapper.get(getTarget());
 
         float currentDistance = positionComponent.position.dst(location);
+        this.setProgress(Math.abs(currentDistance) <= 0.1f ? 1 : 0);
         Vector3 v = location.cpy().sub(positionComponent.position).nor().scl(0.1f);
         v.y = velocityComponent.velocity.y;
 
@@ -78,7 +79,6 @@ public class WalkAction extends Action {
 
         velocityComponent.velocity.set(v);
 
-        this.setProgress(Math.abs(currentDistance) <= 0.1f ? 1 : 0);
         return this.getProgress();
     }
 

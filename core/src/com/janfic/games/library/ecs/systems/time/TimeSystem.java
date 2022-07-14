@@ -34,7 +34,6 @@ public class TimeSystem extends EntitySystem {
             if(timeComponent.hour >= 24) {
                 timeComponent.hour = 0;
             }
-            System.out.println(timeComponent.hour + " " + timeComponent.minute);
         }
     }
 }

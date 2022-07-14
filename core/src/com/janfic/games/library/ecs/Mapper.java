@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.janfic.games.library.ecs.components.actions.ActionControllerComponent;
 import com.janfic.games.library.ecs.components.actions.ActionQueueComponent;
 import com.janfic.games.library.ecs.components.actions.ActionsComponent;
+import com.janfic.games.library.ecs.components.body.BodyComponent;
 import com.janfic.games.library.ecs.components.events.*;
 import com.janfic.games.library.ecs.components.input.ClickableComponent;
 import com.janfic.games.library.ecs.components.input.HitBoxComponent;
@@ -89,6 +90,9 @@ public class Mapper {
     public static final ComponentMapper<ItemFilterComponent> itemFilterComponentMapper = ComponentMapper.getFor(ItemFilterComponent.class);
     public static final ComponentMapper<ItemPropertyComponent> itemPropertyComponentMapper = ComponentMapper.getFor(ItemPropertyComponent.class);
 
+    // Body
+    public static final ComponentMapper<BodyComponent> bodyComponentMapper = ComponentMapper.getFor(BodyComponent.class);
+
     // Actions
     public static final ComponentMapper<ActionQueueComponent> actionQueueComponentMapper = ComponentMapper.getFor(ActionQueueComponent.class);
     public static final ComponentMapper<ActionsComponent> actionsComponentMapper = ComponentMapper.getFor(ActionsComponent.class);
@@ -97,4 +101,6 @@ public class Mapper {
     // Time
     public static final ComponentMapper<TimeComponent> timeComponentMapper = ComponentMapper.getFor(TimeComponent.class);
     public static final ComponentMapper<CooldownComponent> cooldownComponentMapper = ComponentMapper.getFor(CooldownComponent.class);
+
+
 }

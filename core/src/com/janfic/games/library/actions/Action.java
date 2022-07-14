@@ -3,6 +3,8 @@ package com.janfic.games.library.actions;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import java.util.Objects;
+
 /**
  * An abstract Action is a way for entities to perform tasks and change the game state. An Action is performed by its
  * owning entity, and applied to a target entity. Note that these can be the same entity. Each action typically
@@ -159,5 +161,18 @@ public abstract class Action {
 
     public void setIcon(TextureRegion icon) {
         this.icon = icon;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Action action = (Action) o;
+        return Objects.equals(name, action.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

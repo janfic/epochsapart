@@ -28,9 +28,12 @@ import com.janfic.games.library.actions.Action;
 import com.janfic.games.library.actions.actions.PickUpAction;
 import com.janfic.games.library.actions.actions.WalkAction;
 import com.janfic.games.library.actions.controllers.PlayerActionController;
+import com.janfic.games.library.body.bodyparts.HumanHand;
+import com.janfic.games.library.body.bodyparts.HumanLeg;
 import com.janfic.games.library.ecs.components.actions.ActionControllerComponent;
 import com.janfic.games.library.ecs.components.actions.ActionQueueComponent;
 import com.janfic.games.library.ecs.components.actions.ActionsComponent;
+import com.janfic.games.library.ecs.components.body.BodyComponent;
 import com.janfic.games.library.ecs.components.events.EventComponent;
 import com.janfic.games.library.ecs.components.events.EventComponentChangeComponent;
 import com.janfic.games.library.ecs.components.events.EventQueueComponent;
@@ -47,6 +50,7 @@ import com.janfic.games.library.ecs.components.world.WorldInputComponent;
 import com.janfic.games.library.ecs.systems.*;
 import com.janfic.games.library.ecs.systems.actions.ActionControllerSystem;
 import com.janfic.games.library.ecs.systems.actions.ActionSystem;
+import com.janfic.games.library.ecs.systems.body.BodySystem;
 import com.janfic.games.library.ecs.systems.input.InputSystem;
 import com.janfic.games.library.ecs.systems.input.ModelClickSystem;
 import com.janfic.games.library.ecs.systems.physics.BoundingBoxSystem;
@@ -64,10 +68,7 @@ import com.janfic.games.library.utils.ECSClickListener;
 import com.janfic.games.library.utils.voxel.CubeVoxel;
 import com.janfic.games.library.utils.voxel.WorldInputListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class ECSEngine extends Engine {
 
@@ -101,16 +102,17 @@ public class ECSEngine extends Engine {
         EventSystem eventSystem = new EventSystem();
         ModelPositionSystem positionSystem = new ModelPositionSystem();
         WorldGenerationSystem worldGenerationSystem = new WorldGenerationSystem();
-        addSystem(positionSystem);
         addSystem(worldGenerationSystem);
         addSystem(inputSystem);
         addSystem(new GravitySystem());
+        addSystem(new BodySystem());
         addSystem(new WorldInputSystem());
         addSystem(new WorldCollisionSystem());
         addSystem(new PhysicsSystem());
         addSystem(new ActionSystem());
         addSystem(new ActionControllerSystem());
         addSystem(eventSystem);
+        addSystem(positionSystem);
         addSystem(new CameraPositionSystem());
         addSystem(new CameraFollowSystem());
         addSystem(new IsometricCameraSystem());
@@ -168,12 +170,9 @@ public class ECSEngine extends Engine {
                 if(event.getButton() == 1) {
                     Vector3 location = worldVoxel.cpy();
                     PositionComponent positionComponent = Mapper.positionComponentMapper.get(player);
-                    System.out.println(positionComponent.position);
-                    System.out.println(positionComponent.position.y - (float)Math.floor(positionComponent.position.y));
                     location.z = worldVoxel.z + (positionComponent.position.z - (float)Math.floor(positionComponent.position.z));
                     location.x = worldVoxel.x + (positionComponent.position.x - (float)Math.floor(positionComponent.position.x)) ;
                     location.y = worldVoxel.y + (positionComponent.position.y - (float)Math.floor(positionComponent.position.y)) + 1;
-                    System.out.println(location);
                     actionQueueComponent.actionQueue.add(new WalkAction(player, player, location, world));
                 }
             }
@@ -258,15 +257,21 @@ public class ECSEngine extends Engine {
         actionQueueComponent.actionQueue = new LinkedList<>();
 
         actionsComponent = new ActionsComponent();
-        actionsComponent.actions = new ArrayList<>();
-        actionsComponent.actions.add(new WalkAction(player, player, new Vector3(0,0,0), null));
-        actionsComponent.actions.add(new PickUpAction(player, player));
+        actionsComponent.actions = new HashSet<>();
+
+        BodyComponent bodyComponent = new BodyComponent();
+        bodyComponent.parts = new ArrayList<>();
+        bodyComponent.parts.add(new HumanLeg(true, null));
+        bodyComponent.parts.add(new HumanLeg(false, null));
+        bodyComponent.parts.add(new HumanHand( true,5));
+        bodyComponent.parts.add(new HumanHand( true, 5));
+
+        PlayerActionController controller = new PlayerActionController(this);
+        controller.addMappingByActionName("right_click_icon", "Walk");
+        controller.addMappingByActionName("left_click_icon", "Pick Up");
 
         actionControllerComponent = new ActionControllerComponent();
-        Map<String, Action> keyMap = new HashMap<>();
-        keyMap.put("right_click_icon", actionsComponent.actions.get(0));
-        keyMap.put("left_click_icon", actionsComponent.actions.get(1));
-        actionControllerComponent.actionController = new PlayerActionController(this, keyMap);
+        actionControllerComponent.actionController = controller;
 
         player.add(pos);
         player.add(modelInstanceComponent);
@@ -282,6 +287,7 @@ public class ECSEngine extends Engine {
         player.add(actionsComponent);
         player.add(actionQueueComponent);
         player.add(actionControllerComponent);
+        player.add(bodyComponent);
 
         addEntity(player);
     }

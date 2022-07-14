@@ -11,6 +11,8 @@ import com.janfic.games.library.ecs.components.actions.ActionControllerComponent
 import com.janfic.games.library.ecs.components.actions.ActionQueueComponent;
 import com.janfic.games.library.ecs.components.actions.ActionsComponent;
 
+import java.util.ArrayList;
+
 /**
  * The Action Controller System is responsible for updating and passing input to entities that have an action controller.
  */
@@ -29,8 +31,10 @@ public class ActionControllerSystem extends EntitySystem {
     public void update(float deltaTime) {
         super.update(deltaTime);
         for (Entity entity : entities) {
+            ActionsComponent actionsComponent = Mapper.actionsComponentMapper.get(entity);
             ActionControllerComponent actionControllerComponent = Mapper.actionControllerComponentMapper.get(entity);
             actionControllerComponent.actionController.evaluate(entity);
+            actionControllerComponent.actionController.setActions(actionsComponent.actions);
         }
     }
 }

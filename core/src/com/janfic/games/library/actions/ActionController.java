@@ -3,6 +3,11 @@ package com.janfic.games.library.actions;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * The Action Controller provides an interface to choose actions that are available to the entity to add to their action queue.
  * This is particularly useful for player input as well as implementing AIs.
@@ -17,8 +22,11 @@ public abstract class ActionController {
      */
     private Engine engine;
 
+    private Set<Action> actions;
+
     public ActionController(Engine engine) {
         this.engine = engine;
+        this.actions = new HashSet<>();
     }
 
     /**
@@ -34,5 +42,13 @@ public abstract class ActionController {
      */
     public Engine getEngine() {
         return engine;
+    }
+
+    public Set<Action> getActions() {
+        return actions;
+    }
+
+    public void setActions(Set<Action> actions) {
+        this.actions = actions;
     }
 }

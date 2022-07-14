@@ -4,7 +4,8 @@ import com.badlogic.ashley.core.Component;
 import com.janfic.games.library.actions.Action;
 
 import java.util.List;
+import java.util.Set;
 
 public class ActionsComponent implements Component {
-    public List<Action> actions;
+    public Set<Action> actions;
 }
