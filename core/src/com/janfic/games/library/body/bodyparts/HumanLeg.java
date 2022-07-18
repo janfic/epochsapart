@@ -2,6 +2,8 @@ package com.janfic.games.library.body.bodyparts;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.actions.actions.WalkAction;
 import com.janfic.games.library.body.BodyPart;
@@ -18,7 +20,7 @@ public class HumanLeg extends BodyPart {
     public HumanLeg(boolean isLeftLeg, VoxelWorld voxelWorld) {
         super((isLeftLeg ? "Left" : "Right")+ " Leg", 10);
         set = new HashSet<>(getAttachments());
-
+        setImage(new TextureRegion(new Texture("sprites/" + (isLeftLeg ? "left" : "right") + "_leg.png")));
         // Actions
         getAttachments().add((engine, entity) -> {
             ActionsComponent actionsComponent = Mapper.actionsComponentMapper.get(entity);

@@ -522,9 +522,9 @@ public class ECSEngine extends Engine {
                         Action action = actionController.getKeyMap().get(key);
                         Table a = new Table(skin);
                         a.setBackground("table");
-                        Image clickIcon = new Image(new Texture(Gdx.files.local("ui/controls/" + key + ".png")));
+                        Image icon = new Image(new Texture(Gdx.files.local("ui/controls/" + key + ".png")));
                         Image i = new Image(action.getIcon());
-                        a.add(clickIcon);
+                        a.add(icon).size(8,8);
                         a.add().row();
                         a.add();
                         a.add(i);
