@@ -1,4 +1,4 @@
-package com.janfic.games.library.ecs.systems.actions;
+package com.janfic.games.library.ecs.systems.world.actions;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;

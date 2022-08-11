@@ -41,6 +41,7 @@ public class Mapper {
     public static final ComponentMapper<ShaderComponent>          shaderComponentMapper = ComponentMapper.getFor(ShaderComponent.class);
     public static final ComponentMapper<ViewportComponent>        viewportComponentMapper = ComponentMapper.getFor(ViewportComponent.class);
     public static final ComponentMapper<RenderableProviderComponent>        renderableProviderComponentMapper = ComponentMapper.getFor(RenderableProviderComponent.class);
+    public static final ComponentMapper<SpriteComponent>        spriteComponentMapper = ComponentMapper.getFor(SpriteComponent.class);
 
     // 2D Graphics
     public static final ComponentMapper<TextureComponent>         textureComponentMapper = ComponentMapper.getFor(TextureComponent.class);
@@ -58,6 +59,7 @@ public class Mapper {
     public static final ComponentMapper<WorldComponent> worldComponentMapper = ComponentMapper.getFor(WorldComponent.class);
     public static final ComponentMapper<TileComponent> tileComponentMapper = ComponentMapper.getFor(TileComponent.class);
     public static final ComponentMapper<WorldInputComponent> worldInputComponentMapper = ComponentMapper.getFor(WorldInputComponent.class);
+    public static final ComponentMapper<WorldToScreenTransformComponent> worldToScreenComponentMapper = ComponentMapper.getFor(WorldToScreenTransformComponent.class);
 
     // World Generation
     public static final ComponentMapper<GenerateWorldComponent> generateWorldComponentMapper = ComponentMapper.getFor(GenerateWorldComponent.class);
