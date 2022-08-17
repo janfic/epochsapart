@@ -7,6 +7,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.janfic.games.library.ecs.Isometric2DEngine;
 
 public class JanFixelDriver extends ApplicationAdapter {
@@ -20,6 +21,7 @@ public class JanFixelDriver extends ApplicationAdapter {
 	@Override
 	public void render () {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		ScreenUtils.clear(Color.GRAY);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		engine.update(Gdx.graphics.getDeltaTime());
 		if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {

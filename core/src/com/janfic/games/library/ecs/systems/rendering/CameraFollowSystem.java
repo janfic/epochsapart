@@ -10,6 +10,7 @@ import com.janfic.games.library.ecs.Mapper;
 import com.janfic.games.library.ecs.components.physics.PositionComponent;
 import com.janfic.games.library.ecs.components.rendering.CameraComponent;
 import com.janfic.games.library.ecs.components.rendering.CameraFollowComponent;
+import com.janfic.games.library.ecs.components.rendering.WorldToScreenTransformComponent;
 
 public class CameraFollowSystem extends EntitySystem {
 
@@ -25,15 +26,21 @@ public class CameraFollowSystem extends EntitySystem {
         cameras = engine.getEntitiesFor(camerasFamily);
     }
 
+    Vector3 v = new Vector3();
+
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
         for (Entity camera : cameras) {
             CameraComponent cameraComponent = Mapper.cameraComponentMapper.get(camera);
+            WorldToScreenTransformComponent transform = Mapper.worldToScreenComponentMapper.get(camera);
 
             for (Entity followEntity : followEntities) {
                 PositionComponent positionComponent = Mapper.positionComponentMapper.get(followEntity);
-                cameraComponent.camera.lookAt(positionComponent.position);
+                if(transform != null)
+                    cameraComponent.camera.position.set(transform.transform.worldToScreen(positionComponent.position, v).scl(1,1,0));
+                else
+                    cameraComponent.camera.position.set(positionComponent.position);
                 cameraComponent.camera.up.set(Vector3.Y);
                 cameraComponent.camera.update();
             }

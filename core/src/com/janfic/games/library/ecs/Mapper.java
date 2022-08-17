@@ -12,6 +12,8 @@ import com.janfic.games.library.ecs.components.input.InputProcessorComponent;
 import com.janfic.games.library.ecs.components.inventory.*;
 import com.janfic.games.library.ecs.components.isometric.IsometricCameraComponent;
 import com.janfic.games.library.ecs.components.physics.*;
+import com.janfic.games.library.ecs.components.planet.PlanetComponent;
+import com.janfic.games.library.ecs.components.planet.PlanetGenerationComponent;
 import com.janfic.games.library.ecs.components.rendering.*;
 import com.janfic.games.library.ecs.components.time.CooldownComponent;
 import com.janfic.games.library.ecs.components.time.TimeComponent;
@@ -42,10 +44,12 @@ public class Mapper {
     public static final ComponentMapper<ViewportComponent>        viewportComponentMapper = ComponentMapper.getFor(ViewportComponent.class);
     public static final ComponentMapper<RenderableProviderComponent>        renderableProviderComponentMapper = ComponentMapper.getFor(RenderableProviderComponent.class);
     public static final ComponentMapper<SpriteComponent>        spriteComponentMapper = ComponentMapper.getFor(SpriteComponent.class);
+    public static final ComponentMapper<OriginComponent>        originComponentMapper = ComponentMapper.getFor(OriginComponent.class);
 
     // 2D Graphics
     public static final ComponentMapper<TextureComponent>         textureComponentMapper = ComponentMapper.getFor(TextureComponent.class);
     public static final ComponentMapper<TextureRegionComponent>   textureRegionComponentMapper = ComponentMapper.getFor(TextureRegionComponent.class);
+    public static final ComponentMapper<TextureAtlasComponent>   textureAtlasComponentMapper = ComponentMapper.getFor(TextureAtlasComponent.class);
 
     // 3D Graphics
     public static final ComponentMapper<ModelComponent>           modelComponentMapper = ComponentMapper.getFor(ModelComponent.class);
@@ -60,10 +64,12 @@ public class Mapper {
     public static final ComponentMapper<TileComponent> tileComponentMapper = ComponentMapper.getFor(TileComponent.class);
     public static final ComponentMapper<WorldInputComponent> worldInputComponentMapper = ComponentMapper.getFor(WorldInputComponent.class);
     public static final ComponentMapper<WorldToScreenTransformComponent> worldToScreenComponentMapper = ComponentMapper.getFor(WorldToScreenTransformComponent.class);
+    public static final ComponentMapper<PlanetComponent> planetComponentMapper = ComponentMapper.getFor(PlanetComponent.class);
+    public static final ComponentMapper<DirtyTileComponent> dirtyTileComponentMapper = ComponentMapper.getFor(DirtyTileComponent.class);
 
     // World Generation
     public static final ComponentMapper<GenerateWorldComponent> generateWorldComponentMapper = ComponentMapper.getFor(GenerateWorldComponent.class);
-
+    public static final ComponentMapper<PlanetGenerationComponent> planetGenerationComponentMapper = ComponentMapper.getFor(PlanetGenerationComponent.class);
 
     // Game State
 

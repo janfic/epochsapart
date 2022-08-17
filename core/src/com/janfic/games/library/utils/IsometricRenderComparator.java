@@ -12,9 +12,9 @@ public class IsometricRenderComparator implements Comparator<Entity> {
     public int compare(Entity a, Entity b) {
         PositionComponent posA = Mapper.positionComponentMapper.get(a);
         PositionComponent posB = Mapper.positionComponentMapper.get(b);
-
-
-
-        return 0;
+        if(posA.position.y != posB.position.y) {
+            return (int) Math.signum(posA.position.y - posB.position.y);
+        }
+        return (int) Math.signum((posB.position.z + posB.position.x) - (posA.position.z + posA.position.x));
     }
 }
