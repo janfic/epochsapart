@@ -6,5 +6,5 @@ import com.janfic.games.library.utils.isometric.IsometricChunk;
 public class TileComponent implements Component {
     public String name;
     public IsometricChunk chunk;
-    public boolean isVisible, isDirty;
+    public boolean isVisible;
 }

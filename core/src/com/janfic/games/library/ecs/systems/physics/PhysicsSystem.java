@@ -32,9 +32,14 @@ public class PhysicsSystem extends EntitySystem {
                 acceleration.add(force);
             }
 
+
             accelerationComponent.acceleration = acceleration;
             velocityComponent.velocity.add(accelerationComponent.acceleration.cpy().scl(deltaTime));
-            positionComponent.position.add(velocityComponent.velocity.cpy());
+            positionComponent.position.add(velocityComponent.velocity.cpy().scl(deltaTime));
+
+            System.out.println("----");
+            System.out.println(velocityComponent.velocity);
+            System.out.println(acceleration);
         }
     }
     

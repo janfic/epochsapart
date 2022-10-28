@@ -15,6 +15,7 @@ public class IsometricWorld {
     public int chunkWidth, chunkHeight, chunkDepth;
 
     private final IsometricChunk[][][] chunks;
+    private int[][] heightMap;
 
     public IsometricWorld(int worldWidth, int worldHeight, int worldDepth) {
         this.tilesWidth = worldWidth;
@@ -32,6 +33,7 @@ public class IsometricWorld {
                 }
             }
         }
+        this.heightMap = new int[worldWidth][worldDepth];
     }
 
     public void set(int x, int y, int z, Entity tile) {
@@ -44,6 +46,7 @@ public class IsometricWorld {
                 x - chunkX * IsometricChunk.CHUNK_SIZE_X,
                 y - chunkY * IsometricChunk.CHUNK_SIZE_Y,
                 z - chunkZ * IsometricChunk.CHUNK_SIZE_Z, tile);
+        if(heightMap[x][z] < y) heightMap[x][z] = y;
     }
 
     public Entity get(int x, int y, int z) {
@@ -64,7 +67,7 @@ public class IsometricWorld {
 
     public void updateRendering(OrthographicCamera camera, WorldToScreenTransformComponent.WorldToScreenTransform transform) {
 
-        rectangle.setSize(camera.viewportWidth * 3f, camera.viewportHeight * 3f);
+        rectangle.setSize(camera.viewportWidth * 3, camera.viewportHeight * 3);
         rectangle.setPosition(camera.position.x - rectangle.width / 2, camera.position.y - rectangle.height / 2);
 
         int cCount = 0;
@@ -74,7 +77,7 @@ public class IsometricWorld {
                     if(chunks[x][y][z].isDirty)
                         System.out.println("tiles: " + chunks[x][y][z].clean());
 
-                    position.set((x) * IsometricChunk.CHUNK_SIZE_X, (y) * IsometricChunk.CHUNK_SIZE_Y, (z) * IsometricChunk.CHUNK_SIZE_Z);
+                    position.set((x + 0.5f) * IsometricChunk.CHUNK_SIZE_X, (y + 0.5f) * IsometricChunk.CHUNK_SIZE_Y, (z + 0.5f) * IsometricChunk.CHUNK_SIZE_Z);
                     out = transform.worldToScreen(position, out);
                     if(!chunks[x][y][z].hasVisibleTiles()) {
                         setChunkVisible(x,y,z,false);
@@ -108,6 +111,10 @@ public class IsometricWorld {
         if(x < 0 || y < 0 || z < 0) return false;
         if(x >= chunkWidth || y >= chunkHeight || z >= chunkDepth) return false;
         return chunks[x][y][z].isOpaque();
+    }
+
+    public int getHeight(int x, int z) {
+        return heightMap[x][z];
     }
 
     public boolean isTileAt(int x, int y, int z) {

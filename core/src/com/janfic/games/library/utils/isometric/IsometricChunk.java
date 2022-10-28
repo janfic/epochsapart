@@ -3,6 +3,7 @@ package com.janfic.games.library.utils.isometric;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.Mapper;
+import com.janfic.games.library.ecs.components.rendering.InvisibleComponent;
 import com.janfic.games.library.ecs.components.world.DirtyTileComponent;
 import com.janfic.games.library.ecs.components.world.TileComponent;
 
@@ -46,12 +47,11 @@ public class IsometricChunk {
         if(x < 0 || y < 0 || z < 0) return;
         if(x >= CHUNK_SIZE_X || y  >= CHUNK_SIZE_Y || z >= CHUNK_SIZE_Z) return;
         tiles[x][y][z] = tile;
-        //TODO: ADD DirtyComponent
         TileComponent tileComponent = Mapper.tileComponentMapper.get(tile);
-        tileComponent.isDirty = true;
         tileComponent.isVisible = true;
         tileComponent.chunk = this;
         tile.add(new DirtyTileComponent());
+//        tile.add(new InvisibleComponent());
         this.isDirty = true;
         tileCount++;
         //visibleTiles.add(tileComponent);
@@ -85,6 +85,12 @@ public class IsometricChunk {
             visibleTile.isVisible = isVisible;
             //TODO: ADD DirtyComponent
             e.add(new DirtyTileComponent());
+            if(isVisible) {
+                e.remove(InvisibleComponent.class);
+            }
+            else {
+                e.add(new InvisibleComponent());
+            }
         }
     }
 
@@ -111,10 +117,10 @@ public class IsometricChunk {
                     TileComponent tileComponent = getTile( x, y, z);
                     if(tileComponent == null) continue;
                     if(isTileRendering(x,y + 1, z) && isTileRendering(x, y, z - 1) && isTileRendering(x - 1, y, z)) {
-                        tileComponent.isVisible = false;
+                        e.add(new InvisibleComponent());
                     }
                     else {
-                        tileComponent.isVisible = true;
+                        e.remove(InvisibleComponent.class);
                         visibleTiles.add(e);
                     }
                     //TODO: ADD DirtyComponent

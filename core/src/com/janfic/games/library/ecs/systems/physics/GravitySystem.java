@@ -28,8 +28,9 @@ public class GravitySystem extends EntitySystem {
             ForceComponent forceComponent = Mapper.forceComponentMapper.get(entity);
             GravityComponent gravityComponent = Mapper.gravityComponentMapper.get(entity);
 
-            if(!forceComponent.forces.contains(gravityComponent.gravity)) {
+            if(!forceComponent.named.containsKey("gravity")) {
                 forceComponent.forces.add(gravityComponent.gravity);
+                forceComponent.named.put("gravity", gravityComponent.gravity);
             }
         }
     }

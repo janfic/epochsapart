@@ -24,7 +24,7 @@ public class SpriteRenderSystem extends SortedIteratingSystem {
     private ImmutableArray<Entity> rendererEntities;
 
     private static final Family rendererFamily = Family.all(CameraComponent.class, SpriteBatchComponent.class).get(),
-            renderableFamily = Family.all(PositionComponent.class).one(TextureRegionComponent.class).get();
+            renderableFamily = Family.all(PositionComponent.class).one(TextureRegionComponent.class).exclude(InvisibleComponent.class).get();
 
     public SpriteRenderSystem(Comparator<Entity> sorter) {
         super(renderableFamily, sorter);
