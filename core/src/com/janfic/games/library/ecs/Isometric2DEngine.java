@@ -4,10 +4,14 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.library.ecs.components.events.EventQueueComponent;
 import com.janfic.games.library.ecs.components.physics.*;
@@ -23,8 +27,12 @@ import com.janfic.games.library.ecs.systems.planet.TileSpriteSystem;
 import com.janfic.games.library.ecs.systems.rendering.CameraFollowSystem;
 import com.janfic.games.library.ecs.systems.rendering.CameraPositionSystem;
 import com.janfic.games.library.ecs.systems.rendering.SpriteRenderSystem;
+import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import com.janfic.games.library.utils.IsometricRenderComparator;
 import com.janfic.games.library.utils.isometric.IsometricWorld;
+import com.janfic.games.library.utils.spritestack.SpriteStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +72,6 @@ public class Isometric2DEngine extends Engine {
 
         CameraComponent cameraComponent = new CameraComponent();
         OrthographicCamera orthographicCamera = new OrthographicCamera(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 3f);
-//        OrthographicCamera orthographicCamera = new OrthographicCamera(Gdx.graphics.getWidth() , Gdx.graphics.getHeight());
         cameraComponent.camera = orthographicCamera;
         orthographicCamera.position.set(0,0,0);
         orthographicCamera.update();
@@ -74,7 +81,21 @@ public class Isometric2DEngine extends Engine {
 
         CameraFollowComponent cameraFollowComponent = new CameraFollowComponent();
 
+        GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        frameBufferBuilder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
+        frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
+        FrameBufferComponent frameBufferComponent = new FrameBufferComponent();
+        frameBufferComponent.frameBuffer = frameBufferBuilder.build();
+
+        PostProcessorsComponent postProcessorsComponent = new PostProcessorsComponent();
+        postProcessorsComponent.processors = new LinkedList<>();
+        postProcessorsComponent.processors.add(new DitherPostProcess(3));
+        postProcessorsComponent.processors.add(new PixelizePostProcess(3));
+
+
         rendererEntity.add(spriteBatchComponent);
+        rendererEntity.add(postProcessorsComponent);
+        rendererEntity.add(frameBufferComponent);
         rendererEntity.add(cameraComponent);
         rendererEntity.add(worldToScreenTransformComponent);
         rendererEntity.add(cameraFollowComponent);
@@ -126,14 +147,22 @@ public class Isometric2DEngine extends Engine {
         GravityComponent gravityComponent = new GravityComponent();
         gravityComponent.gravity = new Vector3(0, -9, 0);
 
+        SpriteStackComponent spriteStackComponent = new SpriteStackComponent();
+        spriteStackComponent.spriteStack = new SpriteStack(new Texture("sprites/stacktest.png"), 16,16, 2);
+
+        ShaderProgramComponent shaderProgramComponent = new ShaderProgramComponent();
+        shaderProgramComponent.program = new ShaderProgram(Gdx.files.local("shaders/isometricShader.vertex.glsl"), Gdx.files.local("shaders/isometricShader.fragment.glsl"));
+
         player.add(positionComponent);
         player.add(velocityComponent);
         player.add(accelerationComponent);
+        player.add(shaderProgramComponent);
         player.add(forceComponent);
         player.add(gravityComponent);
         player.add(originComponent);
         player.add(cameraFollowComponent);
         player.add(textureRegionComponent);
+        player.add(spriteStackComponent);
 
         addEntity(player);
     }
