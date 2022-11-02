@@ -36,7 +36,7 @@ public class PlanetUpdateSystem extends EntitySystem {
             PlanetComponent planetComponent = Mapper.planetComponentMapper.get(entity);
             planetComponent.world.updateRendering(camera, worldToScreenTransformComponent.transform);
             long end = System.currentTimeMillis();
-            System.out.println("updateTime: " + (end-start)/1000f);
+            //System.out.println("updateTime: " + (end-start)/1000f);
         }
     }
 }

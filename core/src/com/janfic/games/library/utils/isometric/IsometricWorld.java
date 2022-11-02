@@ -99,7 +99,7 @@ public class IsometricWorld {
                 }
             }
         }
-        System.out.println("renderedChunkCount: " + cCount);
+        //System.out.println("renderedChunkCount: " + cCount);
     }
 
     private void setChunkVisible(int x, int y, int z, boolean visible) {

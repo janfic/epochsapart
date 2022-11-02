@@ -148,7 +148,7 @@ public class Isometric2DEngine extends Engine {
         gravityComponent.gravity = new Vector3(0, -9, 0);
 
         SpriteStackComponent spriteStackComponent = new SpriteStackComponent();
-        spriteStackComponent.spriteStack = new SpriteStack(new Texture("sprites/stacktest.png"), 16,16, 2);
+        spriteStackComponent.spriteStack = new SpriteStack(new Texture("sprites/stack_bone.png"), 22,22, 3 ,3);
 
         ShaderProgramComponent shaderProgramComponent = new ShaderProgramComponent();
         shaderProgramComponent.program = new ShaderProgram(Gdx.files.local("shaders/isometricShader.vertex.glsl"), Gdx.files.local("shaders/isometricShader.fragment.glsl"));
@@ -161,7 +161,6 @@ public class Isometric2DEngine extends Engine {
         player.add(gravityComponent);
         player.add(originComponent);
         player.add(cameraFollowComponent);
-        player.add(textureRegionComponent);
         player.add(spriteStackComponent);
 
         addEntity(player);
@@ -188,6 +187,6 @@ public class Isometric2DEngine extends Engine {
         if(Gdx.input.isKeyJustPressed(Input.Keys.D)) {
             positionComponent.position.add(1,0,0);
         }
-        System.out.println(Gdx.graphics.getFramesPerSecond());
+        //System.out.println(Gdx.graphics.getFramesPerSecond());
     }
 }
