@@ -83,7 +83,6 @@ public class IsometricChunk {
         for (Entity e : visibleTiles) {
             TileComponent visibleTile = Mapper.tileComponentMapper.get(e);
             visibleTile.isVisible = isVisible;
-            //TODO: ADD DirtyComponent
             e.add(new DirtyTileComponent());
             if(isVisible) {
                 e.remove(InvisibleComponent.class);
@@ -123,8 +122,6 @@ public class IsometricChunk {
                         e.remove(InvisibleComponent.class);
                         visibleTiles.add(e);
                     }
-                    //TODO: ADD DirtyComponent
-                    //e.add(new DirtyTileComponent());
                 }
             }
         }
