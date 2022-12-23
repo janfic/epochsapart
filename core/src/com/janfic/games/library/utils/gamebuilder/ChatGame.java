@@ -49,6 +49,16 @@ public class ChatGame extends Game<ChatGame.ChatGameState> {
         public ChatGameState() {
             chats = new ArrayList<>();
         }
+
+        @Override
+        public void write(Json json) {
+            json.writeValue("chats", chats);
+        }
+
+        @Override
+        public void read(Json json, JsonValue jsonData) {
+            chats = json.readValue("chats", List.class, String.class, jsonData);
+        }
     }
 
     public ChatGame() {

@@ -16,7 +16,7 @@ import java.util.Date;
  *
  * To see how GameStateChanges are validated and applied see: GameRule
  */
-public abstract class GameStateChange<T extends GameState> implements Json.Serializable{
+public abstract class GameStateChange<T extends GameState> implements Json.Serializable {
 
     private static Date date = new Date();
 
@@ -105,6 +105,7 @@ public abstract class GameStateChange<T extends GameState> implements Json.Seria
         json.writeValue("clientID", clientID);
         json.writeValue("gameID", gameID);
         json.writeValue("id", id);
+        json.writeValue("status", status);
     }
 
     @Override
@@ -113,6 +114,7 @@ public abstract class GameStateChange<T extends GameState> implements Json.Seria
         this.clientID = json.readValue("clientID", Integer.class, jsonData);
         this.timestamp = json.readValue("timestamp", Long.class, jsonData);
         this.gameID = json.readValue("gameID", Integer.class, jsonData);
+        this.status = json.readValue("status", Status.class, jsonData);
     }
 
     /**

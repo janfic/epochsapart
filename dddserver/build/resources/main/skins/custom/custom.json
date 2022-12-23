@@ -1,0 +1,9 @@
+{
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		background: table
+		hScrollKnob: scrollbar
+		vScrollKnob: scrollbar
+	}
+}
+}

@@ -90,4 +90,15 @@ public class GameClientAPI {
             e.printStackTrace();
         }
     }
+
+    public void dispose() {
+        isListening = false;
+        for (Integer integer : connections.keySet()) {
+            Socket s = connections.get(integer);
+            s.dispose();
+        }
+        clientList.clear();
+        socketList.clear();
+        singleton = null;
+    }
 }

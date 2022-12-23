@@ -1,8 +1,13 @@
 package com.janfic.games.library.utils.gamebuilder;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.janfic.games.library.utils.patterns.Observer;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -17,6 +22,7 @@ public class GameClient<T extends GameState> extends Observer<Queue<GameStateCha
     T gameState;
     Queue<GameStateChange<T>> queuedGameStateChanges;
     private int id;
+    Json json = new Json();
 
     public GameClient() {
         id = 0;
@@ -46,15 +52,51 @@ public class GameClient<T extends GameState> extends Observer<Queue<GameStateCha
         if(!GameServerAPI.getSingleton().messages.isEmpty()) {
             GameMessage message = GameServerAPI.getSingleton().messages.poll();
             if(message == null) return;
-            System.out.println(message.header + " " + message.message);
-            if(message.header == GameMessage.GameMessageType.CONNECTION_INFO) {
-                int id = Integer.parseInt(message.message);
-                this.id = id;
+            switch (message.header) {
+                case CONNECTION_INFO:
+                    setID(Integer.parseInt(message.message));
+                    break;
+                case FULL_GAME_STATE:
+                    readFullGameState(message);
+                    break;
+                case GAME_STATE_CHANGE:
+                    receiveGameStateChange(message);
             }
+        }
+    }
+
+    public void receiveGameStateChange(GameMessage message) {
+        GameStateChange<T> change = json.fromJson(GameStateChange.class, message.message);
+        if(change.status == GameStateChange.Status.ACCEPTED) {
+            change.applyStateChange(gameState);
         }
     }
 
     public T getGameState() {
         return gameState;
+    }
+
+    public void setID(int id) {
+        this.id = id;
+    }
+
+    public void setGameState(T gameState) {
+        this.gameState = gameState;
+    }
+
+    private void readFullGameState(GameMessage message){
+        T state = (T) json.fromJson(gameState.getClass(), message.message);
+
+        SnapshotArray<Actor> children = state.getChildren();
+        List<Actor> c = new ArrayList<>();
+        for (Actor child : children) {
+            c.add(child);
+        }
+        state.clear();
+        this.gameState.clear();
+        for (Actor child : c) {
+            System.out.println(child);
+            this.gameState.addActor(child);
+        }
     }
 }

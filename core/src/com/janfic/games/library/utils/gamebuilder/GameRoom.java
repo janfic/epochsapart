@@ -34,13 +34,19 @@ public class GameRoom implements Json.Serializable {
         // Update Game
         if(!clientGameStateChangeRequestQueue.isEmpty())
             game.getQueuedStateChanges().add(clientGameStateChangeRequestQueue.poll());
+
         game.update(delta);
         // Give server processed game state changes
 
         if(!game.getProcessedStateChanges().isEmpty()) {
             // TODO: Add Json-ification of GameStateChange to outgoing messages
             String stateChange = json.toJson(game.getProcessedStateChanges().poll());
-            //parentServer.addOutgoingMessage(new GameMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, stateChange, 0), this);
+
+            for (GameClient gameClient : gameClients) {
+                GameMessage message = new GameMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, stateChange, 0, gameClient.getID());
+                System.out.println("[SERVER]: Sending message: " + message.header + " " + message.message);
+                parentServer.addOutgoingMessage(message);
+            }
         }
     }
 
@@ -61,7 +67,7 @@ public class GameRoom implements Json.Serializable {
     }
 
     public void addGameStateChange(GameStateChange gameStateChange) {
-        game.getQueuedStateChanges().add( gameStateChange);
+        game.getQueuedStateChanges().add(gameStateChange);
     }
 
     @Override
@@ -73,5 +79,9 @@ public class GameRoom implements Json.Serializable {
     @Override
     public void read(Json json, JsonValue jsonData) {
 
+    }
+
+    public Game getGame() {
+        return game;
     }
 }

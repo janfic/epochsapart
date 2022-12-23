@@ -46,8 +46,9 @@ public class GameMessage {
         REQUEST_ROOMS_INFO, // TODO
         REQUEST_LEAVE_GAME, // TODO
         REQUEST_JOIN_ROOM, // TODO
-        GAME_INFO, //TODO
         ROOMS_INFO,
+        REQUEST_FULL_GAME_STATE, //TODO
+        FULL_GAME_STATE,
         DENIED
     }
 

@@ -9,6 +9,6 @@ import java.util.List;
 /**
  *
  */
-public abstract class GameState extends Group {
+public abstract class GameState extends Group implements Json.Serializable {
     // TODO: Add GameState Comparison / Change Serialization
 }

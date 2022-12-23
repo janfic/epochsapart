@@ -16,19 +16,21 @@ public class GameServer {
 
     private static Json json = new Json();
     private static Date date = new Date();
-    private List<GameRoomGroup> groups;
+    //private List<GameRoomGroup> groups;
     private int maxRoomsPerGroup;
     private Queue<GameMessage> outgoingMessages;
     private List<GameClient> gameClients;
-    private Map<GameMessage, GameRoom> destinations;
     private ServerSocket serverSocket;
     private boolean isListening;
+
+    List<GameRoom> rooms;
+
     private Thread connectionListener = new Thread(() -> {
         while (isListening) {
             synchronized (gameClients) {
                 Socket socket = listen(serverSocket);
                 if (socket != null) {
-                    System.out.println("ACCEPTED");
+                    System.out.println("[SERVER]: ACCEPTED new connection");
                     int id = (int) (Math.random() * Integer.MAX_VALUE);
                     while (GameClientAPI.getSingleton().clientList.contains(id) && id != 0) {
                         id = (int) (Math.random() * Integer.MAX_VALUE);
@@ -42,11 +44,11 @@ public class GameServer {
     });
 
     public GameServer() {
-        this.groups = new ArrayList<>();
+        //this.groups = new ArrayList<>();
         this.maxRoomsPerGroup = 2;
         this.outgoingMessages = new LinkedList<>();
         this.gameClients = new ArrayList<>();
-        this.destinations = new HashMap<>();
+        this.rooms = new ArrayList<>();
     }
 
     public static void log(String message) {
@@ -58,28 +60,37 @@ public class GameServer {
     }
 
     public void addGameRoom(GameRoom gameRoom) {
-        // Find Available Game Room Group ( Thread )
-        for (GameRoomGroup group : groups) {
-            if (group.size() < maxRoomsPerGroup) {
-                group.addGameRoom(gameRoom);
-                return;
-            }
-        }
 
-        // Create new group ( thread ) if all full
-        GameRoomGroup group = new GameRoomGroup();
-        group.addGameRoom(gameRoom);
-        groups.add(group);
-        new Thread(group).start();
-        group.setRunning(true);
+        rooms.add(gameRoom);
+
+        /* DEPRECIATED GAME GROUPS DUE TO THREADING ISSUE WITH TEXTURE INITIALIZATION
+            // Find Available Game Room Group ( Thread )
+            for (GameRoomGroup group : groups) {
+                if (group.size() < maxRoomsPerGroup) {
+                    group.addGameRoom(gameRoom);
+                    return;
+                }
+            }
+
+            // Create new group ( thread ) if all full
+            GameRoomGroup group = new GameRoomGroup();
+            group.addGameRoom(gameRoom);
+            groups.add(group);
+            new Thread(group).start();
+            group.setRunning(true);
+         */
     }
 
     // TODO: Implement game server update()
     public void update(float delta) {
+
+        for (GameRoom room : rooms) {
+            room.update(delta);
+        }
+
         // Read Incoming Messages from clients using API
         if (!GameClientAPI.getSingleton().messages.isEmpty()) {
             GameMessage message = GameClientAPI.getSingleton().messages.poll();
-            System.out.println(message.header + " " + message.message);
 
             GameMessage response = new GameMessage(0, message.sender);
             switch (message.header) {
@@ -103,6 +114,10 @@ public class GameServer {
                     break;
                 case GAME_STATE_CHANGE:
                     gameStateChange(message, response);
+                    break;
+                case REQUEST_FULL_GAME_STATE:
+                    requestFullGameState(message, response);
+                    break;
             }
             if (response.header != null) {
                 outgoingMessages.add(response);
@@ -118,10 +133,33 @@ public class GameServer {
         }
     }
 
+    private void requestFullGameState(GameMessage message, GameMessage response) {
+        log("Attempting to retrieve full game state for client #" + message.sender);
+        GameClient client = getClientByID(message.sender);
+        response.setMessage("No such client");
+        response.setHeader(GameMessage.GameMessageType.DENIED);
+        if(client == null) {
+            log("No such client with id.");
+            return;
+        }
+
+        GameRoom room = getRoomByClient(client);
+        response.setMessage("Client is not in a game");
+        response.setHeader(GameMessage.GameMessageType.DENIED);
+        if( room == null) {
+            log("Client not in a game room");
+            return;
+        }
+
+        Json json = new Json();
+        json.setTypeName(null);
+        String state = json.toJson(room.getGame().gameState);
+        response.setHeader(GameMessage.GameMessageType.FULL_GAME_STATE);
+        response.setMessage(state);
+    }
+
     private void gameStateChange(GameMessage message, GameMessage response) {
         GameClient client = getClientByID(message.sender);
-
-
         if(client != null) {
             GameRoom room = getRoomByClient(client);
             if(room != null) {
@@ -132,10 +170,6 @@ public class GameServer {
     }
 
     private void roomsInfo(GameMessage message, GameMessage response) {
-        List<GameRoom> rooms = new ArrayList<>();
-        for (GameRoomGroup group : groups) {
-            rooms.addAll(group.getGameRooms());
-        }
         response.header = GameMessage.GameMessageType.ROOMS_INFO;
         response.message = json.toJson(rooms);
     }
@@ -146,11 +180,9 @@ public class GameServer {
         response.setHeader(GameMessage.GameMessageType.DENIED);
         response.setMessage("Not in game room");
         if (client != null) {
-            for (GameRoomGroup group : groups) {
-                for (GameRoom gameRoom : group.getGameRooms()) {
-                    if(gameRoom.getGameClients().contains(client)) {
-                        room = gameRoom;
-                    }
+            for (GameRoom gameRoom : rooms) {
+                if(gameRoom.getGameClients().contains(client)) {
+                    room = gameRoom;
                 }
             }
             if(room != null) {
@@ -162,6 +194,7 @@ public class GameServer {
     }
 
     private void joinGameRoom(GameMessage message, GameMessage response) {
+        log("Attempting to add client to game room...");
         String[] params = message.message.split(" ");
         GameClient client = getClientByID(message.sender);
         GameRoom room = null;
@@ -169,16 +202,14 @@ public class GameServer {
         response.setMessage("No such room");
         if (client != null) {
             int roomID = Integer.parseInt(params[0]);
-            for (GameRoomGroup group : groups) {
-                for (GameRoom gameRoom : group.getGameRooms()) {
-                    if (gameRoom.getGameClients().contains(client)) {
-                        response.setHeader(GameMessage.GameMessageType.DENIED);
-                        response.setMessage("Already in room");
-                        return;
-                    }
-                    if (gameRoom.getRoomID() == roomID) {
-                        room = gameRoom;
-                    }
+            for (GameRoom gameRoom : rooms) {
+                if (gameRoom.getGameClients().contains(client)) {
+                    response.setHeader(GameMessage.GameMessageType.DENIED);
+                    response.setMessage("Already in room");
+                    return;
+                }
+                if (gameRoom.getRoomID() == roomID) {
+                    room = gameRoom;
                 }
             }
             if (room != null) {
@@ -200,14 +231,18 @@ public class GameServer {
 
     private void createGameRoom(GameMessage message, GameMessage response) {
         try {
-            Class gameType = Class.forName(message.message);
+            Json json = new Json();
+            List<String> params = json.fromJson(List.class, message.message);
+            System.out.println(params.get(0));
+            Class gameType = Class.forName(params.get(0));
             if (!Game.class.isAssignableFrom(gameType)) throw new Exception();
             log("Attempting to create room for " + gameType.getSimpleName() + " game...");
-            Game game = (Game) gameType.getConstructor().newInstance();
+            Game game = (Game) gameType.getConstructor(List.class).newInstance(params.subList(1, params.size()));
             GameRoom chatRoom = new GameRoom(game, this, new ArrayList<>());
             addGameRoom(chatRoom);
             response.setHeader(GameMessage.GameMessageType.ACCEPT);
             response.setMessage("Created new GameRoom with " + gameType.getSimpleName());
+            log("Successfully created new game room for " + gameType.getSimpleName() + " game.");
         } catch (Exception e) {
             log("Failed Request to start " + message.message + " game. Invalid game name.");
             response.setHeader(GameMessage.GameMessageType.DENIED);
@@ -223,13 +258,12 @@ public class GameServer {
     }
 
     private GameRoom getRoomByClient(GameClient client) {
-        for (GameRoomGroup group : groups) {
-            for (GameRoom gameRoom : group.getGameRooms()) {
+            for (GameRoom gameRoom : rooms) {
                 if (gameRoom.getGameClients().contains(client)) {
                     return gameRoom;
                 }
             }
-        }
+
         return null;
     }
 
@@ -243,13 +277,17 @@ public class GameServer {
         isListening = true;
     }
 
-    public void stopServer() {
+    public void pauseServer() {
         isListening = false;
     }
 
-    public void addOutgoingMessage(GameMessage message, GameRoom room) {
+    public void stopServer() {
+        isListening = false;
+        serverSocket.dispose();
+    }
+
+    public void addOutgoingMessage(GameMessage message) {
         this.outgoingMessages.add(message);
-        this.destinations.put(message, room);
     }
 
     public Socket listen(ServerSocket ss) {

@@ -42,6 +42,12 @@ public abstract class Game<T extends GameState> {
      */
     protected Queue<GameStateChange<T>> processedStateChanges;
 
+    public Game() {
+        this.rules = new ArrayList<>();
+        queuedStateChanges = new PriorityQueue<>(new GameStateChange.GameStateChangeComparator());
+        processedStateChanges = new LinkedList<>();
+    }
+
     public Game(T gameState) {
         this.gameState = gameState;
         this.rules = new ArrayList<>();
