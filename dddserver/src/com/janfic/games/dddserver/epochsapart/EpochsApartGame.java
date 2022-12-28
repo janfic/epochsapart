@@ -1,16 +1,13 @@
 package com.janfic.games.dddserver.epochsapart;
 
 import com.badlogic.gdx.math.Vector3;
-import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
+import com.janfic.games.dddserver.epochsapart.entities.HexActor;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.MoveHexEntityStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
-import com.janfic.games.library.utils.gamebuilder.Game;
 import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.realtime.RealTimeGame;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
 
@@ -26,7 +23,7 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
                 "Unable to add this player, posibly a id collision",
                 (epochsApartStateChange, epochsApartGameState) -> {
                     if(!(epochsApartStateChange instanceof PlayerJoinGameStateChange)) return false;
-                    HexEntity entity = epochsApartGameState.getEntityByID(epochsApartStateChange.getID());
+                    HexActor entity = epochsApartGameState.getEntityByID(epochsApartStateChange.getID());
                     return entity == null;
                 }
         );
@@ -37,7 +34,7 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
                 (epochsStateChange, epochsApartGameState) -> {
                     if(!(epochsStateChange instanceof MoveHexEntityStateChange)) return false;
                     MoveHexEntityStateChange moveStateChange = (MoveHexEntityStateChange) epochsStateChange;
-                    HexEntity entity = epochsApartGameState.getEntityByID(moveStateChange.getHexID());
+                    HexActor entity = epochsApartGameState.getEntityByID(moveStateChange.getHexID());
                     if(entity == null) return false;
                     Vector3 hexPosition = entity.getHexPosition();
                     Vector3 delta = moveStateChange.getDelta();

@@ -69,11 +69,8 @@ public class HexGrid extends Group implements Json.Serializable {
             t.setHovered(true);
             lastHovered = t;
         }
-        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && t != null) {
-            EpochsApartGameState state = (EpochsApartGameState) GameServerAPI.getSingleton().getGameClient().getGameState();
-            Player p = (Player) state.getEntityByID(GameServerAPI.getSingleton().getGameClient().getID());
-            MoveHexEntityStateChange moveHexEntityStateChange = new MoveHexEntityStateChange(p.getID(), t.getHexPosition().cpy().sub(p.getHexPosition()));
-            GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, new Json().toJson(moveHexEntityStateChange));
+        else {
+            lastHovered = null;
         }
     }
 
@@ -106,5 +103,9 @@ public class HexGrid extends Group implements Json.Serializable {
         if(s==0) s = 0;
 
         return new Vector3(q, r, s);
+    }
+
+    public HexTile getLastHovered() {
+        return lastHovered;
     }
 }

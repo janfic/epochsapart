@@ -1,22 +1,15 @@
 package com.janfic.games.dddserver.epochsapart.world;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
+import com.janfic.games.dddserver.epochsapart.entities.HexActor;
 
-public class HexTile extends HexEntity implements Json.Serializable {
+public class HexTile extends HexActor implements Json.Serializable {
 
     public static int HEX_WIDTH = 64, HEX_HEIGHT = 64;
 

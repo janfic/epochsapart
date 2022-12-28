@@ -93,10 +93,10 @@ public class GameClient<T extends GameState> extends Observer<Queue<GameStateCha
             c.add(child);
         }
         state.clear();
-        this.gameState.clear();
+        gameState.reset();
         for (Actor child : c) {
-            System.out.println(child);
             this.gameState.addActor(child);
         }
+        gameState.repopulate(state);
     }
 }

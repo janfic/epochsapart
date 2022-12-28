@@ -5,6 +5,11 @@ import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.GameState;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
 
+/**
+ * A RealTimeGame refers to a game in which actions and events happen in real time. It is done without a "turns" for
+ * each entity. ie. Player and entity actions happen at a first come first server basis.
+ * @param <T>
+ */
 public class RealTimeGame<T extends GameState> extends Game<T> {
 
     public RealTimeGame(T gameState) {

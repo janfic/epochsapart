@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
-import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
+import com.janfic.games.dddserver.epochsapart.entities.HexActor;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
 
 public class MoveHexEntityStateChange extends GameStateChange<EpochsApartGameState> {
@@ -25,8 +25,8 @@ public class MoveHexEntityStateChange extends GameStateChange<EpochsApartGameSta
 
     @Override
     public void applyStateChange(EpochsApartGameState state) {
-        HexEntity hexEntity = state.getEntityByID(hexID);
-        hexEntity.moveHexPosition(delta.x, delta.y, delta.z);
+        HexActor hexActor = state.getEntityByID(hexID);
+        hexActor.moveHexPosition(delta.x, delta.y, delta.z);
     }
 
     @Override

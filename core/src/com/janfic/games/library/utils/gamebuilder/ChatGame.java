@@ -59,6 +59,16 @@ public class ChatGame extends Game<ChatGame.ChatGameState> {
         public void read(Json json, JsonValue jsonData) {
             chats = json.readValue("chats", List.class, String.class, jsonData);
         }
+
+        @Override
+        public void reset() {
+
+        }
+
+        @Override
+        public void repopulate(GameState state) {
+
+        }
     }
 
     public ChatGame() {

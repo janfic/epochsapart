@@ -1,22 +1,25 @@
 package com.janfic.games.dddserver.epochsapart.entities;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.janfic.games.library.utils.gamebuilder.GameClient;
+import com.janfic.games.dddserver.epochsapart.cards.actioncards.InspectActionCard;
+import com.janfic.games.dddserver.epochsapart.cards.actioncards.MoveActionCard;
 
-public class Player extends HexEntity implements Json.Serializable{
+public class Player extends HexEntity {
 
     TextureRegion region;
 
     public Player() {
         this(-1, 0,0,0);
         region = new TextureRegion(new Texture("world/hextiles/player.png"));
+        MoveActionCard actionCard = new MoveActionCard();
+        getInventory().getActionCardDeck().addCard(actionCard);
+        getInventory().getActionCardDeck().addCard(new MoveActionCard());
+        getInventory().getActionCardDeck().addCard(new InspectActionCard());
     }
 
     public Player(long clientID, float q, float r, float s) {
@@ -38,6 +41,9 @@ public class Player extends HexEntity implements Json.Serializable{
     @Override
     public void write(Json json) {
         super.write(json);
+        json.setTypeName("class");
+        json.writeType(Player.class);
+        json.setTypeName(null);
     }
 
     @Override
