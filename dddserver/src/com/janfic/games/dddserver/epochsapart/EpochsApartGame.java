@@ -2,7 +2,9 @@ package com.janfic.games.dddserver.epochsapart;
 
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.dddserver.epochsapart.entities.HexActor;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.MoveHexEntityStateChange;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.OpenInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
 import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.realtime.RealTimeGame;
@@ -17,6 +19,26 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
 
     public EpochsApartGame(EpochsApartGameState gameState) {
         super(gameState);
+        GameRule<EpochsApartGameState> playerCloseInventory = new GameRule<>(
+                "Close Player Inventory",
+                "Allows a player to close their own inventory",
+                "This player is not in their inventory",
+                (epochsApartStateChange, epochsApartGameState) -> {
+                    if(!(epochsApartStateChange instanceof CloseInventoryMiniGameStateChange)) return false;
+                    CloseInventoryMiniGameStateChange closeInventoryMiniGameStateChange = (CloseInventoryMiniGameStateChange) epochsApartStateChange;
+                    return !epochsApartGameState.getMiniGamesForHexEntity(closeInventoryMiniGameStateChange.hexID).isEmpty();
+                }
+        );
+        GameRule<EpochsApartGameState> playerOpenInventory = new GameRule<>(
+                "Open Player Inventory",
+                "Allows a player to open their own inventory",
+                "This player is already part of a different minigame",
+                (epochsApartStateChange, epochsApartGameState) -> {
+                    if(!(epochsApartStateChange instanceof OpenInventoryMiniGameStateChange)) return false;
+                    OpenInventoryMiniGameStateChange openInventoryMiniGameStateChange = (OpenInventoryMiniGameStateChange) epochsApartStateChange;
+                    return epochsApartGameState.getMiniGamesForHexEntity(openInventoryMiniGameStateChange.hexID).isEmpty();
+                }
+        );
         GameRule<EpochsApartGameState> playerJoin = new GameRule<>(
                 "Player Join Rule",
                         "Add a player to the current game",
@@ -44,5 +66,7 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
         );
         addRule(playerJoin);
         addRule(hexEntityMovement);
+        addRule(playerCloseInventory);
+        addRule(playerOpenInventory);
     }
 }

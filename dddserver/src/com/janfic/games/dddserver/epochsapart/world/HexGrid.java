@@ -1,19 +1,11 @@
 package com.janfic.games.dddserver.epochsapart.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
-import com.janfic.games.dddserver.epochsapart.entities.Player;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.MoveHexEntityStateChange;
-import com.janfic.games.library.utils.gamebuilder.GameClientAPI;
-import com.janfic.games.library.utils.gamebuilder.GameMessage;
-import com.janfic.games.library.utils.gamebuilder.GameServerAPI;
 
 import java.util.*;
 

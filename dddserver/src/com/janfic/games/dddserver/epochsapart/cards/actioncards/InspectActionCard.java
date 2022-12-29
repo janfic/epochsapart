@@ -2,8 +2,8 @@ package com.janfic.games.dddserver.epochsapart.cards.actioncards;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Json;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
-import com.janfic.games.dddserver.epochsapart.cards.ActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;

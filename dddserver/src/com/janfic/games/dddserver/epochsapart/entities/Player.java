@@ -6,8 +6,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.janfic.games.dddserver.epochsapart.cards.actioncards.CollectActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.InspectActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.MoveActionCard;
+import com.janfic.games.dddserver.epochsapart.cards.entitycards.LeftHandEntityCard;
 
 public class Player extends HexEntity {
 
@@ -16,10 +18,10 @@ public class Player extends HexEntity {
     public Player() {
         this(-1, 0,0,0);
         region = new TextureRegion(new Texture("world/hextiles/player.png"));
-        MoveActionCard actionCard = new MoveActionCard();
-        getInventory().getActionCardDeck().addCard(actionCard);
         getInventory().getActionCardDeck().addCard(new MoveActionCard());
         getInventory().getActionCardDeck().addCard(new InspectActionCard());
+        getInventory().getActionCardDeck().addCard(new CollectActionCard());
+        getInventory().getEntityCardDeck().addCard(new LeftHandEntityCard());
     }
 
     public Player(long clientID, float q, float r, float s) {

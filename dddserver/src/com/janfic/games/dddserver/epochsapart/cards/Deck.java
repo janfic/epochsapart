@@ -49,5 +49,8 @@ public class Deck<T extends Card> extends Group implements Json.Serializable {
     public void read(Json json, JsonValue jsonData) {
         name = json.readValue("name", String.class, jsonData);
         cards = json.readValue("cards", List.class, jsonData);
+//        for (T card : cards) {
+//            addActor(card);
+//        }
     }
 }

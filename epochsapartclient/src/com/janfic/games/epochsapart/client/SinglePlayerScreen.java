@@ -4,20 +4,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGame;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
-import com.janfic.games.dddserver.epochsapart.cards.ActionDeck;
-import com.janfic.games.dddserver.epochsapart.cards.Deck;
+import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCardDeck;
 import com.janfic.games.dddserver.epochsapart.entities.Inventory;
 import com.janfic.games.dddserver.epochsapart.entities.Player;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseInventoryMiniGameStateChange;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.OpenInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
+import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.ScrollStage;
 import com.janfic.games.library.utils.gamebuilder.*;
 
@@ -38,8 +37,6 @@ public class SinglePlayerScreen implements Screen {
         this.game = game;
         defaultSkin = new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json"));
         stage = new ScrollStage(new FitViewport(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f));
-        stage.getCamera().position.set(0, 0, 0);
-        stage.getCamera().update();
     }
 
     @Override
@@ -63,8 +60,7 @@ public class SinglePlayerScreen implements Screen {
         GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.REQUEST_JOIN_ROOM, "0");
 
         stage.addActor(client.getGameState());
-        stage.getCamera().position.set(0, 0, 0);
-        stage.getCamera().update();
+        client.getGameState().setSize(stage.getWidth(), stage.getHeight());
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
@@ -75,9 +71,6 @@ public class SinglePlayerScreen implements Screen {
     public void render(float delta) {
         client.update(delta);
         server.update(delta);
-
-        stage.act(delta);
-        stage.draw();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             server.stopServer();
@@ -95,24 +88,53 @@ public class SinglePlayerScreen implements Screen {
             GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, new Json().toJson(playerJoinGameStateChange));
         }
 
+
+        // Get mini-games and UI
         Player player = (Player) client.getGameState().getEntityByID(client.getID());
         if (player != null) {
+            stage.getCamera().position.set(player.getX(), player.getY(), 0);
+            stage.getCamera().update();
+
             Inventory inventory = player.getInventory();
-            Deck deck = inventory.getActionCardDeck();
-            if (deck.getName().equals("Action") && deck.getStage() == null) {
-                stage.addActor(deck);
-                deck.setBounds(-stage.getWidth() / 4f, -stage.getHeight() / 2f, stage.getWidth() / 2, 100);
-                deck.setOrigin(Align.center);
+            inventory.setPosition(stage.getCamera().position.x -stage.getWidth()/2, stage.getCamera().position.y -stage.getHeight()/2);
+            //inventory.setZIndex(1);
+
+            if(!client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty()) {
+                List<EpochsApartMiniGame> miniGames = client.getGameState().getMiniGamesForHexEntity(client.getID());
+                int z = 2;
+                for (EpochsApartMiniGame miniGame : miniGames) {
+                    if(miniGame.getGameState().getStage() != stage) {
+                        client.getGameState().addActor(miniGame.getGameState());
+                    }
+                    miniGame.getGameState().setPosition(stage.getCamera().position.x -stage.getWidth()/2, stage.getCamera().position.y -stage.getHeight()/2);
+                    //miniGame.getGameState().setZIndex(z++);
+                }
+            }
+
+            if(inventory.getStage() != stage) {
+                client.getGameState().addActor(inventory);
+                inventory.getActionCardDeck().setVisible(true);
             }
         }
 
-        if(player != null && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        if(player != null && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty()) {
             Inventory inventory = player.getInventory();
-            ActionDeck deck = inventory.getActionCardDeck();
+            ActionCardDeck deck = inventory.getActionCardDeck();
             GameStateChange<EpochsApartGameState> stateChange = deck.getActiveCard().performAction(client, client.getGameState());
             if(stateChange != null)
                 GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(stateChange));
         }
+
+        if(player != null && Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            if(client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty())
+                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new OpenInventoryMiniGameStateChange(player.getID())));
+            else {
+                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new CloseInventoryMiniGameStateChange(player.getID())));
+            }
+        }
+
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
@@ -136,9 +158,5 @@ public class SinglePlayerScreen implements Screen {
     }
 
     @Override
-    public void dispose() {
-
-    }
-
-
+    public void dispose() {}
 }

@@ -37,6 +37,7 @@ public class EpochsApartGameState extends GameState {
         json.setTypeName(null);
         json.writeValue("grid", grid);
         json.writeValue("hexEntities", hexActors);
+        json.writeValue("miniGames", miniGames);
     }
 
     @Override
@@ -44,6 +45,7 @@ public class EpochsApartGameState extends GameState {
         clear();
         grid = json.readValue("grid", HexGrid.class, jsonData);
         hexActors = json.readValue("hexEntities", List.class, HexActor.class, jsonData);
+        miniGames = json.readValue("miniGames", List.class, EpochsApartMiniGame.class, jsonData);
         addActor(grid);
         for (HexActor hexActor : hexActors) {
             addActor(hexActor);
@@ -52,6 +54,10 @@ public class EpochsApartGameState extends GameState {
 
     public List<EpochsApartMiniGame> getMiniGames() {
         return miniGames;
+    }
+
+    public void removeMiniGame(EpochsApartMiniGame miniGame) {
+        miniGames.remove(miniGame);
     }
 
     public HexActor getEntityByID(long id) {
@@ -81,10 +87,21 @@ public class EpochsApartGameState extends GameState {
         miniGames.add(miniGame);
     }
 
+    public List<EpochsApartMiniGame> getMiniGamesForHexEntity( long hexID) {
+        List<EpochsApartMiniGame> r = new ArrayList<>();
+        for (EpochsApartMiniGame miniGame : miniGames) {
+            if(miniGame.isEntityInvolved(hexID)) {
+                r.add(miniGame);
+            }
+        }
+        return r;
+    }
+
     @Override
     public void reset() {
         hexActors.clear();
         miniGames.clear();
+        grid.clear();
         clear();
     }
 

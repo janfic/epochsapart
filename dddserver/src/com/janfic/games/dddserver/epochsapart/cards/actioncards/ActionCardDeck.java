@@ -1,18 +1,16 @@
-package com.janfic.games.dddserver.epochsapart.cards;
+package com.janfic.games.dddserver.epochsapart.cards.actioncards;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
+import com.janfic.games.dddserver.epochsapart.cards.Card;
+import com.janfic.games.dddserver.epochsapart.cards.Deck;
 import com.janfic.games.library.utils.ScrollStage;
 
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-
-public class ActionDeck extends Deck<ActionCard> {
+public class ActionCardDeck extends Deck<ActionCard> {
     int active;
 
-    public ActionDeck() {
+    public ActionCardDeck() {
         super("Actions");
         active = 0;
     }
@@ -21,6 +19,9 @@ public class ActionDeck extends Deck<ActionCard> {
     public void act(float delta) {
         super.act(delta);
         ScrollStage stage = (ScrollStage) getStage();
+        setHeight(90);
+        setWidth(300);
+        setOrigin(Align.center);
         if(stage.getScrolled() != 0) {
             cards.get(active).setActive(false);
             active += stage.getScrolled();
@@ -41,9 +42,10 @@ public class ActionDeck extends Deck<ActionCard> {
             Card card = cards.get(i);
             float ds = (i - active);
             float ad = Math.abs(ds);
+//            card.setPosition(ds * card.getWidth() / 2f,0);
             card.setPosition(
-                    (int) (getX() + getOriginX() - 100 * Math.cos(Math.PI / 2 + ((ds / cards.size()) * Math.PI / 2)) + ds),
-                    (int) (getY() + getOriginY() + 10 * Math.sin(Math.PI / 2 + ((ad / cards.size()) * Math.PI / 2))) - ad * 2);
+                    (int) (getOriginX() - 100 * Math.cos(Math.PI / 2 + ((ds / cards.size()) * Math.PI / 2)) + ds) - card.getWidth() / 2,
+                    (int) (getOriginY() + 10 * Math.sin(Math.PI / 2 + ((ad / cards.size()) * Math.PI / 2))) - ad * 2 - card.getHeight() / 2);
         }
 
         while(d >= 0) {
@@ -51,22 +53,26 @@ public class ActionDeck extends Deck<ActionCard> {
             int ni = c - d;
             if(pi < cards.size()) {
                 Card card = cards.get(pi);
-                card.draw(batch, parentAlpha);
+                //card.draw(batch, parentAlpha);
+                card.setZIndex(cards.size());
             }
             if(ni >= 0) {
                 Card card = cards.get(ni);
-                card.draw(batch, parentAlpha);
+                //card.draw(batch, parentAlpha);
+                card.setZIndex(cards.size());
             }
             d--;
         }
+
+        super.draw(batch, parentAlpha);
     }
 
     @Override
     public void write(Json json) {
-        super.write(json);
         json.setTypeName("class");
-        json.writeType(ActionDeck.class);
+        json.writeType(ActionCardDeck.class);
         json.setTypeName(null);
+        super.write(json);
     }
 
     public int getActive() {

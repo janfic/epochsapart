@@ -77,7 +77,7 @@ public abstract class Game<T extends GameState> {
     }
 
     // Private for now
-    private T getGameState() {
+    public T getGameState() {
         return gameState;
     }
 
