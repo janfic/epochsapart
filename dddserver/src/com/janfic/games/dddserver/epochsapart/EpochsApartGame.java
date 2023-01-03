@@ -2,10 +2,7 @@ package com.janfic.games.dddserver.epochsapart;
 
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.dddserver.epochsapart.entities.HexActor;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseInventoryMiniGameStateChange;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.MoveHexEntityStateChange;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.OpenInventoryMiniGameStateChange;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.*;
 import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.realtime.RealTimeGame;
 
@@ -39,6 +36,16 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
                     return epochsApartGameState.getMiniGamesForHexEntity(openInventoryMiniGameStateChange.hexID).isEmpty();
                 }
         );
+        GameRule<EpochsApartGameState> playerEntityMiniGame = new GameRule<>(
+                "Open Player Inventory",
+                "Allows a player to open their own inventory",
+                "This player is already part of a different minigame",
+                (epochsApartStateChange, epochsApartGameState) -> {
+                    if(!(epochsApartStateChange instanceof StartManageInventoryGameStateChange)) return false;
+                    StartManageInventoryGameStateChange change = (StartManageInventoryGameStateChange) epochsApartStateChange;
+                    return epochsApartGameState.getMiniGamesForHexEntity(change.hexID).isEmpty();
+                }
+        );
         GameRule<EpochsApartGameState> playerJoin = new GameRule<>(
                 "Player Join Rule",
                         "Add a player to the current game",
@@ -68,5 +75,6 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
         addRule(hexEntityMovement);
         addRule(playerCloseInventory);
         addRule(playerOpenInventory);
+        addRule(playerEntityMiniGame);
     }
 }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
@@ -19,7 +20,6 @@ public class CollectActionCard extends ActionCard {
         setFace(new TextureRegion(new Texture("cards/actioncards/action_collect.png")));
         setBack(Card.playingCards.get(54));
         setFaceUp(true);
-
     }
 
     @Override
@@ -33,5 +33,4 @@ public class CollectActionCard extends ActionCard {
     public GameStateChange<EpochsApartGameState> performAction(GameClient client, EpochsApartGameState state) {
         return null;
     }
-
 }

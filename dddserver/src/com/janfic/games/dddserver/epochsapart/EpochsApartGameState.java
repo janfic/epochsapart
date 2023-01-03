@@ -109,6 +109,7 @@ public class EpochsApartGameState extends GameState {
     public void repopulate(GameState state) {
         if (!(state instanceof EpochsApartGameState)) return;
         EpochsApartGameState otherState = (EpochsApartGameState) state;
+        System.out.println(otherState.miniGames.isEmpty() ? null : otherState.miniGames.get(0));
         this.grid = otherState.getGrid();
         this.miniGames.addAll(otherState.miniGames);
         this.hexActors.addAll(otherState.hexActors);

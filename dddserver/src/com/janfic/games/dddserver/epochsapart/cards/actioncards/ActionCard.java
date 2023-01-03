@@ -2,6 +2,8 @@ package com.janfic.games.dddserver.epochsapart.cards.actioncards;
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGame;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.cards.Card;

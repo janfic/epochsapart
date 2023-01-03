@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.CollectActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.InspectActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.MoveActionCard;
-import com.janfic.games.dddserver.epochsapart.cards.entitycards.LeftHandEntityCard;
+import com.janfic.games.dddserver.epochsapart.cards.entitycards.human.*;
 
 public class Player extends HexEntity {
 
@@ -21,7 +21,14 @@ public class Player extends HexEntity {
         getInventory().getActionCardDeck().addCard(new MoveActionCard());
         getInventory().getActionCardDeck().addCard(new InspectActionCard());
         getInventory().getActionCardDeck().addCard(new CollectActionCard());
-        getInventory().getEntityCardDeck().addCard(new LeftHandEntityCard());
+
+        getInventory().getEntityCardDeck().addCard(new HumanLeftHandEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanLeftArmEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanLeftLegEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanRightHandEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanRightLegEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanRightArmEntityCard());
+
     }
 
     public Player(long clientID, float q, float r, float s) {

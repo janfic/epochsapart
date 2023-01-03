@@ -1,12 +1,39 @@
 package com.janfic.games.dddserver.epochsapart.cards.entitycards;
 
 import com.janfic.games.dddserver.epochsapart.cards.Card;
-import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class EntityCard extends Card {
-    public EntityCard() {}
+
+    float health;
+    List<ModifierCard> cards;
+
+    public EntityCard() {
+        cards = new ArrayList<>();
+    }
 
     public EntityCard(String string) {
         super(string);
+        cards = new ArrayList<>();
+    }
+
+    public boolean isValidCard(Card card) {
+        boolean b = false;
+        for (ModifierCard modifierCard : cards) {
+            if(modifierCard.isValidCard(card)) b = true;
+        }
+        return b;
+    }
+
+    public List<ModifierCard> getModifierCards() {
+        return cards;
+    }
+
+    public void addModifier(ModifierCard c){
+        cards.add(c);
+        c.setEntityCard(this);
+        c.modify();
     }
 }

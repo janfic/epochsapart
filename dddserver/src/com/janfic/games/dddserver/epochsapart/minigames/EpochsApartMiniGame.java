@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
 import com.janfic.games.library.utils.gamebuilder.Game;
+import com.janfic.games.library.utils.gamebuilder.GameClient;
 import com.janfic.games.library.utils.gamebuilder.GameState;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
 
@@ -58,4 +59,6 @@ public abstract class EpochsApartMiniGame<T extends GameState> extends Game<T> i
     public void read(Json json, JsonValue jsonData) {
         hexEntities = json.readValue("hexEntities", List.class, jsonData);
     }
+
+    public abstract void populate(GameClient<EpochsApartGameState> gameClient);
 }

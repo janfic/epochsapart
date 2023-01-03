@@ -153,7 +153,7 @@ public class GameServer {
 
         Json json = new Json();
         json.setTypeName(null);
-        String state = json.toJson(room.getGame().gameState);
+        String state = json.prettyPrint(room.getGame().gameState);
         response.setHeader(GameMessage.GameMessageType.FULL_GAME_STATE);
         response.setMessage(state);
     }

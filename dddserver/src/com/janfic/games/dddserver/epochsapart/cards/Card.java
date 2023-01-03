@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
@@ -15,16 +17,18 @@ import com.janfic.games.dddserver.epochsapart.cards.actioncards.InspectActionCar
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Card extends Actor implements Json.Serializable {
+public abstract class Card extends Table implements Json.Serializable {
     protected String name;
     //protected int id;
     private TextureRegion face, back;
+    private Image imageFace, imageBack;
     private boolean isFaceUp;
 
     protected static List<TextureRegion> playingCards;
 
+    protected Table informationTable;
+
     public Card() {
-        setSize(62,83);
         setOrigin(Align.center);
         if(playingCards == null) {
             List<TextureRegion> frames = new ArrayList<>();
@@ -40,17 +44,6 @@ public abstract class Card extends Actor implements Json.Serializable {
             }
             playingCards = frames;
         }
-        addListener(new ClickListener() {
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                System.out.println(name + " enter ");
-            }
-
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                System.out.println(name + "exit");
-            }
-        });
     }
 
     public Card(String name) {
@@ -58,20 +51,28 @@ public abstract class Card extends Actor implements Json.Serializable {
         this.name = name;
     }
 
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-        batch.setColor(getColor());
-        batch.draw(isFaceUp ? face : back, getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
-        batch.setColor(Color.WHITE);
-    }
-
     public void setBack(TextureRegion back) {
         this.back = back;
+        imageBack = new Image(back);
+        imageBack.setSize(62,83);
     }
 
     public void setFace(TextureRegion face) {
         this.face = face;
+        imageFace = new Image(face);
+        imageFace.setSize(62,83);
+    }
+
+    public TextureRegion getFace() {
+        return face;
+    }
+
+    public TextureRegion getBack() {
+        return back;
+    }
+
+    public void setInformationTable(Table informationTable) {
+        this.informationTable = informationTable;
     }
 
     public String getName() {
@@ -93,6 +94,19 @@ public abstract class Card extends Actor implements Json.Serializable {
 
     public void setFaceUp(boolean faceUp) {
         isFaceUp = faceUp;
+        clear();
+        add(isFaceUp ? imageFace : imageBack).top().row();
     }
 
+    public Table getInformationTable() {
+        return informationTable;
+    }
+
+    @Override
+    public void setColor(Color color) {
+        super.setColor(color);
+        for (Actor child : getChildren()) {
+            child.setColor(color);
+        }
+    }
 }

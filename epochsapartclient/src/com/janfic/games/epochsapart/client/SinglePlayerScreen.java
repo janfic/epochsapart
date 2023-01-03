@@ -16,6 +16,7 @@ import com.janfic.games.dddserver.epochsapart.entities.Player;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.OpenInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.StartManageInventoryGameStateChange;
 import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.ScrollStage;
 import com.janfic.games.library.utils.gamebuilder.*;
@@ -130,6 +131,12 @@ public class SinglePlayerScreen implements Screen {
                 GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new OpenInventoryMiniGameStateChange(player.getID())));
             else {
                 GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new CloseInventoryMiniGameStateChange(player.getID())));
+            }
+        }
+
+        if(player != null && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            if(client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty()){
+                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new StartManageInventoryGameStateChange(player.getID())));
             }
         }
 

@@ -6,11 +6,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.janfic.games.dddserver.epochsapart.cards.Card;
+import com.janfic.games.dddserver.epochsapart.cards.ItemCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCard;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCardDeck;
 import com.janfic.games.dddserver.epochsapart.cards.Deck;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCardDeck;
+import com.janfic.games.dddserver.epochsapart.cards.items.ClothItemCard;
+import com.janfic.games.dddserver.epochsapart.cards.items.PlantThornsItemCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +24,20 @@ public class Inventory extends Table implements Json.Serializable {
     private List<Deck> decks;
     private ActionCardDeck actionCardDeck;
     private EntityCardDeck entityCardDeck;
+    private Deck<Card> items;
 
     public Inventory() {
         decks = new ArrayList<>();
         actionCardDeck = new ActionCardDeck();
         entityCardDeck = new EntityCardDeck();
+        items = new Deck<>("Items");
+        items.addCard(new ClothItemCard());
+        items.addCard(new PlantThornsItemCard());
         actionCardDeck.setName("Action");
         entityCardDeck.setName("Entity");
         addDeck(actionCardDeck);
         addDeck(entityCardDeck);
+        addDeck(items);
         setFillParent(true);
         bottom();
         add(actionCardDeck);
@@ -76,6 +85,13 @@ public class Inventory extends Table implements Json.Serializable {
         for (Deck deck : decks) {
             addActor(deck);
         }
+    }
+
+    public Inventory makeCopy() {
+        Json json = new Json();
+        String d = json.prettyPrint(this);
+        System.out.println(d);
+        return json.fromJson(Inventory.class, d);
     }
 
     public ActionCardDeck getActionCardDeck() {

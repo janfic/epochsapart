@@ -1,6 +1,7 @@
 package com.janfic.games.dddserver.epochsapart.minigames.inventory;
 
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
+import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCard;
 import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
 import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
@@ -27,6 +28,9 @@ public class InventoryMiniGame extends EpochsApartMiniGame<InventoryGameState> {
     @Override
     public void update(float delta) {
 
+    }
+
+    public void populate(GameClient<EpochsApartGameState> gameClient) {
     }
 
     @Override
