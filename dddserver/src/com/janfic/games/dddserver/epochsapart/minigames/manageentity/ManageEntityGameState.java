@@ -3,7 +3,6 @@ package com.janfic.games.dddserver.epochsapart.minigames.manageentity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -16,20 +15,20 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.Deck;
-import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCardDeck;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
-import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCardDeck;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.ModifierCard;
 import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
-import com.janfic.games.dddserver.epochsapart.entities.Inventory;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.MiniGameStateChange;
+import com.janfic.games.library.utils.gamebuilder.GameClient;
+import com.janfic.games.library.utils.gamebuilder.GameMessage;
+import com.janfic.games.library.utils.gamebuilder.GameServerAPI;
 import com.janfic.games.library.utils.gamebuilder.GameState;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ManageEntityGameState extends GameState {
+public class ManageEntityGameState extends GameState<ManageEntityGame> {
 
     Window window;
     Skin skin;
@@ -43,12 +42,9 @@ public class ManageEntityGameState extends GameState {
 
     HexEntity entity;
 
-    Map<Card, Deck> deckMap;
-
     public ManageEntityGameState() {
         this.skin = new Skin(Gdx.files.internal("ui/skins/default/skin/uiskin.json"));
         this.window = new Window("Entity", skin);
-        this.deckMap = new HashMap<>();
         this.table = new Table();
         this.entityCards = new Table();
         this.overview = new Table();
@@ -71,9 +67,9 @@ public class ManageEntityGameState extends GameState {
         entityCards.defaults().space(10);
         entityCards.pad(10);
 
-        table.add(entityImage).width(100);
+        table.add(entityImage).growX();
         table.add(entityScroll).grow().row();
-        table.add(overview);
+        table.add(overview).growX();
         table.add(inventory).growX().minHeight(150);
 
         ScrollPane decksScroll = new ScrollPane(decks, skin);
@@ -88,6 +84,15 @@ public class ManageEntityGameState extends GameState {
         addActor(window);
         dragAndDrop = new DragAndDrop();
         dragAndDrop.setKeepWithinStage(false);
+    }
+
+    @Override
+    public void update(float delta) {
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
     }
 
     public ManageEntityGameState(HexEntity entity) {
@@ -114,12 +119,10 @@ public class ManageEntityGameState extends GameState {
         dragAndDrop.clear();
     }
 
-    private void makeInventory() {
-        deckMap.clear();
-        List<Deck> copyDecks = entity.getInventory().getDecks();
-        for (int j = 0; j < copyDecks.size(); j++) {
-            Deck deck = copyDecks.get(j);
-            System.out.println(deck.getName());
+    public void makeInventory() {
+        List<Deck> decks = entity.getInventory().getDecks();
+        for (int j = 0; j < decks.size(); j++) {
+            Deck deck = decks.get(j);
             if(deck.getName().equals("Action") || deck.getName().equals("Entity")) continue;
             Image i = deck.getImage();
             i.addListener(new ClickListener() {
@@ -128,7 +131,6 @@ public class ManageEntityGameState extends GameState {
                     deckCards.clear();
                     for (Object card : deck.getCards()) {
                         Card c = (Card) card;
-                        deckMap.put(c, deck);
                         deckCards.add(c);
                         dragAndDrop.addSource(new Source(c) {
                             @Override
@@ -148,7 +150,6 @@ public class ManageEntityGameState extends GameState {
             if(deckCards.getChildren().isEmpty()) {
                 for (Object card : deck.getCards()) {
                     Card c = (Card) card;
-                    deckMap.put(c, deck);
                     deckCards.add(c);
                     dragAndDrop.addSource(new Source(c) {
                         @Override
@@ -164,11 +165,11 @@ public class ManageEntityGameState extends GameState {
                     });
                 }
             }
-            decks.add(i).row();
+            this.decks.add(i).row();
         }
     }
 
-    private void makeEntityCardTable() {
+    public void makeEntityCardTable() {
         entity.getInventory().getEntityCardDeck().getCards().sort((a, b) -> (int) Math.signum(b.getModifierCards().size() - a.getModifierCards().size()));
         for (EntityCard card : entity.getInventory().getEntityCardDeck().getCards()) {
             entityCards.add(card).expandY().top();
@@ -191,23 +192,20 @@ public class ManageEntityGameState extends GameState {
 
                 @Override
                 public void drop(Source source, Payload payload, float x, float y, int pointer) {
-                    System.out.println(payload.getObject());
                     if(!(payload.getObject() instanceof ModifierCard)) return;
                     ModifierCard p = (ModifierCard) payload.getObject();
                     EntityCard entityCard = (EntityCard) getActor();
                     if(!entityCard.isValidCard(p)) return;
-                    entityCard.addModifier(p);
                     dragAndDrop.removeSource(source);
-                    deckMap.get(p).getCards().remove(p);
-                    deckMap.remove(p);
-                    ManageEntityGameState.this.reset();
-                    makeInventory();
-                    makeEntityCardTable();
+                    ApplyModifierCard stateChange = new ApplyModifierCard(entityCard, p);
+                    GameClient client = GameServerAPI.getSingleton().getGameClient();
+                    MiniGameStateChange<ManageEntityGameState, ApplyModifierCard> request = new MiniGameStateChange<>(ManageEntityGameState.this.getGame().miniGameID, stateChange);
+                    Json json = new Json();
+                    GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(request));
                 }
             });
             for (ModifierCard modifierCard : card.getModifierCards()) {
                 entityCards.add(modifierCard).expandY().top();
-
             }
             entityCards.row();
         }

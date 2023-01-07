@@ -15,6 +15,7 @@ public abstract class HexEntity extends HexActor {
     public HexEntity(float q, float r, float s) {
         super(q,r,s);
         inventory = new Inventory();
+        addActor(inventory);
     }
 
     @Override
@@ -24,9 +25,17 @@ public abstract class HexEntity extends HexActor {
     }
 
     @Override
+    public void update(float delta) {
+        super.update(delta);
+        inventory.update(delta);
+    }
+
+    @Override
     public void read(Json json, JsonValue jsonData) {
         super.read(json, jsonData);
+        inventory.remove();
         inventory = json.readValue("inventory", Inventory.class, jsonData);
+        addActor(inventory);
     }
 
     public Inventory getInventory() {

@@ -12,6 +12,8 @@ import com.janfic.games.library.utils.gamebuilder.GameStateChange;
  */
 public class RealTimeGame<T extends GameState> extends Game<T> {
 
+    public RealTimeGame() {}
+
     public RealTimeGame(T gameState) {
         super(gameState);
     }
@@ -23,6 +25,7 @@ public class RealTimeGame<T extends GameState> extends Game<T> {
 
     @Override
     public void update(float delta) {
+        gameState.update(delta);
         if(getQueuedStateChanges().isEmpty()) return;
 
         GameStateChange<T> gameStateChange = getQueuedStateChanges().poll();

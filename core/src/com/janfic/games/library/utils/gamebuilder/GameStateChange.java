@@ -100,7 +100,9 @@ public abstract class GameStateChange<T extends GameState> implements Json.Seria
 
     @Override
     public void write(Json json) {
+        json.setTypeName("class");
         json.writeType(this.getClass());
+        json.setTypeName(null);
         json.writeValue("timestamp", timestamp);
         json.writeValue("clientID", clientID);
         json.writeValue("gameID", gameID);

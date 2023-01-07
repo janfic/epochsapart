@@ -77,7 +77,7 @@ public class GameServerAPI {
     }
 
     public void sendMessage(GameMessage message) {
-        System.out.println("[CLIENT]: Sending message: " + message.header);
+        System.out.println("[CLIENT]: Sending message: " + message.header + " " + message.message);
 
         String data = new Json().toJson(message);
 

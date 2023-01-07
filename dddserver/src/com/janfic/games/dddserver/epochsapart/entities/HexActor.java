@@ -30,6 +30,10 @@ public class HexActor extends Group implements Json.Serializable {
         layer = 0;
     }
 
+    public void update(float delta) {
+
+    }
+
     public void setHexPosition(float q, float r, float s) {
         hexPosition.set(q,r,s);
         updateHexToCartesian();

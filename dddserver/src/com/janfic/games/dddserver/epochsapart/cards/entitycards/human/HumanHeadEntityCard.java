@@ -26,9 +26,4 @@ public class HumanHeadEntityCard extends EntityCard {
         table.add(label).growY().width(200);
         setInformationTable(table);
     }
-
-    @Override
-    public void act(float delta) {
-        super.act(delta);
-    }
 }

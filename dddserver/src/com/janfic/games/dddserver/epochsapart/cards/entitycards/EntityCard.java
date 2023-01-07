@@ -19,6 +19,14 @@ public abstract class EntityCard extends Card {
         cards = new ArrayList<>();
     }
 
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        for (ModifierCard card : cards) {
+            card.update(delta);
+        }
+    }
+
     public boolean isValidCard(Card card) {
         boolean b = false;
         for (ModifierCard modifierCard : cards) {

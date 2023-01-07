@@ -8,6 +8,7 @@ import com.janfic.games.library.utils.gamebuilder.Game;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
 import com.janfic.games.library.utils.gamebuilder.GameState;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
+import com.janfic.games.library.utils.gamebuilder.realtime.RealTimeGame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,10 @@ import java.util.List;
  * Their affects on the world are applied to the world accordingly after the mini-game is complete.
  * @param <T>
  */
-public abstract class EpochsApartMiniGame<T extends GameState> extends Game<T> implements Json.Serializable {
+public abstract class EpochsApartMiniGame<T extends GameState> extends RealTimeGame<T> implements Json.Serializable {
 
+    private static int miniGameCount;
+    public int miniGameID;
     List<HexEntity> hexEntities;
 
     public EpochsApartMiniGame() {
@@ -53,12 +56,26 @@ public abstract class EpochsApartMiniGame<T extends GameState> extends Game<T> i
 //        }
 //        json.writeArrayEnd();
         json.writeValue("hexEntities", hexEntities);
+        json.writeValue("miniGameID", miniGameID);
     }
 
     @Override
     public void read(Json json, JsonValue jsonData) {
         hexEntities = json.readValue("hexEntities", List.class, jsonData);
+        miniGameID = json.readValue("miniGameID", Integer.class, jsonData);
     }
 
     public abstract void populate(GameClient<EpochsApartGameState> gameClient);
+
+    public int getMiniGameID() {
+        return miniGameID;
+    }
+
+    public void setMiniGameID(int miniGameID) {
+        this.miniGameID = miniGameID;
+    }
+
+    public static int generateID() {
+        return miniGameCount++;
+    }
 }

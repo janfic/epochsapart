@@ -3,6 +3,7 @@ package com.janfic.games.dddserver.epochsapart;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.dddserver.epochsapart.entities.HexActor;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.*;
+import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.realtime.RealTimeGame;
 
@@ -12,6 +13,7 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
 
     public EpochsApartGame(List<String> args) {
         this(new EpochsApartGameState(Integer.parseInt(args.get(0))));
+        getGameState().setGame(this);
     }
 
     public EpochsApartGame(EpochsApartGameState gameState) {
@@ -21,9 +23,9 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
                 "Allows a player to close their own inventory",
                 "This player is not in their inventory",
                 (epochsApartStateChange, epochsApartGameState) -> {
-                    if(!(epochsApartStateChange instanceof CloseInventoryMiniGameStateChange)) return false;
-                    CloseInventoryMiniGameStateChange closeInventoryMiniGameStateChange = (CloseInventoryMiniGameStateChange) epochsApartStateChange;
-                    return !epochsApartGameState.getMiniGamesForHexEntity(closeInventoryMiniGameStateChange.hexID).isEmpty();
+                    if(!(epochsApartStateChange instanceof CloseSelfMiniGameStateChange)) return false;
+                    CloseSelfMiniGameStateChange closeSelfMiniGameStateChange = (CloseSelfMiniGameStateChange) epochsApartStateChange;
+                    return !epochsApartGameState.getMiniGamesForHexEntity(closeSelfMiniGameStateChange.hexID).isEmpty();
                 }
         );
         GameRule<EpochsApartGameState> playerOpenInventory = new GameRule<>(
@@ -71,10 +73,28 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
                     return !(Math.max(Math.abs(delta.x), Math.max(Math.abs(delta.y), Math.abs(delta.z))) > 1);
                 }
         );
+        GameRule<EpochsApartGameState> miniGameStateChanges = new GameRule<>(
+                "Mini-Game State Changes",
+                "Allows mini-game state changes to be requested by clients",
+                "Something went wrong",
+                (epochsStateChange, state) -> {
+                    if(!(epochsStateChange instanceof MiniGameStateChange)) return false;
+                    MiniGameStateChange miniGameStateChange = (MiniGameStateChange) epochsStateChange;
+                    if(gameState.getMiniGameByID(miniGameStateChange.miniGameID) == null) return false;
+                    return true;
+                }
+        );
         addRule(playerJoin);
         addRule(hexEntityMovement);
         addRule(playerCloseInventory);
         addRule(playerOpenInventory);
         addRule(playerEntityMiniGame);
+        addRule(miniGameStateChanges);
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        gameState.update(delta);
     }
 }

@@ -10,13 +10,14 @@ import com.janfic.games.library.utils.gamebuilder.GameState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EpochsApartGameState extends GameState {
+public class EpochsApartGameState extends GameState<EpochsApartGame> {
 
     HexGrid grid;
     List<HexActor> hexActors;
     List<EpochsApartMiniGame> miniGames;
 
     public EpochsApartGameState() {
+
         grid = new HexGrid();
         hexActors = new ArrayList<>();
         miniGames = new ArrayList<>();
@@ -54,6 +55,24 @@ public class EpochsApartGameState extends GameState {
 
     public List<EpochsApartMiniGame> getMiniGames() {
         return miniGames;
+    }
+
+    public void update(float delta) {
+        for (EpochsApartMiniGame miniGame : miniGames) {
+            miniGame.update(delta);
+        }
+        for (HexActor hexActor : hexActors) {
+            hexActor.update(delta);
+        }
+    }
+
+    public EpochsApartMiniGame getMiniGameByID(int id) {
+        for (EpochsApartMiniGame miniGame : miniGames) {
+            if(miniGame.getMiniGameID() == id) {
+                return miniGame;
+            }
+        }
+        return null;
     }
 
     public void removeMiniGame(EpochsApartMiniGame miniGame) {
@@ -109,7 +128,6 @@ public class EpochsApartGameState extends GameState {
     public void repopulate(GameState state) {
         if (!(state instanceof EpochsApartGameState)) return;
         EpochsApartGameState otherState = (EpochsApartGameState) state;
-        System.out.println(otherState.miniGames.isEmpty() ? null : otherState.miniGames.get(0));
         this.grid = otherState.getGrid();
         this.miniGames.addAll(otherState.miniGames);
         this.hexActors.addAll(otherState.hexActors);

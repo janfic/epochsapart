@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -13,7 +12,7 @@ import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.cards.actioncards.ActionCardDeck;
 import com.janfic.games.dddserver.epochsapart.entities.Inventory;
 import com.janfic.games.dddserver.epochsapart.entities.Player;
-import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseInventoryMiniGameStateChange;
+import com.janfic.games.dddserver.epochsapart.gamestatechanges.CloseSelfMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.OpenInventoryMiniGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.PlayerJoinGameStateChange;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.StartManageInventoryGameStateChange;
@@ -130,13 +129,16 @@ public class SinglePlayerScreen implements Screen {
             if(client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty())
                 GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new OpenInventoryMiniGameStateChange(player.getID())));
             else {
-                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new CloseInventoryMiniGameStateChange(player.getID())));
+                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new CloseSelfMiniGameStateChange(player.getID())));
             }
         }
 
         if(player != null && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             if(client.getGameState().getMiniGamesForHexEntity(client.getID()).isEmpty()){
                 GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new StartManageInventoryGameStateChange(player.getID())));
+            }
+            else {
+                GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(new CloseSelfMiniGameStateChange(player.getID())));
             }
         }
 

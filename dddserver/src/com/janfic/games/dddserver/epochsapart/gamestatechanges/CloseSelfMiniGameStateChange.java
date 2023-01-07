@@ -4,19 +4,22 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
+import com.janfic.games.dddserver.epochsapart.minigames.inspect.InspectMiniGame;
 import com.janfic.games.dddserver.epochsapart.minigames.inventory.InventoryMiniGame;
+import com.janfic.games.dddserver.epochsapart.minigames.manageentity.ManageEntityGame;
+import com.janfic.games.dddserver.epochsapart.minigames.manageentity.ManageEntityGameState;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CloseInventoryMiniGameStateChange extends  GameStateChange<EpochsApartGameState> {
+public class CloseSelfMiniGameStateChange extends  GameStateChange<EpochsApartGameState> {
 
     public long hexID;
 
-    public CloseInventoryMiniGameStateChange() {}
+    public CloseSelfMiniGameStateChange() {}
 
-    public CloseInventoryMiniGameStateChange(long hexID) {
+    public CloseSelfMiniGameStateChange(long hexID) {
         this.hexID = hexID;
     }
 
@@ -25,7 +28,7 @@ public class CloseInventoryMiniGameStateChange extends  GameStateChange<EpochsAp
         List<EpochsApartMiniGame> games = state.getMiniGamesForHexEntity(hexID);
         List<EpochsApartMiniGame> removal = new ArrayList<>();
         for (EpochsApartMiniGame game : games) {
-            if(game instanceof InventoryMiniGame) {
+            if(game instanceof InventoryMiniGame || game instanceof ManageEntityGame || game instanceof InspectMiniGame) {
                 GameStateChange<EpochsApartGameState> result = game.getResults();
                 removal.add(game);
             }

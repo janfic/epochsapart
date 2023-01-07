@@ -7,6 +7,7 @@ import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
 import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.dddserver.epochsapart.minigames.inventory.InventoryGameState;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
+import com.janfic.games.library.utils.gamebuilder.GameRule;
 import com.janfic.games.library.utils.gamebuilder.GameStateChange;
 
 import java.util.List;
@@ -15,20 +16,27 @@ public class ManageEntityGame extends EpochsApartMiniGame<ManageEntityGameState>
 
     public ManageEntityGame() {
         setGameState(new ManageEntityGameState());
+        getGameState().setGame(this);
     }
 
     public ManageEntityGame(List<HexEntity> entityList) {
         super(entityList);
         setGameState(new ManageEntityGameState(entityList.get(0)));
+        getGameState().setGame(this);
+        GameRule<ManageEntityGameState> applyModifierCard = new GameRule<>(
+                "Apply Modifier Cards Rule",
+                "Players can move modifiers to their entity cards",
+                "Something went wrong",
+                (manageEntityStateChange, gameState) -> {
+                    if(manageEntityStateChange instanceof ApplyModifierCard) return true;
+                    return false;
+                }
+        );
+        addRule(applyModifierCard);
     }
 
     @Override
     public void setup() {
-
-    }
-
-    @Override
-    public void update(float delta) {
 
     }
 

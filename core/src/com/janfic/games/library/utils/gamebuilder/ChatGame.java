@@ -44,10 +44,16 @@ public class ChatGame extends Game<ChatGame.ChatGameState> {
         }
     }
 
-    public static class ChatGameState extends GameState {
+    public static class ChatGameState extends GameState<ChatGame> {
         List<String> chats;
         public ChatGameState() {
+            super(null);
             chats = new ArrayList<>();
+        }
+
+        @Override
+        public void update(float delta) {
+
         }
 
         @Override

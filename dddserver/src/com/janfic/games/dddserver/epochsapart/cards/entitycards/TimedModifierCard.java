@@ -15,8 +15,8 @@ public abstract class TimedModifierCard extends ModifierCard{
     }
 
     @Override
-    public void act(float delta) {
-        super.act(delta);
+    public void update(float delta) {
+        super.update(delta);
         currentTime += delta;
         bar.setValue(currentTime);
     }

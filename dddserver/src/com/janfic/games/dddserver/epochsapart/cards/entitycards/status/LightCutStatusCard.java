@@ -10,7 +10,7 @@ import com.janfic.games.dddserver.epochsapart.cards.items.ClothItemCard;
 public class LightCutStatusCard extends TimedModifierCard {
 
     public LightCutStatusCard() {
-        super("Light Cut", 20, 0);
+        super("Light Cut", 10, 0);
         setFace(new TextureRegion(new Texture("cards/entitycards/status/light_cut.png")));
         setFaceUp(true);
         add(getBar()).width(62).row();

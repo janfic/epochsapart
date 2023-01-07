@@ -49,6 +49,7 @@ public class GameClient<T extends GameState> extends Observer<Queue<GameStateCha
     }
 
     public void update(float delta) {
+        gameState.update(delta);
         if(!GameServerAPI.getSingleton().messages.isEmpty()) {
             GameMessage message = GameServerAPI.getSingleton().messages.poll();
             if(message == null) return;

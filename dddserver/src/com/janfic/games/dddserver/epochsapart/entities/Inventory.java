@@ -64,6 +64,12 @@ public class Inventory extends Table implements Json.Serializable {
         deck.setVisible(false);
     }
 
+    public void update(float delta) {
+        for (Deck deck : decks) {
+            deck.update(delta);
+        }
+    }
+
     @Override
     public void write(Json json) {
         json.writeValue("decks", decks);
@@ -100,5 +106,12 @@ public class Inventory extends Table implements Json.Serializable {
 
     public EntityCardDeck getEntityCardDeck() {
         return entityCardDeck;
+    }
+
+    public Deck getDeckByID(int deckID) {
+        for (Deck deck : decks) {
+            if(deck.getID() == deckID) return deck;
+        }
+        return null;
     }
 }

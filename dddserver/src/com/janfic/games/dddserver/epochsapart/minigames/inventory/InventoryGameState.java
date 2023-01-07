@@ -64,6 +64,11 @@ public class InventoryGameState extends GameState {
         });
     }
 
+    @Override
+    public void update(float delta) {
+
+    }
+
     public InventoryGameState(Inventory entityInventory) {
         this();
         this.inventory = entityInventory.makeCopy();

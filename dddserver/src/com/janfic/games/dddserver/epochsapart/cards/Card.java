@@ -19,7 +19,7 @@ import java.util.List;
 
 public abstract class Card extends Table implements Json.Serializable {
     protected String name;
-    //protected int id;
+    protected int id, deckID;
     private TextureRegion face, back;
     private Image imageFace, imageBack;
     private boolean isFaceUp;
@@ -30,6 +30,7 @@ public abstract class Card extends Table implements Json.Serializable {
 
     public Card() {
         setOrigin(Align.center);
+        setSize(62, 87);
         if(playingCards == null) {
             List<TextureRegion> frames = new ArrayList<>();
             Texture tex = new Texture("cards/playing_cards.png");
@@ -49,6 +50,11 @@ public abstract class Card extends Table implements Json.Serializable {
     public Card(String name) {
         this();
         this.name = name;
+        this.id = name.hashCode();
+    }
+
+    public void update(float delta) {
+
     }
 
     public void setBack(TextureRegion back) {
@@ -82,6 +88,8 @@ public abstract class Card extends Table implements Json.Serializable {
     @Override
     public void write(Json json) {
         json.writeValue("name", name);
+        json.writeValue("id", id);
+        json.writeValue("deckID", deckID);
         json.setTypeName("class");
         json.writeType(getClass());
         json.setTypeName(null);
@@ -90,6 +98,8 @@ public abstract class Card extends Table implements Json.Serializable {
     @Override
     public void read(Json json, JsonValue jsonData) {
         name = json.readValue("name", String.class, jsonData);
+        id = json.readValue("id", Integer.class, jsonData);
+        deckID = json.readValue("deckID", Integer.class, jsonData);
     }
 
     public void setFaceUp(boolean faceUp) {
@@ -108,5 +118,17 @@ public abstract class Card extends Table implements Json.Serializable {
         for (Actor child : getChildren()) {
             child.setColor(color);
         }
+    }
+
+    public void setDeck(Deck deck) {
+        this.deckID = deck.getID();
+    }
+
+    public int getDeckID() {
+        return deckID;
+    }
+
+    public int getID() {
+        return id;
     }
 }
