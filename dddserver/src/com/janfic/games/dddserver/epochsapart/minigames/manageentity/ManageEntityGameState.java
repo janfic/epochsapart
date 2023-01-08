@@ -13,12 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.Deck;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.ModifierCard;
 import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.MiniGameStateChange;
+import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
 import com.janfic.games.library.utils.gamebuilder.GameMessage;
 import com.janfic.games.library.utils.gamebuilder.GameServerAPI;
@@ -198,8 +200,10 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
                     if(!entityCard.isValidCard(p)) return;
                     dragAndDrop.removeSource(source);
                     ApplyModifierCard stateChange = new ApplyModifierCard(entityCard, p);
-                    GameClient client = GameServerAPI.getSingleton().getGameClient();
+                    GameClient<EpochsApartGameState> client = GameServerAPI.getSingleton().getGameClient();
                     MiniGameStateChange<ManageEntityGameState, ApplyModifierCard> request = new MiniGameStateChange<>(ManageEntityGameState.this.getGame().miniGameID, stateChange);
+                    request.setClientID(client.getID());
+                    request.setMiniGameID(getGame().miniGameID);
                     Json json = new Json();
                     GameServerAPI.getSingleton().sendMessage(GameMessage.GameMessageType.GAME_STATE_CHANGE, json.toJson(request));
                 }
@@ -226,5 +230,11 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
     @Override
     public void read(Json json, JsonValue jsonData) {
         this.entity = json.readValue("entity", HexEntity.class, jsonData);
+    }
+
+    @Override
+    public boolean remove() {
+        reset();
+        return super.remove();
     }
 }

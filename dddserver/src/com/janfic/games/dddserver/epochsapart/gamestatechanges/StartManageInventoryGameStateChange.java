@@ -31,8 +31,14 @@ public class StartManageInventoryGameStateChange extends GameStateChange<EpochsA
         List<HexEntity> entityList = new ArrayList<>();
         entityList.add((HexEntity) state.getEntityByID(hexID));
         ManageEntityGame manageEntityGame = new ManageEntityGame(entityList);
-        manageEntityGame.setMiniGameID(miniGameID < 0 ? EpochsApartMiniGame.generateID() : miniGameID);
-        this.miniGameID = manageEntityGame.getMiniGameID();
+        if(miniGameID < 0) {
+            int id = state.nextMiniGameID++;
+            manageEntityGame.setMiniGameID(id);
+            miniGameID = id;
+        }
+        else {
+            manageEntityGame.setMiniGameID(miniGameID);
+        }
         state.addMiniGame(manageEntityGame);
     }
 

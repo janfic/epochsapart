@@ -24,4 +24,8 @@ public abstract class TimedModifierCard extends ModifierCard{
     public ProgressBar getBar() {
         return bar;
     }
+
+    public boolean isTimerOver() {
+        return currentTime >= timer;
+    }
 }

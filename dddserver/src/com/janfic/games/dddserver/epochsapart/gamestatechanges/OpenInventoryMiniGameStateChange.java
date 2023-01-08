@@ -30,8 +30,14 @@ public class OpenInventoryMiniGameStateChange extends GameStateChange<EpochsApar
         List<HexEntity> entityList = new ArrayList<>();
         entityList.add((HexEntity) state.getEntityByID(hexID));
         InventoryMiniGame miniGame = new InventoryMiniGame(entityList);
-        miniGame.setMiniGameID(miniGameID < 0 ? EpochsApartMiniGame.generateID() : miniGameID);
-        this.miniGameID = miniGame.getMiniGameID();
+        if(miniGameID < 0) {
+            int id = state.nextMiniGameID++;
+            miniGame.setMiniGameID(id);
+            miniGameID = id;
+        }
+        else {
+            miniGame.setMiniGameID(miniGameID);
+        }
         state.addMiniGame(miniGame);
     }
 

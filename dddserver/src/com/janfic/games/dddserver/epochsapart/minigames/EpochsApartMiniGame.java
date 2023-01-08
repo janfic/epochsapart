@@ -23,7 +23,6 @@ import java.util.List;
  */
 public abstract class EpochsApartMiniGame<T extends GameState> extends RealTimeGame<T> implements Json.Serializable {
 
-    private static int miniGameCount;
     public int miniGameID;
     List<HexEntity> hexEntities;
 
@@ -75,7 +74,4 @@ public abstract class EpochsApartMiniGame<T extends GameState> extends RealTimeG
         this.miniGameID = miniGameID;
     }
 
-    public static int generateID() {
-        return miniGameCount++;
-    }
 }

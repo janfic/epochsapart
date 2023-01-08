@@ -41,4 +41,8 @@ public class MiniGameStateChange<S extends GameState, T extends GameStateChange<
         gameStateChange = (T) json.readValue("gameStateChange", GameStateChange.class, jsonData);
         miniGameID = json.readValue("miniGameID", Integer.class, jsonData);
     }
+
+    public void setMiniGameID(int miniGameID) {
+        this.miniGameID = miniGameID;
+    }
 }

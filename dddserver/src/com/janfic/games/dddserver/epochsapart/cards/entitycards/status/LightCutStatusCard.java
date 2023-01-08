@@ -22,6 +22,14 @@ public class LightCutStatusCard extends TimedModifierCard {
     }
 
     @Override
+    public void update(float delta) {
+        super.update(delta);
+        if(isTimerOver()) {
+
+        }
+    }
+
+    @Override
     public void modify() {
         getEntityCard().addModifier(new BleedingStatusCard());
     }

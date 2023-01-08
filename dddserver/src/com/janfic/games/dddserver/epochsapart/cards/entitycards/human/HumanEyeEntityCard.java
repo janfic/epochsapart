@@ -1,4 +1,7 @@
 package com.janfic.games.dddserver.epochsapart.cards.entitycards.human;
 
-public class HumanEyeEntityCard {
+import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
+
+public class HumanEyeEntityCard extends EntityCard {
+
 }

@@ -36,7 +36,7 @@ public class CloseSelfMiniGameStateChange extends  GameStateChange<EpochsApartGa
 
         for (EpochsApartMiniGame epochsApartMiniGame : removal) {
             state.removeMiniGame(epochsApartMiniGame);
-            state.removeActor(epochsApartMiniGame.getGameState());
+            epochsApartMiniGame.getGameState().remove();
         }
     }
 

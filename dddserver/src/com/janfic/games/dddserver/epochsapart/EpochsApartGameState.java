@@ -15,6 +15,7 @@ public class EpochsApartGameState extends GameState<EpochsApartGame> {
     HexGrid grid;
     List<HexActor> hexActors;
     List<EpochsApartMiniGame> miniGames;
+    public int nextMiniGameID = 0;
 
     public EpochsApartGameState() {
 
@@ -126,6 +127,7 @@ public class EpochsApartGameState extends GameState<EpochsApartGame> {
 
     @Override
     public void repopulate(GameState state) {
+        System.out.println("REPOPULATE");
         if (!(state instanceof EpochsApartGameState)) return;
         EpochsApartGameState otherState = (EpochsApartGameState) state;
         this.grid = otherState.getGrid();

@@ -35,8 +35,14 @@ public class InspectEntityGameStateChange extends GameStateChange<EpochsApartGam
         entityList.add(inspector);
         entityList.add(inspected);
         InspectMiniGame inspectMiniGame = new InspectMiniGame(entityList);
-        inspectMiniGame.setMiniGameID(miniGameID < 0 ? EpochsApartMiniGame.generateID() : miniGameID);
-        this.miniGameID = inspectMiniGame.getMiniGameID();
+        if(miniGameID < 0) {
+            int id = state.nextMiniGameID++;
+            inspectMiniGame.setMiniGameID(id);
+            miniGameID = id;
+        }
+        else {
+            inspectMiniGame.setMiniGameID(miniGameID);
+        }
         state.addMiniGame(inspectMiniGame);
     }
 

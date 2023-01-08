@@ -1,4 +1,6 @@
 package com.janfic.games.dddserver.epochsapart.cards.entitycards.human;
 
-public class HumanStomachEntityCard {
+import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
+
+public class HumanStomachEntityCard extends EntityCard {
 }
