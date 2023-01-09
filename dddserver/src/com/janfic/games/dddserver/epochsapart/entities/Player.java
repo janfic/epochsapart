@@ -28,6 +28,13 @@ public class Player extends HexEntity {
         getInventory().getEntityCardDeck().addCard(new HumanRightHandEntityCard());
         getInventory().getEntityCardDeck().addCard(new HumanRightLegEntityCard());
         getInventory().getEntityCardDeck().addCard(new HumanRightArmEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanEyesEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanHeartEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanTorsoEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanLeftFootEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanRightFootEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanMouthEntityCard());
+        getInventory().getEntityCardDeck().addCard(new HumanHeadEntityCard());
 
     }
 

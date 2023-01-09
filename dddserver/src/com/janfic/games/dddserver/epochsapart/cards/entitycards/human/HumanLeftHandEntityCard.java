@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.janfic.games.dddserver.epochsapart.Assets;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 import com.janfic.games.dddserver.epochsapart.cards.items.PlantThornsItemCard;
@@ -18,7 +19,7 @@ public class HumanLeftHandEntityCard extends EntityCard {
     public HumanLeftHandEntityCard() {
         super("Human Left Hand");
         skin = new Skin(Gdx.files.internal("ui/skins/default/skin/uiskin.json"));
-        setFace(new TextureRegion(new Texture("cards/entitycards/entity_human_left_hand.png")));
+        setFace(Assets.getSingleton().getHumanEntityCards().findRegion("left_hand"));
         setFaceUp(true);
         Table table = new Table();
         Image image = new Image(getFace());

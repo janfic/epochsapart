@@ -1,0 +1,104 @@
+
+human.png
+size: 1024,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+eyes
+  rotate: false
+  xy: 322, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+head
+  rotate: false
+  xy: 258, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+heart
+  rotate: false
+  xy: 2, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: false
+  xy: 386, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: false
+  xy: 450, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: false
+  xy: 514, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+left_leg
+  rotate: false
+  xy: 130, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+mouth
+  rotate: false
+  xy: 66, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+right_arm
+  rotate: false
+  xy: 834, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: false
+  xy: 642, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: false
+  xy: 706, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+right_leg
+  rotate: false
+  xy: 578, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+stomach
+  rotate: false
+  xy: 194, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1
+torso
+  rotate: false
+  xy: 770, 2
+  size: 62, 87
+  orig: 62, 87
+  offset: 0, 0
+  index: -1

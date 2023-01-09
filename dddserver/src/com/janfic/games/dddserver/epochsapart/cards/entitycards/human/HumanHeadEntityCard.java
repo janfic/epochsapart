@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.janfic.games.dddserver.epochsapart.Assets;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 
@@ -16,7 +17,7 @@ public class HumanHeadEntityCard extends EntityCard {
 
     public HumanHeadEntityCard() {
         super("Human Head");
-        setFace(new TextureRegion(new Texture("cards/entitycards/entity_human_left_arm.png")));
+        setFace(Assets.getSingleton().getHumanEntityCards().findRegion("head"));
         setFaceUp(true);
         Table table = new Table();
         Image image = new Image(getFace());
