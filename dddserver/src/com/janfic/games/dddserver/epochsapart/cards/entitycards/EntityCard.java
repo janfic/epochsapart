@@ -7,7 +7,6 @@ import java.util.List;
 
 public abstract class EntityCard extends Card {
 
-    float health;
     List<ModifierCard> cards;
 
     public EntityCard() {

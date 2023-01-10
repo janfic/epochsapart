@@ -8,17 +8,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.janfic.games.dddserver.epochsapart.Assets;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 
-public class HumanMouthEntityCard extends EntityCard {
+public class HumanMouthEntityCard extends HumanEntityCard {
     public HumanMouthEntityCard() {
-        super("Human Mouth");
+        super("Human Mouth", 5);
         setFace(Assets.getSingleton().getHumanEntityCards().findRegion("mouth"));
         setFaceUp(true);
-        Table table = new Table();
-        Image image = new Image(getFace());
-        Label label = new Label("This is a description. This is a description. This is a description.", new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json")));
-        table.add(image);
-        label.setWrap(true);
-        table.add(label).growY().width(200);
-        setInformationTable(table);
+        addImage();
     }
 }

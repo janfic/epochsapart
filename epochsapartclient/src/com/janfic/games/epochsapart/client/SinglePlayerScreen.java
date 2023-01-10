@@ -35,7 +35,7 @@ public class SinglePlayerScreen implements Screen {
 
     public SinglePlayerScreen(EpochsApartDriver game) {
         this.game = game;
-        defaultSkin = new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json"));
+        defaultSkin = new Skin(Gdx.files.internal("skins/epochsapart/epochsapart.json"));
         stage = new ScrollStage(new FitViewport(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f));
     }
 

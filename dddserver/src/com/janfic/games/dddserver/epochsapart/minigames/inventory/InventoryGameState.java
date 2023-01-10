@@ -27,7 +27,7 @@ public class InventoryGameState extends GameState {
     Skin skin;
 
     public InventoryGameState() {
-        skin = new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json"));
+        this.skin = new Skin(Gdx.files.internal("skins/epochsapart/epochsapart.json"));
         window = new Window("Inventory", skin);
         table = new Table();
         decks = new Table();
@@ -44,9 +44,10 @@ public class InventoryGameState extends GameState {
         table.add(decksScroll).growY().width(100);
         Table cardTable = new Table();
         cardTable.add(cardsScroll).grow().row();
-        cardTable.add(infoScrollPane).growX().height(100).row();
+        cardTable.add(infoScrollPane).growX().height(120).row();
         table.add(cardTable).grow().row();
         table.padTop(30);
+        table.padRight(16);
         window.add(table).grow();
         window.setKeepWithinStage(false);
         addActor(window);
@@ -78,23 +79,31 @@ public class InventoryGameState extends GameState {
             i.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    float width = cards.getWidth();
                     cards.clear();
+                    float rowWidth = 0;
+
                     for (Object card : deck.getCards()) {
                         Card c = (Card) card;
-                        cards.add(c);
+                        Image im = new Image(c.getFace());
+                        im.addListener(new InputListener() {
+                            @Override
+                            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                                cardInfo.clear();
+                                cardInfo.add(c.getInformationTable());
+                            }
+                        });
+
+                        float cardWidth = im.getWidth();
+                        if(rowWidth + cardWidth >= width - cardWidth) {
+                            rowWidth = 0;
+                            cards.row();
+                        }
+                        cards.add(im);
+                        rowWidth += cardWidth;
                     }
                 }
             });
-            for (Object card : deck.getCards()) {
-                Card c = (Card) card;
-                c.addListener(new InputListener() {
-                    @Override
-                    public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                        cardInfo.clear();
-                        cardInfo.add(c.getInformationTable());
-                    }
-                });
-            }
         }
     }
 

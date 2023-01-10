@@ -1,17 +1,22 @@
 package com.janfic.games.dddserver.epochsapart.cards.entitycards;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.janfic.games.dddserver.epochsapart.Assets;
 
-public abstract class TimedModifierCard extends ModifierCard{
+public abstract class TimedModifierCard extends ModifierCard {
     float timer, currentTime;
     ProgressBar bar;
-    Skin skin = new Skin(Gdx.files.internal("ui/skins/default/skin/uiskin.json"));
-    public TimedModifierCard(String name, float timer, float currentTime) {
+    Skin skin;
+    public TimedModifierCard(String name, float timer, float currentTime, boolean isVerticleBar) {
+        super(name);
+        skin = Assets.getSingleton().getSkin();;
         this.timer = timer;
         this.currentTime = currentTime;
-        this.bar = new ProgressBar(0, timer, 0.01f, false, skin);
+        this.bar = new ProgressBar(0, timer, timer / 31f, isVerticleBar, skin);
     }
 
     @Override

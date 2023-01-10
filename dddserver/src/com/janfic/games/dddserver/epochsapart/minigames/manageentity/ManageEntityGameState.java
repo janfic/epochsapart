@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.janfic.games.dddserver.epochsapart.Assets;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.Deck;
@@ -45,7 +46,7 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
     HexEntity entity;
 
     public ManageEntityGameState() {
-        this.skin = new Skin(Gdx.files.internal("ui/skins/default/skin/uiskin.json"));
+        this.skin = Assets.getSingleton().getSkin();
         this.window = new Window("Entity", skin);
         this.table = new Table();
         this.entityCards = new Table();
@@ -55,6 +56,7 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
         this.decks = new Table();
         table.setFillParent(true);
         table.padTop(30);
+        table.padRight(16);
         table.left();
         table.defaults().space(5);
         deckCards.defaults().space(10);
@@ -66,8 +68,8 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
         entityScroll = new ScrollPane(entityCards, skin);
 
         entityCards.left().top();
-        entityCards.defaults().space(10);
-        entityCards.pad(10);
+        entityCards.defaults().space(5);
+        entityCards.pad(5);
 
         table.add(entityImage).growX();
         table.add(entityScroll).grow().row();

@@ -1,0 +1,68 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	courier_9px: {
+		file: courier_9px.fnt
+	}
+}
+com.badlogic.gdx.graphics.Color: {
+	RGBA_0_0_0_255: {
+		r: 0
+		g: 0
+		b: 0
+		a: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	default: {
+		up: button
+		down: button_down
+		over: button_hover
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+	default: {
+		font: courier_9px
+		fontColor: RGBA_0_0_0_255
+	}
+	entity-attribute: {
+		font: courier_9px
+		fontColor: RGBA_0_0_0_255
+		background: scrollpane_background
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
+	default-vertical: {
+		background: scrollpane_background
+		knob: progress_bar_knob
+		knobBefore: progress_bar_before
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		background: scrollpane_background
+		hScrollKnob: button
+		vScrollKnob: button
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+	default: {
+		font: courier_9px
+		fontColor: RGBA_0_0_0_255
+		up: button
+		down: button_down
+		over: button_hover
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
+	default: {
+		label: default
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+	default: {
+		background: window
+		titleFont: courier_9px
+		titleFontColor: RGBA_0_0_0_255
+	}
+}
+}

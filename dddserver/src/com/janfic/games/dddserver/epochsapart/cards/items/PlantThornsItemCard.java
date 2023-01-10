@@ -13,6 +13,7 @@ public class PlantThornsItemCard extends ModifierCard {
         super("Thorns");
         setFace(new TextureRegion(new Texture("cards/items/thorns.png")));
         setFaceUp(true);
+        addImage();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class MainMenuScreen implements Screen {
 
     public MainMenuScreen(EpochsApartDriver game) {
         this.game = game;
-        defaultSkin = new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json"));
+        defaultSkin = new Skin(Gdx.files.internal("skins/epochsapart/epochsapart.json"));
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         startSinglePlayer = new TextButton("Singleplayer", defaultSkin);
         startMultiPlayer = new TextButton("Mulitplayer", defaultSkin);

@@ -12,23 +12,16 @@ import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 import com.janfic.games.dddserver.epochsapart.cards.items.PlantThornsItemCard;
 
-public class HumanLeftHandEntityCard extends EntityCard {
+public class HumanLeftHandEntityCard extends HumanEntityCard {
 
     Skin skin;
 
     public HumanLeftHandEntityCard() {
-        super("Human Left Hand");
+        super("Human Left Hand", 5);
         skin = new Skin(Gdx.files.internal("ui/skins/default/skin/uiskin.json"));
         setFace(Assets.getSingleton().getHumanEntityCards().findRegion("left_hand"));
         setFaceUp(true);
-        Table table = new Table();
-        Image image = new Image(getFace());
-        Label label = new Label("This is a description. This is a description. This is a description.", new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json")));
-        table.add(image);
-        label.setWrap(true);
-        table.add(label).growY().width(200);
-        setInformationTable(table);
-
+        addImage();
     }
 
     @Override

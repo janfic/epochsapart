@@ -11,25 +11,14 @@ import com.janfic.games.dddserver.epochsapart.Assets;
 import com.janfic.games.dddserver.epochsapart.cards.Card;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 
-public class HumanRightHandEntityCard extends EntityCard {
+public class HumanRightHandEntityCard extends HumanEntityCard {
 
     float health;
 
     public HumanRightHandEntityCard() {
-        super("Human Right Hand");
+        super("Human Right Hand", 5);
         setFace(Assets.getSingleton().getHumanEntityCards().findRegion("right_hand"));
         setFaceUp(true);
-        Table table = new Table();
-        Image image = new Image(getFace());
-        Label label = new Label("This is a description. This is a description. This is a description.", new Skin(Gdx.files.internal("assets/ui/skins/default/skin/uiskin.json")));
-        table.add(image);
-        label.setWrap(true);
-        table.add(label).growY().width(200);
-        setInformationTable(table);
-    }
-
-    @Override
-    public void act(float delta) {
-        super.act(delta);
+        addImage();
     }
 }

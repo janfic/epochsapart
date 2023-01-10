@@ -12,6 +12,7 @@ public class ClothItemCard extends ModifierCard {
         super("Cloth");
         setFace(new TextureRegion(new Texture("cards/items/cloth.png")));
         setFaceUp(true);
+        addImage();
     }
 
     @Override
