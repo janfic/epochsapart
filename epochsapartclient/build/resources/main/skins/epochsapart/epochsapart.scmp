@@ -173,6 +173,25 @@ atlasData: {
 			type: NINE_PATCH
 			hidden: false
 		}
+		{
+			file: C:/Users/Jan Fic/Desktop/Game Development/Projects/fixellibrary/assets/skins/epochsapart/attribute_background.9.png
+			bgColor: {
+				r: 1
+				g: 1
+				b: 1
+				a: 1
+			}
+			tint: null
+			tintName: null
+			name: attribute_background
+			tiled: false
+			minWidth: -1
+			minHeight: -1
+			customized: false
+			tenPatchData: null
+			type: NINE_PATCH
+			hidden: false
+		}
 	]
 	fontDrawables: [
 		{
@@ -186,6 +205,44 @@ atlasData: {
 			tint: null
 			tintName: null
 			name: courier_9px_0
+			tiled: false
+			minWidth: -1
+			minHeight: -1
+			customized: false
+			tenPatchData: null
+			type: FONT
+			hidden: false
+		}
+		{
+			file: C:/Users/Jan Fic/Desktop/Game Development/Projects/fixellibrary/assets/skins/epochsapart/courier_6px_0.png
+			bgColor: {
+				r: 0
+				g: 0
+				b: 0
+				a: 1
+			}
+			tint: null
+			tintName: null
+			name: courier_6px_0
+			tiled: false
+			minWidth: -1
+			minHeight: -1
+			customized: false
+			tenPatchData: null
+			type: FONT
+			hidden: false
+		}
+		{
+			file: C:/Users/Jan Fic/Desktop/Game Development/Projects/fixellibrary/assets/ui/fonts/cour_9px.png
+			bgColor: {
+				r: 0
+				g: 0
+				b: 0
+				a: 1
+			}
+			tint: null
+			tintName: null
+			name: cour_9px
 			tiled: false
 			minWidth: -1
 			minHeight: -1
@@ -210,6 +267,16 @@ jsonData: {
 		}
 	]
 	fonts: [
+		{
+			class: com.ray3k.skincomposer.data.FontData
+			name: cour_9px
+			file: C:/Users/Jan Fic/Desktop/Game Development/Projects/fixellibrary/assets/ui/fonts/cour_9px.fnt
+		}
+		{
+			class: com.ray3k.skincomposer.data.FontData
+			name: courier_6px
+			file: C:/Users/Jan Fic/Desktop/Game Development/Projects/fixellibrary/assets/skins/epochsapart/courier_6px.fnt
+		}
 		{
 			class: com.ray3k.skincomposer.data.FontData
 			name: courier_9px
@@ -1374,7 +1441,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.g2d.BitmapFont
 						name: font
 						optional: false
-						value: courier_9px
+						value: cour_9px
 					}
 					fontColor: {
 						type: com.badlogic.gdx.graphics.Color
@@ -1401,7 +1468,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.g2d.BitmapFont
 						name: font
 						optional: false
-						value: courier_9px
+						value: cour_9px
 					}
 					fontColor: {
 						type: com.badlogic.gdx.graphics.Color
@@ -1413,7 +1480,7 @@ jsonData: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
 						name: background
 						optional: true
-						value: scrollpane_background
+						value: attribute_background
 					}
 				}
 				deletable: true
@@ -1670,6 +1737,13 @@ preferences: {
 	id: {
 		class: java.lang.Integer
 		value: 178155844
+	}
+	preview-bg-color: {
+		class: com.badlogic.gdx.graphics.Color
+		r: 1
+		g: 1
+		b: 1
+		a: 1
 	}
 	last-import-export-path: {
 		class: java.lang.String

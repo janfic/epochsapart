@@ -1,5 +1,11 @@
 {
 com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	cour_9px: {
+		file: cour_9px.fnt
+	}
+	courier_6px: {
+		file: courier_6px.fnt
+	}
 	courier_9px: {
 		file: courier_9px.fnt
 	}
@@ -21,13 +27,13 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
-		font: courier_9px
+		font: cour_9px
 		fontColor: RGBA_0_0_0_255
 	}
 	entity-attribute: {
-		font: courier_9px
+		font: cour_9px
 		fontColor: RGBA_0_0_0_255
-		background: scrollpane_background
+		background: attribute_background
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {

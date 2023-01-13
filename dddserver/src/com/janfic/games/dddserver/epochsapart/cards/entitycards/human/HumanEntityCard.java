@@ -20,8 +20,8 @@ public class HumanEntityCard extends EntityCard {
         super(name);
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
-        healthBar = new ProgressBar(0, maxHealth, maxHealth / (87f / 2f), true, Assets.getSingleton().getSkin());
-        add(healthBar).height(87).padRight(8);
+        healthBar = new ProgressBar(0, maxHealth, maxHealth / (84f / 2f), true, Assets.getSingleton().getSkin());
+        add(healthBar).height(86).padRight(8);
         addAttribute(new HumanAttribute());
         addAttribute(new FleshAttribute());
     }
