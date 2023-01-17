@@ -113,3 +113,4 @@ Thumbs.db
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
 assets/ui/controls/*.png
+dddserver/build/tmp/compileJava/previous-compilation-data.bin

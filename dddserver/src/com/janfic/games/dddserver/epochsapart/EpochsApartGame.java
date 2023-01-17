@@ -95,6 +95,5 @@ public class EpochsApartGame extends RealTimeGame<EpochsApartGameState> {
     @Override
     public void update(float delta) {
         super.update(delta);
-        gameState.update(delta);
     }
 }

@@ -5,6 +5,6 @@ import com.janfic.games.dddserver.epochsapart.cards.CardAttribute;
 
 public class HumanAttribute extends CardAttribute {
     public HumanAttribute() {
-        super("human", Color.GOLD);
+        super("human", Color.PURPLE);
     }
 }

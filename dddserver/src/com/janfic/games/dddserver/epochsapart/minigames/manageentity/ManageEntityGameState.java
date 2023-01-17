@@ -21,7 +21,6 @@ import com.janfic.games.dddserver.epochsapart.cards.entitycards.EntityCard;
 import com.janfic.games.dddserver.epochsapart.cards.entitycards.ModifierCard;
 import com.janfic.games.dddserver.epochsapart.entities.HexEntity;
 import com.janfic.games.dddserver.epochsapart.gamestatechanges.MiniGameStateChange;
-import com.janfic.games.dddserver.epochsapart.minigames.EpochsApartMiniGame;
 import com.janfic.games.library.utils.gamebuilder.GameClient;
 import com.janfic.games.library.utils.gamebuilder.GameMessage;
 import com.janfic.games.library.utils.gamebuilder.GameServerAPI;
@@ -37,7 +36,7 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
     Skin skin;
 
     Table table, entityCards, overview, inventory, decks, deckCards;
-    Image entityImage;
+    Table entityImage;
 
     ScrollPane entityScroll;
 
@@ -50,7 +49,7 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
         this.window = new Window("Entity", skin);
         this.table = new Table();
         this.entityCards = new Table();
-        this.overview = new Table();
+        this.overview = new Table(skin);
         this.inventory = new Table();
         this.deckCards = new Table();
         this.decks = new Table();
@@ -64,16 +63,21 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
         deckCards.left().top();
         window.setKeepWithinStage(false);
         window.add(table).grow();
-        entityImage = new Image();
+        entityImage = new Table(skin);
+        entityImage.add(new Label("Entity Image Here!", skin));
         entityScroll = new ScrollPane(entityCards, skin);
 
         entityCards.left().top();
         entityCards.defaults().space(5);
         entityCards.pad(5);
 
-        table.add(entityImage).growX();
+        entityImage.setBackground("attribute_background");
+        overview.setBackground("attribute_background");
+        overview.add(new Label("Entity Status Overview Here!", skin));
+
+        table.add(entityImage).width(200).growY();
         table.add(entityScroll).grow().row();
-        table.add(overview).growX();
+        table.add(overview).width(200).growY();
         table.add(inventory).growX().minHeight(150);
 
         ScrollPane decksScroll = new ScrollPane(decks, skin);
@@ -82,7 +86,8 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
         decks.left().top();
         decks.pad(10);
         decks.defaults().space(10);
-        inventory.add(decksScroll).growY().minWidth(100);
+        inventory.defaults().space(5);
+        inventory.add(decksScroll).growY().width(120);
         inventory.add(deckCardsScroll).grow();
 
         addActor(window);
@@ -102,6 +107,7 @@ public class ManageEntityGameState extends GameState<ManageEntityGame> {
     public ManageEntityGameState(HexEntity entity) {
         this();
         this.entity = entity;
+        window.getTitleLabel().setText(entity.getName());
         makeEntityCardTable();
         makeInventory();
     }

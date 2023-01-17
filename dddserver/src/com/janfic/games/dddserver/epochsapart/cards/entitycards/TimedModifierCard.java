@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.janfic.games.dddserver.epochsapart.Assets;
 
 public abstract class TimedModifierCard extends ModifierCard {
-    float timer, currentTime;
+    protected float timer, currentTime;
     ProgressBar bar;
     Skin skin;
     public TimedModifierCard(String name, float timer, float currentTime, boolean isVerticleBar) {

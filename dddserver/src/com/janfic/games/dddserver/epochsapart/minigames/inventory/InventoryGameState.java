@@ -43,6 +43,7 @@ public class InventoryGameState extends GameState {
         table.left();
         table.add(decksScroll).growY().width(100);
         Table cardTable = new Table();
+        cardTable.defaults().space(5);
         cardTable.add(cardsScroll).grow().row();
         cardTable.add(infoScrollPane).growX().height(120).row();
         table.add(cardTable).grow().row();
