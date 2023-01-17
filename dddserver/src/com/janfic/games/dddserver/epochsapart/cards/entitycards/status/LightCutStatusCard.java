@@ -28,15 +28,18 @@ public class LightCutStatusCard extends TimedModifierCard {
     @Override
     public void update(float delta) {
         super.update(delta);
-
-//        if(isTimerOver()) {
-//            ModifierCard bleeding = null;
-//            for (ModifierCard modifierCard : getEntityCard().getModifierCards()) {
-//                if(modifierCard instanceof BleedingStatusCard) {
-//                    bleeding = modifierCard;
-//                }
-//            }
-//        }
+        if(isTimerOver()) {
+            ModifierCard bleeding = null;
+            for (ModifierCard modifierCard : getEntityCard().getModifierCards()) {
+                if(modifierCard instanceof BleedingStatusCard) {
+                    bleeding = modifierCard;
+                }
+            }
+            if(bleeding != null) {
+                bleeding.remove();
+                getEntityCard().getModifierCards().remove(bleeding);
+            }
+        }
     }
 
     @Override
