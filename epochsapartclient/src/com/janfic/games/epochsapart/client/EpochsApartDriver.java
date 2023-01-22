@@ -5,11 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.tools.bmfont.BitmapFontWriter;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.janfic.games.dddserver.epochsapart.EpochsApartGameState;
@@ -35,12 +32,12 @@ public class EpochsApartDriver extends Game {
         stage.getCamera().update();
 
         Screen mainMenu = new MainMenuScreen(this);
-        Screen startMultiPlayerScreen = new MultiPlayerScreen(this);
+        Screen startMultiPlayerScreen = new WorldSimScreen(this);
         Screen startSinglePlayerScreen = new SinglePlayerScreen(this);
 
         screens = new HashMap<>();
         screens.put("mainMenu", mainMenu);
-        screens.put("startMultiPlayer", startMultiPlayerScreen);
+        screens.put("startWorldSimPrototype", startMultiPlayerScreen);
         screens.put("startSinglePlayer", startSinglePlayerScreen);
 
         currentScreen = mainMenu;
