@@ -1,5 +1,6 @@
 package com.janfic.games.dddserver.worldsim;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -94,7 +95,7 @@ public class Polyhedron {
         return null;
     }
 
-    public Mesh makeMesh() {
+    public Mesh makeMesh(Color color) {
         Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 2,
                 new VertexAttributes(
                         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
@@ -102,18 +103,15 @@ public class Polyhedron {
                 )
         );
         float[] verts = new float[vertices.size() * mesh.getVertexSize() / 4];
-        float cr =  1;
-        float cg =  1;
-        float cb =  1;
         for (int i = 0; i < vertices.size(); i++) {
             int j = i * 7;
             verts[j] = vertices.get(i).x;
             verts[j + 1] = vertices.get(i).y;
             verts[j + 2] = vertices.get(i).z;
-            verts[j + 3] = cr;
-            verts[j + 4] = cg;
-            verts[j + 5] = cb;
-            verts[j + 6] = 1;
+            verts[j + 3] = color.r;
+            verts[j + 4] = color.g;
+            verts[j + 5] = color.b;
+            verts[j + 6] = color.a;
         }
         mesh.setVertices(verts, 0, vertices.size() * (3 + 4));
         short[] indices = new short[edges.size() * 2];
