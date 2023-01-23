@@ -24,7 +24,6 @@ public class Face {
             center.add(vertex);
         }
         this.center = center.scl(1f /vertices.size());
-        System.out.println(center);
         neighbors = new ArrayList<>();
     }
 

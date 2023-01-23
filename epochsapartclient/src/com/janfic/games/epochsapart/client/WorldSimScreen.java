@@ -5,12 +5,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.World;
@@ -24,7 +22,7 @@ public class WorldSimScreen implements Screen {
     ShapeRenderer renderer;
     World world;
     HexWorld hexWorld;
-    Mesh mesh;
+    Mesh mesh, mesh2;
     ShaderProgram shaderProgram;
 
     FirstPersonCameraController controller;
@@ -38,6 +36,8 @@ public class WorldSimScreen implements Screen {
         hexWorld = new HexWorld(5, 0, 0, 1);
         renderer = new ShapeRenderer();
         mesh = hexWorld.polyhedron.makeMesh();
+        mesh2 = hexWorld.polyhedron.copy().makeMesh();
+        mesh.transform(new Matrix4().translate(1, 0 , 0));
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -67,6 +67,9 @@ public class WorldSimScreen implements Screen {
 //        renderer.end();
 
         controller.update();
+        hexWorld.polyhedron.addTransform(new Matrix4().rotate(hexWorld.polyhedron.getUp().cpy().sub(hexWorld.polyhedron.getCenter()), 30 * delta));
+        mesh = hexWorld.polyhedron.makeMesh();
+
 
         shaderProgram.bind();
         shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);

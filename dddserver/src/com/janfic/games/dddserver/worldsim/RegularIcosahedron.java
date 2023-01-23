@@ -109,5 +109,7 @@ public class RegularIcosahedron extends Polyhedron {
                 }
             }
         }
+        calculateCenter();
+        setUp(top);
     }
 }
