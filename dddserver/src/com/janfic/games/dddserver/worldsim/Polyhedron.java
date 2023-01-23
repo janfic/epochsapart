@@ -83,15 +83,20 @@ public class Polyhedron {
     }
 
     public static Polyhedron uniformTruncate(Polyhedron polyhedron) {
+
+        long start = System.currentTimeMillis();
+        long end = System.currentTimeMillis();
+
         Polyhedron copy = polyhedron.copy();
+
 
         List<Vertex> vs = new ArrayList<>();
         List<Edge> es = new ArrayList<>();
         List<Face> fs = new ArrayList<>();
 
-
-
         // Split Edges
+        System.out.print("1)");
+        start = System.currentTimeMillis();
         Set<Edge> marked = new HashSet<>();
         HashMap<Vertex, List<Vertex>> vertexFaceMap = new HashMap<>();
         for (Vertex vertex : copy.vertices) {
@@ -116,11 +121,15 @@ public class Polyhedron {
                 }
             }
         }
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
 
+        System.out.print("2)");
+        start = System.currentTimeMillis();
         // Construct Edges
         for (Map.Entry<Vertex, List<Vertex>> vertexListEntry : vertexFaceMap.entrySet()) {
             List<Vertex> value = vertexListEntry.getValue();
-            Face f = Face.makeFaceFromVertices(value);
+            Face f = Face.makeFaceFromVertices(value, es);
             List<Edge> ves = new ArrayList<>();
             for (int i = 0; i < value.size(); i++) {
                 Vertex a = value.get(i);
@@ -139,7 +148,11 @@ public class Polyhedron {
             }
             fs.add(f);
         }
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
 
+        System.out.print("3)");
+        start = System.currentTimeMillis();
         // Construct Faces
         for (Face face : copy.faces) {
             List<Vertex> vertexList = new ArrayList<>();
@@ -149,16 +162,29 @@ public class Polyhedron {
                 vertexList.add(vs.get(vs.indexOf(a)));
                 vertexList.add(vs.get(vs.indexOf(b)));
             }
-            Face f = Face.makeFaceFromVertices(vertexList);
+            Face f = Face.makeFaceFromVertices(vertexList, es);
             fs.add(f);
         }
 
-        System.out.println(fs.size());
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
 
+        System.out.print("4)");
+        start = System.currentTimeMillis();
         Polyhedron r = new Polyhedron(vs, es, fs);
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
+        System.out.print("5)");
+        start = System.currentTimeMillis();
         r.setUp(copy.up.cpy());
         r.calculateCenter();
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
+        System.out.print("6)");
+        start = System.currentTimeMillis();
         r.calculateNeighbors();
+        end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
         return r;
     }
 
@@ -208,6 +234,8 @@ public class Polyhedron {
     }
 
     public Polyhedron copy() {
+        System.out.print("c)");
+        long start = System.currentTimeMillis();
         List<Vertex> vs = new ArrayList<>();
         List<Edge> es = new ArrayList<>();
         List<Face> fs = new ArrayList<>();
@@ -243,6 +271,8 @@ public class Polyhedron {
         polyhedron.calculateCenter();
         polyhedron.setUp(this.up.cpy());
         polyhedron.calculateNeighbors();
+        long end = System.currentTimeMillis();
+        System.out.println(" " + (end - start) / 1000f);
         return polyhedron;
     }
 
@@ -257,11 +287,8 @@ public class Polyhedron {
 
     public void calculateNeighbors() {
         for (Face face : faces) {
-            for (Face other : faces) {
-                if(face == other) continue;
-                if(!face.neighbors.contains(other) && face.isNeighbor(other)) {
-                    face.neighbors.add(other);
-                }
+            for (Edge edge : face.edges) {
+                face.neighbors.add(edge.getOtherFace(face));
             }
         }
     }

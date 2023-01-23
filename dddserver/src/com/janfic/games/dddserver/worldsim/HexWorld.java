@@ -17,9 +17,12 @@ public class HexWorld {
         polyhedron0 = new RegularIcosahedron(height);
         polyhedron1 = Polyhedron.uniformTruncate(polyhedron0);
         polyhedron2 = polyhedron1.copy();
-        for(int i = 0; i < level; i++) {
+        for(int i = 1; i <= level; i++) {
+            System.out.println("level: " + i);
             polyhedron2 = Polyhedron.dual(polyhedron2);
+            System.out.println("dualed");
             polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
+            System.out.println("truncated");
         }
 
         polyhedron1.setTransform(new Matrix4().translate(0 , 0, height));

@@ -78,23 +78,37 @@ public class RegularIcosahedron extends Polyhedron {
                 6, 7, 1, 7, 8, 2, 8, 9, 3, 9, 10, 4, 10, 6, 5,
                 11, 6, 7, 11, 7, 8, 11, 8, 9, 11, 9, 10, 11, 10, 6
         };
+
+        for (int i = 0; i < facesIndexes.length; i+=3) {
+            Vertex f0 = vertices.get(facesIndexes[i]), f1 = vertices.get(facesIndexes[i+1]), f2 = vertices.get(facesIndexes[i+2]);
+            Edge s = new Edge(f0, f1);
+            Edge u = new Edge(f1, f2);
+            Edge v = new Edge(f2, f0);
+            if (!edges.contains(s)){
+                edges.add(s);
+            }
+            if (!edges.contains(u)){
+                edges.add(u);
+            }
+            if (!edges.contains(v)){
+                edges.add(v);
+            }
+        }
+
+
         for (int i = 0; i < facesIndexes.length; i+=3) {
             List<Edge> fEdges = new ArrayList<>();
             List<Vertex> fVertices = new ArrayList<>();
             Vertex f0 = vertices.get(facesIndexes[i]), f1 = vertices.get(facesIndexes[i+1]), f2 = vertices.get(facesIndexes[i+2]);
-            Edge s = new Edge(f0, f1);
-            Edge u = new Edge(f1, f2);
-            Edge v = new Edge(f0, f2);
+            Edge s = edges.get(edges.indexOf(new Edge(f0, f1)));
+            Edge u = edges.get(edges.indexOf(new Edge(f1, f2)));
+            Edge v = edges.get(edges.indexOf(new Edge(f2, f0)));
             fEdges.add(s);
             fEdges.add(u);
             fEdges.add(v);
             fVertices.add(f0);
             fVertices.add(f1);
             fVertices.add(f2);
-            for (Edge fEdge : fEdges) {
-                if (edges.contains(fEdge)) continue;
-                edges.add(fEdge);
-            }
             Face f = new Face(fVertices, fEdges);
             faces.add(f);
         }

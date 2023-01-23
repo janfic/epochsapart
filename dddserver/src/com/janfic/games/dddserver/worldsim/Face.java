@@ -23,11 +23,14 @@ public class Face {
         }
         this.center = center.scl(1f /vertices.size());
         neighbors = new ArrayList<>();
+        for (Edge edge : this.edges) {
+            edge.addFace(this);
+        }
     }
 
     public boolean isNeighbor(Face f) {
         Set<Edge> intersection = new HashSet<>(this.edgesSet);
-        intersection.retainAll(f.edges);
+        intersection.retainAll(f.edgesSet);
         return intersection.size() > 0;
     }
 
@@ -57,27 +60,35 @@ public class Face {
      * @param vertices with size n
      * @return new n sided face
      */
-    public static Face makeFaceFromVertices(List<Vertex> vertices) {
-
-        List<Edge> es = new ArrayList<>(), kes = new ArrayList<>();
+    public static Face makeFaceFromVertices(List<Vertex> vertices, List<Edge> edgePool) {
+        List<Edge> es = new ArrayList<>(), ke = new ArrayList<>();
         for (int i = 0; i < vertices.size(); i++) {
             Vertex a = vertices.get(i);
             for (int j = 0; j < vertices.size(); j++) {
                 if(j == i) continue;;
                 Vertex b = vertices.get(j);
                 Edge e = new Edge(a, b);
-                if(!kes.contains(e)) {
-                    kes.add(e);
+
+                if(!ke.contains(e)) {
+                    if (edgePool.contains(e)) {
+                        ke.add(edgePool.get(edgePool.indexOf(e)));
+                    }
+                    else {
+                        ke.add(e);
+                    }
                 }
 
             }
         }
 
-        kes.sort((a, b) -> (int) Math.signum(a.dist() - b.dist()));
+        ke.sort((a, b) -> (int) Math.signum(a.dist() - b.dist()));
         for (int i = 0; i < vertices.size(); i++) {
-            es.add(kes.get(i));
+            Edge edge = ke.get(i);
+            es.add(edge);
+            if(!edgePool.contains(edge)) {
+                edgePool.add(edge);
+            }
         }
-
         return new Face(vertices, es);
     }
 }

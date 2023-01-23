@@ -28,8 +28,11 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(20, 0, 0, 3);
+        hexWorld = new HexWorld(50, 0, 0, 5);
         renderer = new ShapeRenderer();
+        mesh0 = hexWorld.polyhedron0.makeMesh(Color.ORANGE);
+        mesh1 = hexWorld.polyhedron1.makeMesh(Color.YELLOW);
+        mesh2 = hexWorld.polyhedron2.makeMesh(Color.WHITE);
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -58,9 +61,7 @@ public class WorldSimScreen implements Screen {
 //        hexWorld.polyhedron0.addTransform(new Matrix4().rotate(hexWorld.polyhedron0.getUp().cpy().sub(hexWorld.polyhedron0.getCenter()), 30 * delta));
 //        hexWorld.polyhedron1.addTransform(new Matrix4().rotate(hexWorld.polyhedron1.getUp().cpy().sub(hexWorld.polyhedron1.getCenter()), 30 * delta));
 //        hexWorld.polyhedron2.addTransform(new Matrix4().rotate(hexWorld.polyhedron2.getUp().cpy().sub(hexWorld.polyhedron2.getCenter()), 30 * delta));
-        mesh0 = hexWorld.polyhedron0.makeMesh(Color.ORANGE);
-        mesh1 = hexWorld.polyhedron1.makeMesh(Color.YELLOW);
-        mesh2 = hexWorld.polyhedron2.makeMesh(Color.WHITE);
+
 
         shaderProgram.bind();
         shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);
