@@ -1,10 +1,8 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.math.Vector3;
-
 public class HexWorld {
 
-    public Polyhedron polyhedron;
+    public Polyhedron polyhedron0, polyhedron1, polyhedron2;
 
     float posX, posY;
     int level;
@@ -14,6 +12,8 @@ public class HexWorld {
         posY = sy;
         this.level = level;
 
-        polyhedron = new RegularIcosahedron(height);
+        polyhedron0 = new RegularIcosahedron(height);
+        polyhedron1 = Polyhedron.dual(polyhedron0);
+        polyhedron2 = Polyhedron.dual(polyhedron1);
     }
 }

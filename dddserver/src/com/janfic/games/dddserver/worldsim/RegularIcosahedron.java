@@ -30,8 +30,8 @@ public class RegularIcosahedron extends Polyhedron {
         Vector3 n = new Vector3((float) (bd * Math.cos(Math.PI / 5)), 0, (float) (bd * Math.sin((Math.PI / 5))));
         float gn = g.dst(n);
 
-        Vector3 bottom = new Vector3();
-        Vector3 top = new Vector3(0,gn + bd + gn,0);
+        Vertex bottom = new Vertex();
+        Vertex top = new Vertex(0,gn + bd + gn,0);
         vertices.add(bottom);
 
         for (int i = 0; i < 5; i++) {
@@ -39,13 +39,13 @@ public class RegularIcosahedron extends Polyhedron {
             float x = (float) (radCD * Math.cos(theta));
             float y = gn;
             float z = (float) (radCD * Math.sin(theta));
-            Vector3 v = new Vector3(x, y , z);
+            Vertex v = new Vertex(x, y , z);
             vertices.add(v);
         }
 
         for (int i = 1; i < 6; i++) {
-            Vector3 v1 = vertices.get(i);
-            Vector3 v2 = vertices.get((i % 5) + 1);
+            Vertex v1 = vertices.get(i);
+            Vertex v2 = vertices.get((i % 5) + 1);
         }
 
         for (int i = 0; i < 5; i++) {
@@ -53,7 +53,7 @@ public class RegularIcosahedron extends Polyhedron {
             float x = (float) (radCD * Math.cos(theta));
             float y = gn + bd;
             float z = (float) (radCD * Math.sin(theta));
-            Vector3 v = new Vector3(x, y , z);
+            Vertex v = new Vertex(x, y , z);
             vertices.add(v);
         }
 
@@ -80,8 +80,8 @@ public class RegularIcosahedron extends Polyhedron {
         };
         for (int i = 0; i < facesIndexes.length; i+=3) {
             List<Edge> fEdges = new ArrayList<>();
-            List<Vector3> fVertices = new ArrayList<>();
-            Vector3 f0 = vertices.get(facesIndexes[i]), f1 = vertices.get(facesIndexes[i+1]), f2 = vertices.get(facesIndexes[i+2]);
+            List<Vertex> fVertices = new ArrayList<>();
+            Vertex f0 = vertices.get(facesIndexes[i]), f1 = vertices.get(facesIndexes[i+1]), f2 = vertices.get(facesIndexes[i+2]);
             Edge s = new Edge(f0, f1);
             Edge u = new Edge(f1, f2);
             Edge v = new Edge(f0, f2);
@@ -101,14 +101,7 @@ public class RegularIcosahedron extends Polyhedron {
 
         // Face Neighbors
         // Bottom Ring
-        for (Face face : faces) {
-            for (Face other : faces) {
-                if(face == other) continue;
-                if(!face.neighbors.contains(other) && face.isNeighbor(other)) {
-                    face.neighbors.add(other);
-                }
-            }
-        }
+        calculateNeighbors();
         calculateCenter();
         setUp(top);
     }

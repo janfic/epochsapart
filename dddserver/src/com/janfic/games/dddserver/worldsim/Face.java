@@ -8,20 +8,21 @@ import java.util.List;
 import java.util.Set;
 
 public class Face {
-    List<Vector3> vertices;
+    List<Vertex> vertices;
     List<Edge> edges;
     Set<Edge> edgesSet;
     Vector3 center;
     List<Face> neighbors;
 
-    public Face(List<Vector3> vertices, List<Edge> edges) {
+    public Face(List<Vertex> vertices, List<Edge> edges) {
         this.edges = edges;
         this.vertices = vertices;
         this.edgesSet = new HashSet<>();
         edgesSet.addAll(edges);
         Vector3 center = new Vector3();
-        for (Vector3 vertex : vertices) {
+        for (Vertex vertex : vertices) {
             center.add(vertex);
+            vertex.addFace(this);
         }
         this.center = center.scl(1f /vertices.size());
         neighbors = new ArrayList<>();
@@ -37,11 +38,20 @@ public class Face {
         return edges;
     }
 
-    public List<Vector3> getVertices() {
+    public List<Vertex> getVertices() {
         return vertices;
     }
 
     public List<Face> getNeighbors() {
         return neighbors;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Face)) return super.equals(obj);
+        Face other = (Face) obj;
+        Set<Edge> intersection = new HashSet<>(edgesSet);
+        intersection.retainAll(other.edgesSet);
+        return intersection.size() == edgesSet.size();
     }
 }

@@ -4,25 +4,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.World;
-import com.janfic.games.library.ecs.components.rendering.ModelBatchComponent;
 import org.lwjgl.opengl.GL20;
-
-import java.util.Arrays;
 
 public class WorldSimScreen implements Screen {
 
     ShapeRenderer renderer;
     World world;
     HexWorld hexWorld;
-    Mesh mesh, mesh2;
+    Mesh mesh0, mesh1, mesh2;
     ShaderProgram shaderProgram;
 
     FirstPersonCameraController controller;
@@ -35,9 +30,9 @@ public class WorldSimScreen implements Screen {
         world = new World(1);
         hexWorld = new HexWorld(5, 0, 0, 1);
         renderer = new ShapeRenderer();
-        mesh = hexWorld.polyhedron.makeMesh();
-        mesh2 = hexWorld.polyhedron.copy().makeMesh();
-        mesh.transform(new Matrix4().translate(1, 0 , 0));
+        mesh0 = hexWorld.polyhedron0.makeMesh();
+        mesh1 = hexWorld.polyhedron1.makeMesh();
+        mesh2 = hexWorld.polyhedron2.makeMesh();
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -61,19 +56,20 @@ public class WorldSimScreen implements Screen {
 
     @Override
     public void render(float delta) {
-//        renderer.begin(ShapeRenderer.ShapeType.Line);
-//        renderer.setColor(Color.WHITE);
-//        //hexWorld.draw(renderer, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
-//        renderer.end();
 
         controller.update();
-        hexWorld.polyhedron.addTransform(new Matrix4().rotate(hexWorld.polyhedron.getUp().cpy().sub(hexWorld.polyhedron.getCenter()), 30 * delta));
-        mesh = hexWorld.polyhedron.makeMesh();
-
+        hexWorld.polyhedron0.addTransform(new Matrix4().rotate(hexWorld.polyhedron0.getUp().cpy().sub(hexWorld.polyhedron0.getCenter()), 30 * delta));
+        hexWorld.polyhedron1.addTransform(new Matrix4().rotate(hexWorld.polyhedron1.getUp().cpy().sub(hexWorld.polyhedron1.getCenter()), 30 * delta));
+        hexWorld.polyhedron2.addTransform(new Matrix4().rotate(hexWorld.polyhedron2.getUp().cpy().sub(hexWorld.polyhedron2.getCenter()), 30 * delta));
+        mesh0 = hexWorld.polyhedron0.makeMesh();
+        mesh1 = hexWorld.polyhedron1.makeMesh();
+        mesh2 = hexWorld.polyhedron2.makeMesh();
 
         shaderProgram.bind();
         shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);
-        mesh.render(shaderProgram, GL20.GL_LINES);
+        mesh0.render(shaderProgram, GL20.GL_LINES);
+        mesh1.render(shaderProgram, GL20.GL_LINES);
+        mesh2.render(shaderProgram, GL20.GL_LINES);
     }
 
     @Override

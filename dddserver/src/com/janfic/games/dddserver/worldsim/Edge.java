@@ -3,10 +3,12 @@ package com.janfic.games.dddserver.worldsim;
 import com.badlogic.gdx.math.Vector3;
 
 public class Edge {
-    public Vector3 a, b;
-    public Edge(Vector3 a, Vector3 b) {
+    public Vertex a, b;
+    public Edge(Vertex a, Vertex b) {
         this.a = a;
         this.b = b;
+        a.addEdge(this);
+        b.addEdge(this);
     }
 
     public float dist() {

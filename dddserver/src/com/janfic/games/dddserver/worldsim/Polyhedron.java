@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision._btMprSimplex_t;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,14 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 public class Polyhedron {
-    List<Vector3> vertices;
+    List<Vertex> vertices;
     List<Edge> edges;
     List<Face> faces;
-    Vector3 center;
+    Vertex center;
     Vector3 up;
     Matrix4 transform;
 
-    public Polyhedron(List<Vector3> v, List<Edge> e, List<Face> f) {
+    public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
         edges = new ArrayList<>(e);
         faces = new ArrayList<>(f);
@@ -36,8 +37,56 @@ public class Polyhedron {
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
-        Polyhedron r = new Polyhedron();
+        Polyhedron copy = polyhedron.copy();
 
+        List<Vertex> vs = new ArrayList<>();
+        List<Edge> es = new ArrayList<>();
+        List<Face> fs = new ArrayList<>();
+
+        for (Face face : copy.faces) {
+            vs.add(new Vertex(face.center));
+            for (Face neighbor : face.neighbors) {
+                Edge e = new Edge(new Vertex(neighbor.center), new Vertex(face.center));
+                es.add(e);
+            }
+        }
+
+        // Added Face references to Vertex
+        // X: Make Face.equals() to avoid duplicates in Vertex.faces
+        // X: Get centers of adjacent Faces
+        // X: Find associated vertices in local scope
+        // X: Find associated edges in local scope
+        // X: Create Face with centers and their edges
+
+        for (Vertex vertex : copy.vertices) {
+            List<Vertex> fv = new ArrayList<>();
+            List<Edge> fe = new ArrayList<>();
+
+            // Vertices
+            for (Face face : vertex.faces) {
+                fv.add(vs.get(vs.indexOf(new Vertex(face.center))));
+            }
+
+            // Edges
+            for (int i = 0; i < fv.size(); i++) {
+                Vertex va = fv.get(i);
+                for (Vertex vb : fv) {
+                    if(vb.equals(va)) continue;
+                    Edge e = new Edge(va, vb);
+                    if(es.contains(e) && !fe.contains(e)) {
+                        fe.add(es.get(es.indexOf(e)));
+                    }
+                }
+            }
+
+            Face face = new Face(fv, fe);
+            fs.add(face);
+        }
+
+        Polyhedron r = new Polyhedron(vs, es, fs);
+        r.calculateCenter();
+        r.calculateNeighbors();
+        r.setUp(copy.up.cpy());
         return r;
     }
 
@@ -53,9 +102,9 @@ public class Polyhedron {
                 )
         );
         float[] verts = new float[vertices.size() * mesh.getVertexSize() / 4];
-        float cr =  (float) Math.random();
-        float cg =  (float) Math.random();
-        float cb =  (float) Math.random();
+        float cr =  1;
+        float cg =  1;
+        float cb =  1;
         for (int i = 0; i < vertices.size(); i++) {
             int j = i * 7;
             verts[j] = vertices.get(i).x;
@@ -89,29 +138,29 @@ public class Polyhedron {
         return faces;
     }
 
-    public List<Vector3> getVertices() {
+    public List<Vertex> getVertices() {
         return vertices;
     }
 
     public Polyhedron copy() {
-        List<Vector3> vs = new ArrayList<>();
+        List<Vertex> vs = new ArrayList<>();
         List<Edge> es = new ArrayList<>();
         List<Face> fs = new ArrayList<>();
 
-        for (Vector3 vertex : vertices) {
+        for (Vertex vertex : vertices) {
             vs.add(vertex.cpy());
         }
 
         for (Edge edge : edges) {
-            Vector3 a = vs.get(vs.indexOf(edge.a));
-            Vector3 b = vs.get(vs.indexOf(edge.b));
+            Vertex a = vs.get(vs.indexOf(edge.a));
+            Vertex b = vs.get(vs.indexOf(edge.b));
 
             Edge e = new Edge(a, b);
             es.add(e);
         }
 
         for (Face face : faces) {
-            List<Vector3> cV = new ArrayList<>();
+            List<Vertex> cV = new ArrayList<>();
             for (Vector3 vertex : face.vertices) {
                 cV.add(vs.get(vs.indexOf(vertex)));
             }
@@ -121,20 +170,34 @@ public class Polyhedron {
             }
             Face f = new Face(cV, cE);
             fs.add(f);
+
         }
 
         Polyhedron polyhedron = new Polyhedron(vs, es, fs);
         polyhedron.calculateCenter();
+        polyhedron.setUp(this.up.cpy());
+        polyhedron.calculateNeighbors();
         return polyhedron;
     }
 
     public Vector3 calculateCenter() {
-        center = new Vector3();
+        center = new Vertex();
         for (Vector3 vertex : vertices) {
             center.add(vertex);
         }
         center.scl(1f / vertices.size());
         return center;
+    }
+
+    public void calculateNeighbors() {
+        for (Face face : faces) {
+            for (Face other : faces) {
+                if(face == other) continue;
+                if(!face.neighbors.contains(other) && face.isNeighbor(other)) {
+                    face.neighbors.add(other);
+                }
+            }
+        }
     }
 
     public Vector3 getCenter() {
