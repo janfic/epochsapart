@@ -35,12 +35,11 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(1, 0, 0, 1);
+        hexWorld = new HexWorld(5, 0, 0, 1);
         renderer = new ShapeRenderer();
         mesh = hexWorld.makeMesh();
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
-        System.out.println(shaderProgram.getFragmentShaderSource());
         camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(10, 0, 0);
         camera.lookAt(0,0,0);
