@@ -37,7 +37,7 @@ public class WorldSimScreen implements Screen {
         world = new World(1);
         hexWorld = new HexWorld(5, 0, 0, 1);
         renderer = new ShapeRenderer();
-        mesh = hexWorld.makeMesh();
+        mesh = hexWorld.polyhedron.makeMesh();
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
