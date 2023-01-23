@@ -60,35 +60,39 @@ public class Face {
      * @param vertices with size n
      * @return new n sided face
      */
-    public static Face makeFaceFromVertices(List<Vertex> vertices, List<Edge> edgePool) {
-        List<Edge> es = new ArrayList<>(), ke = new ArrayList<>();
+    public static Face makeFaceFromVertices(List<Vertex> vertices, List<Edge> es, int n) {
+        List<Edge> newEdges = new ArrayList<>();
+        List<Edge> possibleEdges = new LinkedList<>();
+
         for (int i = 0; i < vertices.size(); i++) {
             Vertex a = vertices.get(i);
-            for (int j = 0; j < vertices.size(); j++) {
-                if(j == i) continue;;
+            for (int j = i + 1; j < vertices.size(); j++) {
                 Vertex b = vertices.get(j);
-                Edge e = new Edge(a, b);
-
-                if(!ke.contains(e)) {
-                    if (edgePool.contains(e)) {
-                        ke.add(edgePool.get(edgePool.indexOf(e)));
-                    }
-                    else {
-                        ke.add(e);
-                    }
+                if(i == j || a == b) continue;
+                Edge e = new Edge(a,b);
+                if(es.contains(e)) {
+                    e = es.get(es.indexOf(e));
                 }
-
+                insert(possibleEdges, e);
             }
         }
 
-        ke.sort((a, b) -> (int) Math.signum(a.dist() - b.dist()));
         for (int i = 0; i < vertices.size(); i++) {
-            Edge edge = ke.get(i);
-            es.add(edge);
-            if(!edgePool.contains(edge)) {
-                edgePool.add(edge);
+            Edge possibleEdge = possibleEdges.get(i);
+            if(es.contains(possibleEdge)) {
+                possibleEdge = es.get(es.indexOf(possibleEdge));
             }
+            newEdges.add(possibleEdge);
         }
-        return new Face(vertices, es);
+
+        return new Face(vertices, newEdges);
+    }
+
+    private static void insert(List<Edge> edges, Edge e) {
+        int i = 0;
+        while(i < edges.size() && e.dist() > edges.get(i).dist()) {
+            i++;
+        }
+        edges.add(i, e);
     }
 }

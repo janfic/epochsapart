@@ -19,10 +19,12 @@ public class HexWorld {
         polyhedron2 = polyhedron1.copy();
         for(int i = 1; i <= level; i++) {
             System.out.println("level: " + i);
+            System.out.print("dual...");
             polyhedron2 = Polyhedron.dual(polyhedron2);
-            System.out.println("dualed");
+            System.out.println("done");
+            System.out.print("truncate...");
             polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
-            System.out.println("truncated");
+            System.out.println("done");
         }
 
         polyhedron1.setTransform(new Matrix4().translate(0 , 0, height));

@@ -28,7 +28,7 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(50, 0, 0, 5);
+        hexWorld = new HexWorld(20, 0, 0, 4);
         renderer = new ShapeRenderer();
         mesh0 = hexWorld.polyhedron0.makeMesh(Color.ORANGE);
         mesh1 = hexWorld.polyhedron1.makeMesh(Color.YELLOW);
