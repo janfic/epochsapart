@@ -1,11 +1,8 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Face {
     List<Vertex> vertices;
@@ -53,5 +50,34 @@ public class Face {
         Set<Edge> intersection = new HashSet<>(edgesSet);
         intersection.retainAll(other.edgesSet);
         return intersection.size() == edgesSet.size();
+    }
+
+    /**
+     * Will attempt to make a face with shortest n edges.
+     * @param vertices with size n
+     * @return new n sided face
+     */
+    public static Face makeFaceFromVertices(List<Vertex> vertices) {
+
+        List<Edge> es = new ArrayList<>(), kes = new ArrayList<>();
+        for (int i = 0; i < vertices.size(); i++) {
+            Vertex a = vertices.get(i);
+            for (int j = 0; j < vertices.size(); j++) {
+                if(j == i) continue;;
+                Vertex b = vertices.get(j);
+                Edge e = new Edge(a, b);
+                if(!kes.contains(e)) {
+                    kes.add(e);
+                }
+
+            }
+        }
+
+        kes.sort((a, b) -> (int) Math.signum(a.dist() - b.dist()));
+        for (int i = 0; i < vertices.size(); i++) {
+            es.add(kes.get(i));
+        }
+
+        return new Face(vertices, es);
     }
 }
