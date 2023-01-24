@@ -1,6 +1,0 @@
-{
-  "attributes" : {
-    "suit": "String",
-    "amount" : "String"
-  }
-}
