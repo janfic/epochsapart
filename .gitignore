@@ -100,6 +100,8 @@ gradle-app.setting
 /desktop/build/
 /html/build/
 /ios/build/
+/dddserver/build/
+/epochsapartclient/build/
 
 ## OS Specific
 .DS_Store
@@ -113,4 +115,4 @@ Thumbs.db
 /ios/IOSLauncher.app
 /ios/IOSLauncher.app.dSYM
 assets/ui/controls/*.png
-dddserver/build/tmp/compileJava/previous-compilation-data.bin
+*.jar
