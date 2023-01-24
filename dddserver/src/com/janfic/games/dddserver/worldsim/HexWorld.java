@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Matrix4;
 
 public class HexWorld {
 
-    public Polyhedron polyhedron0, polyhedron1, polyhedron2;
+    public Polyhedron polyhedron, polyhedron0, polyhedron1, polyhedron2;
 
     float posX, posY;
     int level;
@@ -21,13 +21,11 @@ public class HexWorld {
             System.out.println("level: " + i);
             System.out.print("dual...");
             polyhedron2 = Polyhedron.dual(polyhedron2);
-            System.out.println("done");
-            System.out.print("truncate...");
-            polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
-            System.out.println("done");
+//            System.out.println("done");
+//            System.out.print("truncate...");
+//            polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
+//            System.out.println("done");
         }
-
-        polyhedron1.setTransform(new Matrix4().translate(0 , 0, height));
-        polyhedron2.setTransform(new Matrix4().translate(0, 0, 2 * height));
+        polyhedron = polyhedron2.copy();
     }
 }

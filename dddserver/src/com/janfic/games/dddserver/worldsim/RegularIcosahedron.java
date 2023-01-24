@@ -23,7 +23,6 @@ public class RegularIcosahedron extends Polyhedron {
 
         // BD Length
         float bd = b.dst(d);
-        System.out.println(bd);
 
         // GN ( decagon measurement )
         Vector3 g = new Vector3((float) (bd * Math.cos(0)), 0, (float) (bd * Math.sin(0)));
