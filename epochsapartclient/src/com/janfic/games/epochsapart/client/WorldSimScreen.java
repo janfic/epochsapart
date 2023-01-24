@@ -27,12 +27,13 @@ public class WorldSimScreen implements Screen {
     PerspectiveCamera camera;
     float radius;
 
+
     ModelBatch batch;
     ModelInstance instance;
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(15, 0, 0, 4);
+        hexWorld = new HexWorld(15, 0, 0, 6);
         renderer = new ShapeRenderer();
         mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
         radius = 20;
@@ -42,7 +43,7 @@ public class WorldSimScreen implements Screen {
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 1f;
-        camera.far = 300f;
+        camera.far = hexWorld.height / 3f;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class WorldSimScreen implements Screen {
         }
 
 
-        camera.position.set(camera.position.cpy().add(delta.scl(deltaTime)));
+        camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - hexWorld.height / 2)* deltaTime)));
         norm = camera.position.cpy().sub(pos);
         norm.scl(radius / norm.len());
         camera.position.set(pos.cpy().add(norm));

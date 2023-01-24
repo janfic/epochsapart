@@ -55,4 +55,18 @@ public class Vertex extends Vector3 {
         }
         return r;
     }
+
+    public static Vector3 getAverage(List<Vertex> vertices) {
+        Vector3 center = new Vector3();
+        for (Vertex vertex : vertices) {
+            center.add(vertex);
+        }
+        center.scl(1f / vertices.size());
+        return center;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

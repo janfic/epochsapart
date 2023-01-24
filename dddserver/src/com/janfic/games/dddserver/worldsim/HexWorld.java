@@ -8,10 +8,12 @@ public class HexWorld {
 
     float posX, posY;
     int level;
+    public float height;
 
     public HexWorld(float height, float sx, float sy, int level) {
         posX = sx;
         posY = sy;
+        this.height = height;
         this.level = level;
 
         polyhedron0 = new RegularIcosahedron(height);
@@ -26,6 +28,7 @@ public class HexWorld {
             polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
             System.out.println("done");
         }
-        polyhedron = Polyhedron.sphereProject(polyhedron2, height);
+//        polyhedron = Polyhedron.sphereProject(polyhedron2, height / 2);
+        polyhedron = polyhedron2;
     }
 }

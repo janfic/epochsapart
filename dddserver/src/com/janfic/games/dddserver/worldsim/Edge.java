@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Edge implements Comparable<Edge>{
     public Vertex a, b;
@@ -50,5 +51,10 @@ public class Edge implements Comparable<Edge>{
     public int compareTo(Edge edge) {
         if(edge.equals(this)) return 0;
         return (int) Math.signum(this.dist() - edge.dist());
+    }
+
+    @Override
+    public int hashCode() {
+        return a.hashCode() + b.hashCode();
     }
 }

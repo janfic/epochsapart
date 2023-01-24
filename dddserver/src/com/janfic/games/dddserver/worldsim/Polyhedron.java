@@ -2,6 +2,7 @@ package com.janfic.games.dddserver.worldsim;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision._btMprSimplex_t;
@@ -38,6 +39,7 @@ public class Polyhedron {
         List<Edge> es = new ArrayList<>();
         List<Face> fs = new ArrayList<>();
 
+        Map<Edge, Edge> edgeMap = new HashMap<>();
         Map<Vector3, Set<Vertex>> map = new HashMap<>();
 
         for (Face face : copy.faces) {
@@ -52,18 +54,24 @@ public class Polyhedron {
             }
         }
 
+        System.out.print("faces..");
         for (Map.Entry<Vector3, Set<Vertex>> entry : map.entrySet()) {
             Vector3 key = entry.getKey();
             Set<Vertex> vertexSet = entry.getValue();
-            Face face = Face.makeFaceFromVertices(new ArrayList<>(vertexSet), es, vertexSet.size());
+            List<Vertex> vertexList = new ArrayList<>(vertexSet);
+            Vector3 center = Vertex.getAverage(vertexList);
+            Vector3 normal = center.cpy().sub(copy.center);
+            Face.sortVerticesClockwise(vertexList, normal);
+            Face face = Face.makeFaceFromVertices(vertexList, edgeMap, vertexSet.size());
             for (Edge edge : face.edges) {
-                if(!es.contains(edge))
-                    es.add(edge);
+                if(!edgeMap.containsKey(edge))
+                    edgeMap.put(edge, edge);
             }
             fs.add(face);
         }
 
-        Polyhedron r = new Polyhedron(vs, es, fs);
+        System.out.print("calc");
+        Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.calculateCenter();
         r.calculateNeighbors();
         r.setUp(copy.up.cpy());
@@ -75,10 +83,12 @@ public class Polyhedron {
 
         List<Vertex> vs = new ArrayList<>();
         List<Edge> es = new ArrayList<>();
+        Map<Edge, Edge> edgeMap = new HashMap<>();
         List<Face> fs = new ArrayList<>();
 
         Map<Vector3, Set<Vertex>> map = new HashMap<>();
 
+        System.out.print("edges..");
         // Create Edges
         for (Edge edge : copy.edges) {
             Vertex a = edge.a;
@@ -96,6 +106,7 @@ public class Polyhedron {
 
             Edge e = new Edge(s, t);
             es.add(e);
+            edgeMap.put(e, e);
 
             if(!map.containsKey(a))
                 map.put(a, new HashSet<>());
@@ -114,19 +125,37 @@ public class Polyhedron {
             map.get(d).add(t);
         }
 
-
+        System.out.println("faces..");
+        long timeSorting = 0;
+        long timeCreating = 0;
+        long total = 0;
+        long tStart = System.currentTimeMillis();
         for (Map.Entry<Vector3, Set<Vertex>> entry : map.entrySet()) {
             Vector3 key = entry.getKey();
             Set<Vertex> vertexSet = entry.getValue();
-            Face face = Face.makeFaceFromVertices(new ArrayList<>(vertexSet), es, vertexSet.size());
+            List<Vertex> vertexList = new ArrayList<>(vertexSet);
+            Vector3 center = Vertex.getAverage(vertexList);
+            Vector3 normal = center.cpy().sub(copy.center);
+            long start = System.currentTimeMillis();
+            Face.sortVerticesClockwise(vertexList, normal);
+            long end = System.currentTimeMillis();
+            timeSorting += end - start;
+            start = System.currentTimeMillis();
+            Face face = Face.makeFaceFromVertices(vertexList, edgeMap, vertexSet.size());
+            end = System.currentTimeMillis();
+            timeCreating += end - start;
             for (Edge edge : face.edges) {
-                if(!es.contains(edge))
-                    es.add(edge);
+                if(!edgeMap.containsKey(edge))
+                    edgeMap.put(edge, edge);
             }
             fs.add(face);
         }
+        long tEnd = System.currentTimeMillis();
 
-        Polyhedron r = new Polyhedron(vs, es, fs);
+        System.out.println("sorting: " + timeSorting / 1000f + "| creating: "  + timeCreating / 1000f);
+        System.out.println("total:" +  (tEnd - tStart) / 1000f);
+
+        Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.setUp(copy.up.cpy());
         r.calculateCenter();
         r.calculateNeighbors();
@@ -179,7 +208,8 @@ public class Polyhedron {
     }
 
     public Mesh makeMesh(Color color, int renderType) {
-        Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 2,
+        System.out.println("making mesh");
+        Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 6,
                 new VertexAttributes(
                         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
                         new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
@@ -209,6 +239,16 @@ public class Polyhedron {
                 indices[j + 1] = (short) b;
             }
             mesh.setIndices(indices);
+        }
+        else if (renderType == GL20.GL_TRIANGLES) {
+            int amount = 0;
+            for (Face face : faces) {
+                amount += (face.vertices.size() - 2);
+            }
+            short[] indices = new short[amount * 3];
+            for (int i = 0; i < faces.size(); i++) {
+                Face face = faces.get(i);
+            }
         }
         mesh.transform(transform);
         return mesh;
@@ -282,6 +322,22 @@ public class Polyhedron {
         for (Face face : faces) {
             for (Edge edge : face.edges) {
                 face.neighbors.add(edge.getOtherFace(face));
+            }
+        }
+    }
+
+    public void sortReferences() {
+        for (Face face : faces) {
+            Vector3 norm = face.center.cpy().sub(this.center).nor();
+            Face.sortVerticesClockwise(face.vertices, norm);
+            float[] vers = new float[face.vertices.size() * 3];
+            List<Vertex> vertexList = face.vertices;
+            for (int i = 0; i < vertexList.size(); i++) {
+                Vertex vertex = vertexList.get(i);
+                int j = i * 3;
+                vers[j] = vertex.x;
+                vers[j+1] = vertex.y;
+                vers[j+2] = vertex.z;
             }
         }
     }

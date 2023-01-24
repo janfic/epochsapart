@@ -60,32 +60,77 @@ public class Face {
      * @param vertices with size n
      * @return new n sided face
      */
-    public static Face makeFaceFromVertices(List<Vertex> vertices, List<Edge> es, int n) {
+    public static Face makeFaceFromVertices(List<Vertex> vertices, Map<Edge, Edge> edgeMap, int n) {
         List<Edge> newEdges = new ArrayList<>();
         List<Edge> possibleEdges = new LinkedList<>();
 
         for (int i = 0; i < vertices.size(); i++) {
             Vertex a = vertices.get(i);
-            for (int j = i + 1; j < vertices.size(); j++) {
-                Vertex b = vertices.get(j);
-                if(i == j || a == b) continue;
-                Edge e = new Edge(a,b);
-                if(es.contains(e)) {
-                    e = es.get(es.indexOf(e));
-                }
-                insert(possibleEdges, e);
-            }
+            Vertex b = vertices.get((i + 1) % vertices.size());
+            Edge e = new Edge(a, b);
+            possibleEdges.add(e);
         }
 
-        for (int i = 0; i < vertices.size(); i++) {
+        for (int i = 0; i < possibleEdges.size(); i++) {
             Edge possibleEdge = possibleEdges.get(i);
-            if(es.contains(possibleEdge)) {
-                possibleEdge = es.get(es.indexOf(possibleEdge));
+            if(edgeMap.containsKey(possibleEdge)) {
+                possibleEdge = edgeMap.get(possibleEdge);
             }
             newEdges.add(possibleEdge);
         }
 
         return new Face(vertices, newEdges);
+    }
+
+    public static void sortVerticesClockwise(List<Vertex> vertices, Vector3 normal) {
+        Vector3 center = Vertex.getAverage(vertices);
+        normal.nor();
+
+        Vertex x = vertices.get(0);
+
+        ClockwiseSorter sorter = new ClockwiseSorter(center, normal, x);
+        vertices.sort(sorter);
+    }
+
+    private static class ClockwiseSorter implements Comparator<Vector3> {
+
+        Vector3 n, c;
+        Vector3 x, p;
+
+        public ClockwiseSorter(Vector3 center, Vector3 normal, Vector3 x) {
+            this.c = center;
+            this.n = normal.cpy().nor();
+            this.p = projectToPlane(c, n, x);
+            this.x = x;
+        }
+
+        public float getAngle(Vector3 v) {
+            Vector3 q = projectToPlane(c, n, v);
+            float angle = (float) Math.acos(
+                    q.dot(p) /
+                            (q.len() * p.len())
+            );
+            Vector3 cross = q.cpy().crs(p);
+            if(n.dot(cross) > 0) {
+                angle = -angle;
+            }
+            if(angle < 0) angle += (Math.PI * 2);
+            if(Float.isNaN(angle) && v != x) {
+                angle = (float) Math.PI;
+            }
+            return angle;
+        }
+
+        @Override
+        public int compare(Vector3 a, Vector3 b) {
+            if(a.equals(b)) return 0;
+            return (int) Math.signum(getAngle(a) - getAngle(b));
+        }
+    }
+
+    private static Vector3 projectToPlane(Vector3 center, Vector3 normal, Vector3 x) {
+        Vector3 cx = x.cpy().sub(center);
+        return cx.cpy().sub(normal.cpy().scl(cx.cpy().dot(normal)));
     }
 
     private static void insert(List<Edge> edges, Edge e) {
