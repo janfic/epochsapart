@@ -21,11 +21,11 @@ public class HexWorld {
             System.out.println("level: " + i);
             System.out.print("dual...");
             polyhedron2 = Polyhedron.dual(polyhedron2);
-//            System.out.println("done");
-//            System.out.print("truncate...");
-//            polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
-//            System.out.println("done");
+            System.out.println("done");
+            System.out.print("truncate...");
+            polyhedron2 = Polyhedron.uniformTruncate(polyhedron2);
+            System.out.println("done");
         }
-        polyhedron = polyhedron2.copy();
+        polyhedron = Polyhedron.sphereProject(polyhedron2, height);
     }
 }

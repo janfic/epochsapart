@@ -32,13 +32,13 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(15, 0, 0, 1);
+        hexWorld = new HexWorld(15, 0, 0, 4);
         renderer = new ShapeRenderer();
-        mesh = hexWorld.polyhedron.makeMesh(Color.WHITE);
-        radius = 10;
+        mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+        radius = 20;
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
-        camera = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 1f;
@@ -76,14 +76,12 @@ public class WorldSimScreen implements Screen {
         }
 
 
-        camera.position.set(camera.position.cpy().add(delta));
+        camera.position.set(camera.position.cpy().add(delta.scl(deltaTime)));
         norm = camera.position.cpy().sub(pos);
         norm.scl(radius / norm.len());
         camera.position.set(pos.cpy().add(norm));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.update();
-
-        System.out.println(camera.position.dst(hexWorld.polyhedron.getCenter()));
 
         shaderProgram.bind();
         shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);

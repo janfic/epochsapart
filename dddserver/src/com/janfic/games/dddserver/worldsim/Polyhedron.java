@@ -1,9 +1,6 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
@@ -129,10 +126,6 @@ public class Polyhedron {
             fs.add(face);
         }
 
-        System.out.println(fs.size());
-        System.out.println(es.size());
-        System.out.println(vs.size());
-
         Polyhedron r = new Polyhedron(vs, es, fs);
         r.setUp(copy.up.cpy());
         r.calculateCenter();
@@ -140,7 +133,52 @@ public class Polyhedron {
         return r;
     }
 
-    public Mesh makeMesh(Color color) {
+    public static Polyhedron sphereProject(Polyhedron polyhedron, float radius) {
+        Polyhedron copy = polyhedron.copy();
+
+        Map<Vertex, Vertex> map = new HashMap<>();
+
+        List<Vertex> vertexList = new ArrayList<>();
+        List<Edge> edgeList = new ArrayList<>();
+        List<Face> faceList = new ArrayList<>();
+
+        Vector3 center = copy.center;
+        for (Vertex vertex : copy.vertices) {
+            Vector3 dir = vertex.cpy().sub(center).nor();
+            Vertex newDelta = new Vertex(center.cpy().add(dir.scl(radius)));
+            map.put(vertex, newDelta);
+            vertexList.add(newDelta);
+        }
+
+        for (Edge edge : copy.edges) {
+            Edge e = new Edge(map.get(edge.a), map.get(edge.b));
+            edgeList.add(e);
+        }
+
+        for (Face face : copy.faces) {
+            List<Vertex> verts = new ArrayList<>();
+            for (Vertex vertex : face.vertices) {
+                verts.add(map.get(vertex));
+            }
+            List<Edge> edges = new ArrayList<>();
+            for (Edge edge : face.edges) {
+                Edge e = new Edge(map.get(edge.a), map.get(edge.b));
+                e = edgeList.get(edgeList.indexOf(e));
+                edges.add(e);
+            }
+
+            faceList.add(new Face(verts, edges));
+        }
+
+
+        Polyhedron r = new Polyhedron(vertexList, edgeList, faceList);
+        r.calculateCenter();
+        r.calculateNeighbors();
+        r.setUp(copy.up.cpy());
+        return r;
+    }
+
+    public Mesh makeMesh(Color color, int renderType) {
         Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 2,
                 new VertexAttributes(
                         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
@@ -159,16 +197,19 @@ public class Polyhedron {
             verts[j + 6] = color.a;
         }
         mesh.setVertices(verts, 0, vertices.size() * (3 + 4));
-        short[] indices = new short[edges.size() * 2];
-        for (int i = 0; i < edges.size(); i++) {
-            Edge edge = edges.get(i);
-            int a = vertices.indexOf(edge.a);
-            int b = vertices.indexOf(edge.b);
-            int j = i * 2;
-            indices[j] = (short) a;
-            indices[j + 1] = (short) b;
+
+        if(renderType == GL20.GL_LINES) {
+            short[] indices = new short[edges.size() * 2];
+            for (int i = 0; i < edges.size(); i++) {
+                Edge edge = edges.get(i);
+                int a = vertices.indexOf(edge.a);
+                int b = vertices.indexOf(edge.b);
+                int j = i * 2;
+                indices[j] = (short) a;
+                indices[j + 1] = (short) b;
+            }
+            mesh.setIndices(indices);
         }
-        mesh.setIndices(indices);
         mesh.transform(transform);
         return mesh;
     }
@@ -186,7 +227,6 @@ public class Polyhedron {
     }
 
     public Polyhedron copy() {
-        System.out.print("c)");
         long start = System.currentTimeMillis();
         List<Vertex> vs = new ArrayList<>(vertices);
         List<Edge> es = new ArrayList<>(edges);
@@ -225,7 +265,7 @@ public class Polyhedron {
         polyhedron.setUp(this.up.cpy());
         polyhedron.calculateNeighbors();
         long end = System.currentTimeMillis();
-        System.out.println(" " + (end - start) / 1000f);
+        //System.out.println(" " + (end - start) / 1000f);
         return polyhedron;
     }
 
