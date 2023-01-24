@@ -33,7 +33,7 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(15, 0, 0, 6);
+        hexWorld = new HexWorld(15, 0, 0, 0);
         renderer = new ShapeRenderer();
         mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
         radius = 20;
@@ -43,7 +43,7 @@ public class WorldSimScreen implements Screen {
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 1f;
-        camera.far = hexWorld.height / 3f;
+        camera.far = 200;
     }
 
     @Override
@@ -75,9 +75,25 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
             delta.add(camera.up.cpy().crs(norm).nor());
         }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            hexWorld.truncate();
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
+            hexWorld.dual();
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            hexWorld.sphere();
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            hexWorld.reset();
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+        }
 
 
-        camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - hexWorld.height / 2)* deltaTime)));
+        camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - (hexWorld.height / 2 + 5))* deltaTime)));
         norm = camera.position.cpy().sub(pos);
         norm.scl(radius / norm.len());
         camera.position.set(pos.cpy().add(norm));

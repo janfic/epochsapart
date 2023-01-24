@@ -17,8 +17,8 @@ public class HexWorld {
         this.level = level;
 
         polyhedron0 = new RegularIcosahedron(height);
-        polyhedron1 = Polyhedron.uniformTruncate(polyhedron0);
-        polyhedron2 = polyhedron1.copy();
+        //polyhedron1 = Polyhedron.uniformTruncate(polyhedron0);
+        polyhedron2 = polyhedron0.copy();
         for(int i = 1; i <= level; i++) {
             System.out.println("level: " + i);
             System.out.print("dual...");
@@ -30,5 +30,21 @@ public class HexWorld {
         }
 //        polyhedron = Polyhedron.sphereProject(polyhedron2, height / 2);
         polyhedron = polyhedron2;
+    }
+
+    public void dual() {
+        polyhedron = Polyhedron.dual(polyhedron);
+    }
+
+    public void truncate() {
+        polyhedron = Polyhedron.uniformTruncate(polyhedron);
+    }
+
+    public void sphere() {
+        polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
+    }
+
+    public void reset() {
+        polyhedron = new RegularIcosahedron(height);
     }
 }

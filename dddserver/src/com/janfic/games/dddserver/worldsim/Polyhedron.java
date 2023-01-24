@@ -36,7 +36,6 @@ public class Polyhedron {
         Polyhedron copy = polyhedron.copy();
 
         List<Vertex> vs = new ArrayList<>();
-        List<Edge> es = new ArrayList<>();
         List<Face> fs = new ArrayList<>();
 
         Map<Edge, Edge> edgeMap = new HashMap<>();
@@ -50,11 +49,10 @@ public class Polyhedron {
             Set<Vertex> vertexSet = new HashSet<>();
             map.put(vertex, vertexSet);
             for (Face face : vertex.faces) {
-                vertexSet.add(new Vertex(face.center));
+                vertexSet.add(vs.get(vs.indexOf(new Vertex(face.center))));
             }
         }
 
-        System.out.print("faces..");
         for (Map.Entry<Vector3, Set<Vertex>> entry : map.entrySet()) {
             Vector3 key = entry.getKey();
             Set<Vertex> vertexSet = entry.getValue();
@@ -70,7 +68,6 @@ public class Polyhedron {
             fs.add(face);
         }
 
-        System.out.print("calc");
         Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.calculateCenter();
         r.calculateNeighbors();

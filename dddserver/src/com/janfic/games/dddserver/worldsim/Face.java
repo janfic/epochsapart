@@ -26,6 +26,9 @@ public class Face {
         for (Edge edge : this.edges) {
             edge.addFace(this);
         }
+        for( Vertex v : this.vertices) {
+            v.addFace(this);
+        }
     }
 
     public boolean isNeighbor(Face f) {
