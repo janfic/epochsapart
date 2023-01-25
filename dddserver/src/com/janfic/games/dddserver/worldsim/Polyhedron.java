@@ -403,7 +403,7 @@ public class Polyhedron implements RenderableProvider {
     public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
         for (Face face : faces) {
             Renderable r = pool.obtain();
-            r.meshPart.mesh = face.makeMesh(renderType, this);
+            //r.meshPart.mesh = face.makeMesh(renderType, this);
         }
     }
 }
