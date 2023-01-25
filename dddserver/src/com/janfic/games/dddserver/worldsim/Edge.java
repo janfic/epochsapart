@@ -9,10 +9,29 @@ import java.util.Objects;
 public class Edge implements Comparable<Edge>{
     public Vertex a, b;
     public List<Face> faces;
+    public Polyhedron parent;
+    public short aIndex, bIndex;
+
     public Edge(Vertex a, Vertex b) {
         this.a = a;
         this.b = b;
         faces = new ArrayList<>();
+    }
+
+    public void setAIndex(short index) {
+        aIndex = index;
+    }
+
+    public void setBIndex(short index) {
+        bIndex = index;
+    }
+
+    public short getAIndex() {
+        return aIndex;
+    }
+
+    public short getBIndex() {
+        return bIndex;
     }
 
     public float dist() {

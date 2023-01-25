@@ -1,21 +1,25 @@
 package com.janfic.games.dddserver.worldsim;
 
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.GeometryUtils;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.bullet.collision._btMprSimplex_t;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 
 import java.util.*;
 
-public class Polyhedron {
+public class Polyhedron implements RenderableProvider {
     List<Vertex> vertices;
     List<Edge> edges;
     List<Face> faces;
     Vertex center;
     Vector3 up;
     Matrix4 transform;
+    int renderType;
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
@@ -23,6 +27,8 @@ public class Polyhedron {
         faces = new ArrayList<>(f);
         transform = new Matrix4();
         calculateCenter();
+        index();
+
     }
 
     public Polyhedron() {
@@ -49,7 +55,9 @@ public class Polyhedron {
             Set<Vertex> vertexSet = new HashSet<>();
             map.put(vertex, vertexSet);
             for (Face face : vertex.faces) {
-                vertexSet.add(vs.get(vs.indexOf(new Vertex(face.center))));
+                Vertex v = new Vertex(face.center);
+                vertexSet.add(vs.get(vs.indexOf(v)));
+                v.setIndex((short) vs.indexOf(v));
             }
         }
 
@@ -85,7 +93,6 @@ public class Polyhedron {
 
         Map<Vector3, Set<Vertex>> map = new HashMap<>();
 
-        System.out.print("edges..");
         // Create Edges
         for (Edge edge : copy.edges) {
             Vertex a = edge.a;
@@ -205,7 +212,6 @@ public class Polyhedron {
     }
 
     public Mesh makeMesh(Color color, int renderType) {
-        System.out.println("making mesh");
         Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 6,
                 new VertexAttributes(
                         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
@@ -213,6 +219,7 @@ public class Polyhedron {
                 )
         );
         float[] verts = new float[vertices.size() * mesh.getVertexSize() / 4];
+
         for (int i = 0; i < vertices.size(); i++) {
             int j = i * 7;
             verts[j] = vertices.get(i).x;
@@ -229,8 +236,8 @@ public class Polyhedron {
             short[] indices = new short[edges.size() * 2];
             for (int i = 0; i < edges.size(); i++) {
                 Edge edge = edges.get(i);
-                int a = vertices.indexOf(edge.a);
-                int b = vertices.indexOf(edge.b);
+                int a = edge.a.getIndex();
+                int b = edge.b.getIndex();
                 int j = i * 2;
                 indices[j] = (short) a;
                 indices[j + 1] = (short) b;
@@ -243,9 +250,26 @@ public class Polyhedron {
                 amount += (face.vertices.size() - 2);
             }
             short[] indices = new short[amount * 3];
+            int index = 0;
             for (int i = 0; i < faces.size(); i++) {
                 Face face = faces.get(i);
+                Vertex a = face.vertices.get(0);
+                for (int j = 1; j < face.vertices.size() - 1; j++) {
+                    Vertex b = face.vertices.get(j);
+                    Vertex c = face.vertices.get(j + 1);
+                    Plane plane = new Plane(a, b ,c);
+                    if(plane.isFrontFacing(face.center.cpy().sub(this.center))) {
+                        indices[index++] = a.getIndex();
+                        indices[index++] = b.getIndex();
+                        indices[index++] = c.getIndex();
+                    } else {
+                        indices[index++] = a.getIndex();
+                        indices[index++] = c.getIndex();
+                        indices[index++] = b.getIndex();
+                    }
+                }
             }
+            mesh.setIndices(indices);
         }
         mesh.transform(transform);
         return mesh;
@@ -344,6 +368,13 @@ public class Polyhedron {
 
     }
 
+    public void index() {
+        for (int i = 0; i < vertices.size(); i++) {
+            Vertex vertex = vertices.get(i);
+            vertex.setIndex((short)i);
+        }
+    }
+
     public Vector3 getCenter() {
         return center;
     }
@@ -366,5 +397,13 @@ public class Polyhedron {
 
     public Matrix4 getTransform() {
         return transform;
+    }
+
+    @Override
+    public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
+        for (Face face : faces) {
+            Renderable r = pool.obtain();
+            r.meshPart.mesh = face.makeMesh(renderType, this);
+        }
     }
 }

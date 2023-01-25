@@ -12,11 +12,20 @@ public class Vertex extends Vector3 {
 
     List<Edge> edges;
     List<Face> faces;
+    short index;
 
     public Vertex(Vector3 vector3) {
         super(vector3);
         edges = new ArrayList<>();
         faces = new ArrayList<>();
+    }
+
+    public void setIndex(short index) {
+        this.index = index;
+    }
+
+    public short getIndex() {
+        return index;
     }
 
     public Vertex(float x, float y, float z) {

@@ -1,5 +1,6 @@
 package com.janfic.games.dddserver.worldsim;
 
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.math.*;
 
 import java.util.*;
@@ -127,7 +128,7 @@ public class Face {
         @Override
         public int compare(Vector3 a, Vector3 b) {
             if(a.equals(b)) return 0;
-            return (int) Math.signum(getAngle(a) - getAngle(b));
+            return (int) Math.signum(getAngle(b) - getAngle(a));
         }
     }
 

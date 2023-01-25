@@ -15,6 +15,9 @@ import com.janfic.games.dddserver.worldsim.World;
 import org.graalvm.compiler.loop.MathUtil;
 import org.lwjgl.opengl.GL20;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WorldSimScreen implements Screen {
 
     ShapeRenderer renderer;
@@ -27,23 +30,27 @@ public class WorldSimScreen implements Screen {
     PerspectiveCamera camera;
     float radius;
 
+    int renderType = GL20.GL_TRIANGLES;
 
     ModelBatch batch;
     ModelInstance instance;
+
+    List<Renderable> renderables;
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
         hexWorld = new HexWorld(15, 0, 0, 0);
         renderer = new ShapeRenderer();
-        mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
-        radius = 20;
+        mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
+        radius = 15 * 2;
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 1f;
-        camera.far = 200;
+        camera.far = radius * 2;
+        renderables = new ArrayList<>();
     }
 
     @Override
@@ -75,23 +82,34 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
             delta.add(camera.up.cpy().crs(norm).nor());
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
             hexWorld.truncate();
-            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             hexWorld.dual();
-            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             hexWorld.sphere();
-            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             hexWorld.reset();
-            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, GL20.GL_LINES);
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
         }
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            renderType = renderType == GL20.GL_LINES ? GL20.GL_TRIANGLES : GL20.GL_LINES;
+            mesh = hexWorld.polyhedron.makeMesh(Color.WHITE, renderType);
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
+            camera.far += deltaTime;
+            camera.update();
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.X)) {
+            camera.far -= deltaTime;
+            camera.update();
+        }
 
         camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - (hexWorld.height / 2 + 5))* deltaTime)));
         norm = camera.position.cpy().sub(pos);
@@ -100,9 +118,14 @@ public class WorldSimScreen implements Screen {
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.update();
 
+        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+
         shaderProgram.bind();
         shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);
-        mesh.render(shaderProgram, GL20.GL_LINES);
+        Gdx.gl.glCullFace(GL20.GL_FRONT);
+        mesh.render(shaderProgram, renderType);
+        //Gdx.gl.glCullFace(GL20.GL_BACK);
+        //mesh.render(shaderProgram, GL20.GL_TRIANGLES);
     }
 
     @Override

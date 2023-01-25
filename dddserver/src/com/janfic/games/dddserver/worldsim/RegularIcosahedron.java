@@ -116,6 +116,7 @@ public class RegularIcosahedron extends Polyhedron {
         // Bottom Ring
         calculateNeighbors();
         calculateCenter();
+        index();
         setUp(top);
     }
 }
