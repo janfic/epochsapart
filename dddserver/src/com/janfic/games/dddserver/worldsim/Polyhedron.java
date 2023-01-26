@@ -1,8 +1,10 @@
 package com.janfic.games.dddserver.worldsim;
 
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
@@ -19,7 +21,7 @@ public class Polyhedron implements RenderableProvider {
     Vertex center;
     Vector3 up;
     Matrix4 transform;
-    int renderType;
+    public int renderType;
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
@@ -28,7 +30,7 @@ public class Polyhedron implements RenderableProvider {
         transform = new Matrix4();
         calculateCenter();
         index();
-
+        renderType = GL20.GL_LINES;
     }
 
     public Polyhedron() {
@@ -258,7 +260,7 @@ public class Polyhedron implements RenderableProvider {
                     Vertex b = face.vertices.get(j);
                     Vertex c = face.vertices.get(j + 1);
                     Plane plane = new Plane(a, b ,c);
-                    if(plane.isFrontFacing(face.center.cpy().sub(this.center))) {
+                    if(!plane.isFrontFacing(face.center.cpy().sub(this.center))) {
                         indices[index++] = a.getIndex();
                         indices[index++] = b.getIndex();
                         indices[index++] = c.getIndex();
@@ -285,6 +287,14 @@ public class Polyhedron implements RenderableProvider {
 
     public List<Vertex> getVertices() {
         return vertices;
+    }
+
+    public void setRenderType(int renderType) {
+        this.renderType = renderType;
+    }
+
+    public int getRenderType() {
+        return renderType;
     }
 
     public Polyhedron copy() {
@@ -325,6 +335,7 @@ public class Polyhedron implements RenderableProvider {
         polyhedron.calculateCenter();
         polyhedron.setUp(this.up.cpy());
         polyhedron.calculateNeighbors();
+        polyhedron.setRenderType(this.renderType);
         long end = System.currentTimeMillis();
         //System.out.println(" " + (end - start) / 1000f);
         return polyhedron;
@@ -399,11 +410,34 @@ public class Polyhedron implements RenderableProvider {
         return transform;
     }
 
+    Camera camera;
+
+    public void setRenderSettings(Camera camera) {
+        this.camera = camera;
+    }
+
     @Override
-    public void getRenderables(Array<Renderable> array, Pool<Renderable> pool) {
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+        for (int i = 0; i < faces.size(); i++) {
+            Face face = faces.get(i);
+            if(camera.position.dst(face.center) > camera.far) continue;
+            Renderable renderable = pool.obtain();
+            if(face.isDirty) {
+                face.clean(renderType, this);
+            }
+            renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
+            renderable.meshPart.mesh = face.getMesh();
+            renderable.meshPart.offset = 0;
+            renderable.meshPart.size = face.vertices.size() * (renderType == GL20.GL_LINES ? 2 : 3);
+            renderable.meshPart.primitiveType = renderType;
+            renderable.worldTransform.set(transform);
+            renderables.add(renderable);
+        }
+    }
+
+    public void dirty() {
         for (Face face : faces) {
-            Renderable r = pool.obtain();
-            //r.meshPart.mesh = face.makeMesh(renderType, this);
+            face.setDirty(true);
         }
     }
 }
