@@ -22,6 +22,7 @@ public class Polyhedron implements RenderableProvider {
     Vector3 up;
     Matrix4 transform;
     public int renderType;
+    private int chunkSize = 2;
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
@@ -33,6 +34,10 @@ public class Polyhedron implements RenderableProvider {
         renderType = GL20.GL_LINES;
     }
 
+    public void setChunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
+    }
+
     public Polyhedron() {
         vertices = new ArrayList<>();
         edges = new ArrayList<>();
@@ -41,6 +46,8 @@ public class Polyhedron implements RenderableProvider {
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
+        System.out.println("DUAL");
+
         Polyhedron copy = polyhedron.copy();
 
         List<Vertex> vs = new ArrayList<>();
@@ -81,7 +88,9 @@ public class Polyhedron implements RenderableProvider {
         Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.calculateCenter();
         r.calculateNeighbors();
+        r.setChunkSize(copy.chunkSize);
         r.setUp(copy.up.cpy());
+        r.makeChunks();
         return r;
     }
 
@@ -164,7 +173,9 @@ public class Polyhedron implements RenderableProvider {
         Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.setUp(copy.up.cpy());
         r.calculateCenter();
+        r.setChunkSize(polyhedron.chunkSize + 2);
         r.calculateNeighbors();
+        r.makeChunks();
         return r;
     }
 
@@ -209,6 +220,8 @@ public class Polyhedron implements RenderableProvider {
         Polyhedron r = new Polyhedron(vertexList, edgeList, faceList);
         r.calculateCenter();
         r.calculateNeighbors();
+        r.setChunkSize(polyhedron.chunkSize);
+        r.makeChunks();
         r.setUp(copy.up.cpy());
         return r;
     }
@@ -336,6 +349,7 @@ public class Polyhedron implements RenderableProvider {
         polyhedron.setUp(this.up.cpy());
         polyhedron.calculateNeighbors();
         polyhedron.setRenderType(this.renderType);
+        polyhedron.setChunkSize(this.chunkSize);
         long end = System.currentTimeMillis();
         //System.out.println(" " + (end - start) / 1000f);
         return polyhedron;
@@ -416,23 +430,136 @@ public class Polyhedron implements RenderableProvider {
         this.camera = camera;
     }
 
-    @Override
-    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+    Map<Vector3, Mesh> meshMap;
+    Map<Vector3, List<Face>> chunks;
+    List<Vector3> chunkVertices;
+
+    public void makeChunks()  {
+        float radius = center.cpy().dst(vertices.get(0));
+        System.out.println("making chunks");
+
+        chunks = new HashMap<>();
+        chunkVertices = new ArrayList<>();
+        meshMap = new HashMap<>();
+
+        float deltaDivisions = chunkSize;
+        float thetaDivisions = chunkSize;
+
+        for (float theta = 0; theta < Math.PI * 2; theta += 2 * Math.PI / thetaDivisions) {
+            for (float delta = 0; delta < Math.PI * 2; delta += 2 * Math.PI / deltaDivisions) {
+                Vector3 vector3 = new Vector3(
+                        (float) (radius * Math.cos(theta) * Math.sin(delta)),
+                        (float) (radius * Math.sin(theta) * Math.sin(delta)),
+                        (float) (radius * Math.cos(delta) ));
+                vector3.add(center);
+                chunks.put(vector3, new ArrayList<>());
+                chunkVertices.add(vector3);
+
+            }
+        }
+
         for (int i = 0; i < faces.size(); i++) {
             Face face = faces.get(i);
-            if(camera.position.dst(face.center) > camera.far) continue;
+            float dist = chunkVertices.get(0).dst2(face.center);
+            Vector3 closest = chunkVertices.get(0);
+            for (Vector3 vector3 : chunks.keySet()) {
+                float d = vector3.dst2(face.center);
+                if(dist > d) {
+                    closest = vector3;
+                    dist = d;
+                }
+            }
+            chunks.get(closest).add(face);
+        }
+
+        System.out.println(chunkVertices.size());
+    }
+
+
+    @Override
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+
+        for (int i = 0; i < chunkVertices.size(); i++) {
+            Vector3 chunkVector = chunkVertices.get(i);
+            if(camera.position.dst(chunkVector) > camera.far) continue;
             Renderable renderable = pool.obtain();
-            if(face.isDirty) {
-                face.clean(renderType, this);
+            if(!meshMap.containsKey(chunkVector)) {
+                List<Face> faceList = chunks.get(chunkVector);
+                renderable.meshPart.mesh = makeMeshWithFaces(faceList, renderType);
+                meshMap.put(chunkVector, renderable.meshPart.mesh);
+            }
+            else {
+                renderable.meshPart.mesh = meshMap.get(chunkVector);
             }
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
-            renderable.meshPart.mesh = face.getMesh();
             renderable.meshPart.offset = 0;
-            renderable.meshPart.size = face.vertices.size() * (renderType == GL20.GL_LINES ? 2 : 3);
             renderable.meshPart.primitiveType = renderType;
+            renderable.meshPart.size = renderable.meshPart.mesh.getNumIndices() * (renderType == GL20.GL_LINES ? 2 : 3);
             renderable.worldTransform.set(transform);
             renderables.add(renderable);
         }
+    }
+
+    public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
+        List<Vertex> vertexList = new ArrayList<>();
+        List<Edge> edgeList = new ArrayList<>();
+        Map<Vertex, Vertex> vertexMap = new HashMap<>();
+        Map<Edge, Edge> edgeMap = new HashMap<>();
+        for (Face face : faces) {
+            for (Vertex vertex : face.vertices) {
+                if(!vertexMap.containsKey(vertex)) {
+                    vertexList.add(vertex);
+                    vertexMap.put(vertex, vertex);
+                }
+            }
+            for(Edge edge : face.edges) {
+                if(!edgeMap.containsKey(edge)) {
+                    edgeList.add(edge);
+                    edgeMap.put(edge, edge);
+                }
+            }
+        }
+        Mesh mesh = new Mesh(true, true, vertexList.size(), vertexList.size() * (renderType == GL20.GL_LINES ? 20 : 30),
+                new VertexAttributes(
+                        new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                        new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),
+                        new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
+                )
+        );
+        //System.out.println(vertexList.size());
+        float[] verts = new float[vertexList.size() * mesh.getVertexSize() / 4];
+        int posOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset / 4;
+        int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
+        int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
+        for (int i = 0; i < vertexList.size(); i++) {
+            Vertex v = vertexList.get(i);
+            Vector3 norm = v.cpy().sub(center).nor();
+            int j = i * mesh.getVertexSize() / 4;
+            verts[j + posOffset] = v.x;
+            verts[j + posOffset + 1] = v.y;
+            verts[j + posOffset + 2] = v.z;
+            verts[j + norOffset] = norm.x;
+            verts[j + norOffset + 1] = norm.y;
+            verts[j + norOffset + 2] = norm.z;
+            verts[j + colOffset] = 1;
+            verts[j + colOffset + 1] = 1;
+            verts[j + colOffset + 2] = 1;
+            verts[j + colOffset + 3] = 1;
+        }
+        mesh.setVertices(verts, 0, verts.length);
+        if(renderType == GL20.GL_LINES) {
+            short[] indices = new short[edgeList.size() * 2];
+            for (int i = 0; i < edgeList.size(); i++) {
+                Edge edge = edgeList.get(i);
+                int a = vertexList.indexOf(edge.a);
+                int b = vertexList.indexOf(edge.b);
+                int j = i * 2;
+                indices[j] = (short) a;
+                indices[j + 1] = (short) b;
+            }
+            mesh.setIndices(indices, 0, indices.length);
+        }
+        return mesh;
     }
 
     public void dirty() {

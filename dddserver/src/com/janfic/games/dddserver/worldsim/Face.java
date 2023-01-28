@@ -195,6 +195,31 @@ public class Face {
         return mesh;
     }
 
+    public List<Face> collectNeighbors(int radius) {
+        List<Face> faces = new ArrayList<>();
+        Set<Face> marked = new HashSet<>();
+        Queue<Face> queue = new LinkedList<>();
+        Map<Face, Integer> distance = new HashMap<>();
+        queue.add(this);
+        distance.put(this, 0);
+
+        while(!queue.isEmpty()) {
+            Face f = queue.poll();
+            if(marked.contains(f)) continue;
+            marked.add(f);
+            faces.add(f);
+            if(distance.get(f) < radius) {
+                for (Face neighbor : f.neighbors) {
+                    if(!distance.containsKey(neighbor))
+                        distance.put(neighbor, distance.get(f) + 1);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        return faces;
+    }
+
     public void setDirty(boolean dirty) {
         isDirty = dirty;
     }
@@ -233,5 +258,7 @@ public class Face {
             if (a.equals(b)) return 0;
             return (int) Math.signum(getAngle(a) - getAngle(b));
         }
+
+
     }
 }

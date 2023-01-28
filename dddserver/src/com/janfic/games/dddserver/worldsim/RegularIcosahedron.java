@@ -31,44 +31,28 @@ public class RegularIcosahedron extends Polyhedron {
         Vector3 n = new Vector3((float) (bd * Math.cos(Math.PI / 5)), 0, (float) (bd * Math.sin((Math.PI / 5))));
         float gn = g.dst(n);
 
-        Vertex bottom = new Vertex();
-        Vertex top = new Vertex(0,gn + bd + gn,0);
+        Vertex bottom = new Vertex(0,-gn - bd/2,0);
+        Vertex top = new Vertex(0,gn + bd/2,0);
         vertices.add(bottom);
 
         for (int i = 0; i < 5; i++) {
             float theta = (float) (2 * Math.PI / 5 * i);
             float x = (float) (radCD * Math.cos(theta));
-            float y = gn;
+            float y = bottom.y + gn;
             float z = (float) (radCD * Math.sin(theta));
             Vertex v = new Vertex(x, y , z);
             vertices.add(v);
-        }
-
-        for (int i = 1; i < 6; i++) {
-            Vertex v1 = vertices.get(i);
-            Vertex v2 = vertices.get((i % 5) + 1);
         }
 
         for (int i = 0; i < 5; i++) {
             float theta = (float) (2 * Math.PI / 5 * i - Math.PI / 5);
             float x = (float) (radCD * Math.cos(theta));
-            float y = gn + bd;
+            float y = bottom.y + gn + bd;
             float z = (float) (radCD * Math.sin(theta));
             Vertex v = new Vertex(x, y , z);
             vertices.add(v);
         }
 
-        for (int i =6; i < 11; i++) {
-            Vector3 v1 = vertices.get(i);
-            Vector3 v2 = vertices.get((i % 5) + 6);
-        }
-
-        for (int i = 1; i <= 5; i++) {
-            Vector3 v1 = vertices.get(i);
-            Vector3 v2 = vertices.get(i + 5);
-            Vector3 v3 = vertices.get(i % 5 + 6);
-
-        }
         vertices.add(top);
 
 
@@ -114,10 +98,10 @@ public class RegularIcosahedron extends Polyhedron {
             faces.add(f);
         }
 
-        // Face Neighbors
-        // Bottom Ring
         calculateNeighbors();
         calculateCenter();
+        setChunkSize(2);
+        makeChunks();
         index();
         setUp(top);
     }
