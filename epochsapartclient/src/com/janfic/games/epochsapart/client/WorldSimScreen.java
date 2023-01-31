@@ -125,6 +125,11 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.I)) {
             System.out.println(hexWorld.polyhedron.getFaces().size());
         }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            hexWorld.generateTerrain();
+            hexWorld.polyhedron.dirty();
+        }
+
 
         hexWorld.polyhedron.setRenderSettings(camera);
         hexWorld.polyhedron.setRenderType(renderType);

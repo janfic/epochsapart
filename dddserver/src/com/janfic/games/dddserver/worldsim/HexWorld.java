@@ -1,6 +1,7 @@
 package com.janfic.games.dddserver.worldsim;
 
 import com.badlogic.gdx.math.Matrix4;
+import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 
 public class HexWorld {
 
@@ -16,6 +17,7 @@ public class HexWorld {
         this.height = height;
         this.level = level;
         polyhedron = new RegularIcosahedron(height);
+
     }
 
     public void dual() {
@@ -32,5 +34,11 @@ public class HexWorld {
 
     public void reset() {
         polyhedron = new RegularIcosahedron(height);
+    }
+
+    public void generateTerrain() {
+        for (Face face : polyhedron.faces) {
+            face.setHeight((float) Math.random());
+        }
     }
 }

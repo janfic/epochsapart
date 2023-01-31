@@ -18,6 +18,10 @@ public class Face {
     float height;
 
     public Face(List<Vertex> vertices, List<Edge> edges) {
+        this(vertices, edges, 0);
+    }
+
+    public Face(List<Vertex> vertices, List<Edge> edges, float height) {
         this.edges = edges;
         this.vertices = vertices;
         this.edgesSet = new HashSet<>();
@@ -35,7 +39,15 @@ public class Face {
         for (Vertex v : this.vertices) {
             v.addFace(this);
         }
-        this.height = MathUtils.random(1f);
+        this.height = height;
+    }
+
+    public void setHeight(float height) {
+        this.height = height;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     /**
