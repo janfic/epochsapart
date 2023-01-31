@@ -193,7 +193,7 @@ public class Face {
         for (int i = 0; i < this.vertices.size(); i++) {
             Vertex v = this.vertices.get(i).cpy();
             Vector3 norm = this.center.cpy().sub(center).nor();
-            Vector3 vNorm = center.cpy().sub(v).nor();
+            Vector3 vNorm = v.cpy().sub(center).nor();
             v.add(vNorm.cpy().scl(height));
             int j = i * mesh.getVertexSize() / 4;
             vertices[j + vertexOffset + posOffset] = v.x;
@@ -237,8 +237,9 @@ public class Face {
             }
             offsets[1] += index;
         }
+        if(height == 0 ) return offsets;
         // Side Faces
-        // For each side face:
+        // For each side face: ( edge )
         //      move vertexOffset to new offset
         //      move indexOffset to new offset
         //      lines:
@@ -253,6 +254,52 @@ public class Face {
         //              add 4 verts ( two top, two bottom ) ( with new normal )
         //              get triangle index
         //              update offsets[]
+        if(GL20.GL_LINES == renderType) {
+            // Add top and bottom verts
+            int faceVertOffset = offsets[0];
+            int faceIndexOffset = offsets[1];
+            for (int i = 0; i < this.vertices.size(); i++) {
+                Vertex v = this.vertices.get(i).cpy();
+                Vector3 norm = this.center.cpy().sub(center).nor();
+                Vector3 vNorm = v.cpy().sub(center).nor();
+                Vector3 bottom = v.cpy();
+                Vector3 top = v.cpy().add(vNorm.cpy().scl(height));
+                int j = i * (mesh.getVertexSize() / 4) * 2; // Adding 2 vertices
+                int offset = j + vertexOffset + faceVertOffset;
+                vertices[offset + posOffset] = top.x;
+                vertices[offset + posOffset + 1] = top.y;
+                vertices[offset + posOffset + 2] = top.z;
+                vertices[offset + norOffset] = norm.x;
+                vertices[offset + norOffset + 1] = norm.y;
+                vertices[offset + norOffset + 2] = norm.z;
+                vertices[offset + colOffset] = 1;
+                vertices[offset + colOffset + 1] = 1;
+                vertices[offset + colOffset + 2] = 1;
+                vertices[offset + colOffset + 3] = 1;
+                offsets[0] += (mesh.getVertexSize() / 4);
+                short topIndex = (short) (offset / (mesh.getVertexSize() / 4));
+                offset += (mesh.getVertexSize() / 4);
+                vertices[offset + posOffset] = bottom.x;
+                vertices[offset + posOffset + 1] = bottom.y;
+                vertices[offset + posOffset + 2] = bottom.z;
+                vertices[offset + norOffset] = norm.x;
+                vertices[offset + norOffset + 1] = norm.y;
+                vertices[offset + norOffset + 2] = norm.z;
+                vertices[offset + colOffset] = 1;
+                vertices[offset + colOffset + 1] = 1;
+                vertices[offset + colOffset + 2] = 1;
+                vertices[offset + colOffset + 3] = 1;
+                offsets[0] += (mesh.getVertexSize() / 4);
+                short bottomIndex = (short) (offset / (mesh.getVertexSize() / 4));
+
+                int iOffset = i * 2 + indexOffset;
+                indices[iOffset + faceIndexOffset] = topIndex;
+                indices[iOffset + faceIndexOffset + 1] = bottomIndex;
+                offsets[1] += 2;
+            }
+
+        }
+
         return offsets;
     }
 

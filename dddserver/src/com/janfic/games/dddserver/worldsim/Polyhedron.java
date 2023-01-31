@@ -504,7 +504,6 @@ public class Polyhedron implements RenderableProvider {
     }
 
     public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
-        System.out.println("MAKE CHUNK MESH");
         int edgeCount = 0, vertexCount = 0, triangleCount = 0;
         int indexCount = 0;
         for (Face face : faces) {
@@ -522,13 +521,7 @@ public class Polyhedron implements RenderableProvider {
         );
         float[] vertices = new float[vertexCount * mesh.getVertexSize() / 4];
         int vertexOffset = 0, indexOffset = 0;
-        short[] indices = new short[0];
-        if (renderType == GL20.GL_LINES) {
-            indices = new short[edgeCount * 2];
-        }
-        else if( renderType == GL20.GL_TRIANGLES) {
-            indices = new short[triangleCount * 3];
-        }
+        short[] indices = new short[indexCount];
         for(Face face : faces) {
             int[] offsets = face.addToMesh(mesh, vertices, indices, vertexOffset, indexOffset, renderType, this);
             vertexOffset += offsets[0];
