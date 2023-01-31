@@ -66,6 +66,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
         api 'com.github.czyzby:noise4j:0.1.0'
+        api 'de.articdive:jnoise-pipeline:4.0.0'
         api 'org.codehaus.groovy:groovy-all:2.4.5'
     }
 }

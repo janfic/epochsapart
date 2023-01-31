@@ -15,7 +15,6 @@ import com.badlogic.gdx.math.*;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.Vertex;
 import com.janfic.games.dddserver.worldsim.World;
-import org.graalvm.compiler.loop.MathUtil;
 import org.lwjgl.opengl.GL20;
 
 import java.util.ArrayList;

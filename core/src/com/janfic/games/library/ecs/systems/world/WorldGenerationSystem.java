@@ -34,7 +34,6 @@ import com.janfic.games.library.utils.ECSClickListener;
 import com.janfic.games.library.utils.voxel.CubeVoxel;
 import com.janfic.games.library.utils.voxel.VoxelChunk;
 import com.janfic.games.library.utils.voxel.VoxelWorld;
-import jdk.internal.icu.text.NormalizerBase;
 
 import java.io.File;
 

@@ -1,5 +1,4 @@
 include 'desktop', 'core'
 include 'epochsapartclient'
-include 'epochsapartclient'
 include 'dddserver'
 
