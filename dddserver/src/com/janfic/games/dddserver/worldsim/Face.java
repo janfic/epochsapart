@@ -195,6 +195,60 @@ public class Face {
         return mesh;
     }
 
+    public int[] addToMesh(Mesh mesh, float[] vertices, short[] indices, int vertexOffset, int indexOffset, int renderType, Polyhedron polyhedron) {
+        Vector3 center = polyhedron.center.cpy();
+        int posOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset / 4;
+        int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
+        int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
+        int[] offsets = new int[2];
+        for (int i = 0; i < this.vertices.size(); i++) {
+            Vertex v = this.vertices.get(i);
+            Vector3 norm = this.center.cpy().sub(center).nor();
+            int j = i * mesh.getVertexSize() / 4;
+            vertices[j + vertexOffset + posOffset] = v.x;
+            vertices[j + vertexOffset + posOffset + 1] = v.y;
+            vertices[j + vertexOffset + posOffset + 2] = v.z;
+            vertices[j + vertexOffset + norOffset] = norm.x;
+            vertices[j + vertexOffset + norOffset + 1] = norm.y;
+            vertices[j + vertexOffset + norOffset + 2] = norm.z;
+            vertices[j + vertexOffset + colOffset] = 1;
+            vertices[j + vertexOffset + colOffset + 1] = 1;
+            vertices[j + vertexOffset + colOffset + 2] = 1;
+            vertices[j + vertexOffset + colOffset + 3] = 1;
+            offsets[0] += mesh.getVertexSize() / 4;
+        }
+        if(renderType == GL20.GL_LINES) {
+            for (int i = 0; i < edges.size(); i++) {
+                Edge edge = edges.get(i);
+                int j = i * 2;
+                indices[indexOffset + j] = (short) (this.vertices.indexOf(edge.a) + vertexOffset / (mesh.getVertexSize() / 4));
+                indices[indexOffset + j + 1] = (short) (this.vertices.indexOf(edge.b) + vertexOffset / (mesh.getVertexSize() / 4));
+                offsets[1] += 2;
+            }
+        }
+        else if(renderType == GL20.GL_TRIANGLES) {
+            Vertex v = this.vertices.get(0);
+            int index = 0;
+            for (int j = 1; j < this.vertices.size() - 1; j++) {
+                Vertex b = this.vertices.get(j);
+                Vertex c = this.vertices.get(j + 1);
+                Plane plane = new Plane(v, b, c);
+                if (!plane.isFrontFacing(this.center.cpy().sub(polyhedron.center))) {
+                    indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
+                    indices[indexOffset + index+1] = (short) (vertexOffset / (mesh.getVertexSize() / 4)+ this.vertices.indexOf(b));
+                    indices[indexOffset + index+2] = (short) (vertexOffset / (mesh.getVertexSize() / 4)+ this.vertices.indexOf(c));
+                } else {
+                    indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
+                    indices[indexOffset + index+1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
+                    indices[indexOffset + index+2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
+                }
+                index += 3;
+            }
+            offsets[1] += index;
+        }
+        return offsets;
+    }
+
     public List<Face> collectNeighbors(int radius) {
         List<Face> faces = new ArrayList<>();
         Set<Face> marked = new HashSet<>();

@@ -33,7 +33,7 @@ public class WorldSimScreen implements Screen {
     PerspectiveCamera camera;
     float radius;
 
-    int renderType = GL20.GL_TRIANGLES;
+    int renderType = GL20.GL_LINES;
 
     ModelBatch batch;
     ModelInstance instance;
@@ -121,6 +121,9 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.X)) {
             camera.far -= deltaTime;
             camera.update();
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.I)) {
+            System.out.println(hexWorld.polyhedron.getFaces().size());
         }
 
         hexWorld.polyhedron.setRenderSettings(camera);

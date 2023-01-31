@@ -100,7 +100,7 @@ public class RegularIcosahedron extends Polyhedron {
 
         calculateNeighbors();
         calculateCenter();
-        setChunkSize(2);
+        setChunkSize(1);
         makeChunks();
         index();
         setUp(top);
