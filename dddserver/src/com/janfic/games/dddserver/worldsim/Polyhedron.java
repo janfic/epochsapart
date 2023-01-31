@@ -505,12 +505,14 @@ public class Polyhedron implements RenderableProvider {
 
     public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
         int edgeCount = 0, vertexCount = 0, triangleCount = 0;
+        int indexCount = 0;
         for (Face face : faces) {
             edgeCount += face.edges.size();
-            vertexCount += face.vertices.size();
+            indexCount += face.getMeshIndexCount(renderType);
+            vertexCount += face.getMeshVertexCount();
             triangleCount += face.vertices.size() - 2;
         }
-        Mesh mesh = new Mesh(false, vertexCount , (renderType == GL20.GL_LINES ? edgeCount * 2 : triangleCount * 3),
+        Mesh mesh = new Mesh(false, vertexCount , indexCount,
                 new VertexAttributes(
                         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
                         new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),

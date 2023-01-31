@@ -249,6 +249,14 @@ public class Face {
         return offsets;
     }
 
+    public int getMeshVertexCount() {
+        return vertices.size();
+    }
+
+    public int getMeshIndexCount(int renderType) {
+        return (renderType == GL20.GL_LINES ? edges.size() * 2 : (vertices.size() - 2) * 3);
+    }
+
     public List<Face> collectNeighbors(int radius) {
         List<Face> faces = new ArrayList<>();
         Set<Face> marked = new HashSet<>();
