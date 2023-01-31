@@ -16,9 +16,14 @@ public class Face {
     Vector3 center;
     List<Face> neighbors;
     float height;
+    Color color;
 
     public Face(List<Vertex> vertices, List<Edge> edges) {
         this(vertices, edges, 0);
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     public Face(List<Vertex> vertices, List<Edge> edges, float height) {
@@ -204,7 +209,7 @@ public class Face {
             v.add(vNorm.cpy().scl(height));
             int j = i * mesh.getVertexSize() / 4;
             int offset = j + vertexOffset;
-            addVertex(mesh, vertices, offset, v, norm, Color.WHITE);
+            addVertex(mesh, vertices, offset, v, norm, color == null ? Color.WHITE : color);
             offsets[0] += mesh.getVertexSize() / 4;
         }
         if (renderType == GL20.GL_LINES) {
@@ -264,11 +269,11 @@ public class Face {
                 Vector3 top = v.cpy().add(vNorm.cpy().scl(height));
                 int j = i * (mesh.getVertexSize() / 4) * 2; // Adding 2 vertices
                 int offset = j + vertexOffset + faceVertOffset;
-                addVertex(mesh, vertices, offset, top, norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, top, norm,  color == null ? Color.WHITE : color);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 short topIndex = (short) (offset / (mesh.getVertexSize() / 4));
                 offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, bottom, norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, bottom, norm,  color == null ? Color.WHITE : color);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 short bottomIndex = (short) (offset / (mesh.getVertexSize() / 4));
 
@@ -316,19 +321,19 @@ public class Face {
                 sortVerticesClockwise(sideVectors, norm);
                 int j = (index) * mesh.getVertexSize() / 4;
                 int offset = j + vertexOffset + faceVertOffset;
-                addVertex(mesh, vertices, offset, sideVectors.get(0), norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, sideVectors.get(0), norm,  color == null ? Color.WHITE : color);
                 short aIndex = (short) (offset / (mesh.getVertexSize() / 4));
                 offsets[0] += (mesh.getVertexSize() / 4);
                 offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(1), norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, sideVectors.get(1), norm,  color == null ? Color.WHITE : color);
                 short bIndex = (short) (aIndex + 1);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(2), norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, sideVectors.get(2), norm,  color == null ? Color.WHITE : color);
                 short cIndex = (short) (bIndex + 1);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(3), norm, Color.WHITE);
+                addVertex(mesh, vertices, offset, sideVectors.get(3), norm, color == null ? Color.WHITE : color);
                 short dIndex = (short) (cIndex + 1);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 index += 4;

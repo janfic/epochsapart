@@ -1,7 +1,10 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.math.Matrix4;
-import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
+import com.badlogic.gdx.graphics.Color;
+import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
+import de.articdive.jnoise.generators.noise_parameters.interpolation.Interpolation;
+import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
+import de.articdive.jnoise.pipeline.JNoise;
 
 public class HexWorld {
 
@@ -37,8 +40,21 @@ public class HexWorld {
     }
 
     public void generateTerrain() {
+        PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(3301).setInterpolation(Interpolation.COSINE).build();
+        float scale = 1 / 4f;
         for (Face face : polyhedron.faces) {
-            face.setHeight((float) Math.random());
+            float f = (float) generator.evaluateNoise(face.center.x * scale, face.center.y * scale, face.center.z * scale);
+            f = (f + 1) / 2f;
+            face.setHeight(f);
+            if(f > 0.6f) {
+                face.setColor(Color.GREEN);
+            }
+            else if (f > 0.5f) {
+                face.setColor(Color.YELLOW);
+            }
+            else {
+                face.setColor(Color.BLUE);
+            }
         }
     }
 }
