@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Vector3;
 
@@ -16,8 +17,7 @@ public class Face {
     Set<Edge> edgesSet;
     Vector3 center;
     List<Face> neighbors;
-    Mesh mesh;
-    boolean isDirty = true;
+    float height;
 
     public Face(List<Vertex> vertices, List<Edge> edges) {
         this.edges = edges;
@@ -37,6 +37,7 @@ public class Face {
         for (Vertex v : this.vertices) {
             v.addFace(this);
         }
+        this.height = MathUtils.random(1.0f);
     }
 
     /**
@@ -117,19 +118,6 @@ public class Face {
         return intersection.size() == edgesSet.size();
     }
 
-    public void clean(int renderType, Polyhedron polyhedron) {
-        isDirty = false;
-        mesh = makeMesh( renderType,  polyhedron);
-    }
-
-    public boolean isDirty() {
-        return isDirty;
-    }
-
-    public Mesh getMesh() {
-        return mesh;
-    }
-
     public Mesh makeMesh(int renderType, Polyhedron polyhedron) {
         Vector3 center = polyhedron.center.cpy();
         Mesh mesh = new Mesh(true, true, vertices.size(), vertices.size() * 10,
@@ -201,9 +189,12 @@ public class Face {
         int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
         int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
         int[] offsets = new int[2];
+        // Top Face
         for (int i = 0; i < this.vertices.size(); i++) {
-            Vertex v = this.vertices.get(i);
+            Vertex v = this.vertices.get(i).cpy();
             Vector3 norm = this.center.cpy().sub(center).nor();
+            Vector3 vNorm = center.cpy().sub(v).nor();
+            v.add(vNorm.cpy().scl(height));
             int j = i * mesh.getVertexSize() / 4;
             vertices[j + vertexOffset + posOffset] = v.x;
             vertices[j + vertexOffset + posOffset + 1] = v.y;
@@ -246,15 +237,41 @@ public class Face {
             }
             offsets[1] += index;
         }
+        // Side Faces
+        // For each side face:
+        //      move vertexOffset to new offset
+        //      move indexOffset to new offset
+        //      lines:
+        //          add top and bottom verts [ top, top, top, ...,  bottom, bottom, ... ]
+        //          get index of top
+        //          get index of bottom
+        //          add to indices
+        //          update offset[]
+        //      triangles:
+        //          for each edge
+        //              calculate normal for face
+        //              add 4 verts ( two top, two bottom ) ( with new normal )
+        //              get triangle index
+        //              update offsets[]
         return offsets;
     }
 
     public int getMeshVertexCount() {
-        return vertices.size();
+        if(height == 0) {
+            return vertices.size();
+        }
+        else {
+            return vertices.size() + edges.size() * 4;
+        }
     }
 
     public int getMeshIndexCount(int renderType) {
-        return (renderType == GL20.GL_LINES ? edges.size() * 2 : (vertices.size() - 2) * 3);
+        if(height == 0) {
+            return (renderType == GL20.GL_LINES ? edges.size() * 2 : (vertices.size() - 2) * 3);
+        }
+        else {
+            return (renderType == GL20.GL_LINES ? edges.size() * 2  + vertices.size() * 2: (vertices.size() - 2) * 3) + (edges.size() * 2) * 3;
+        }
     }
 
     public List<Face> collectNeighbors(int radius) {
@@ -280,10 +297,6 @@ public class Face {
         }
 
         return faces;
-    }
-
-    public void setDirty(boolean dirty) {
-        isDirty = dirty;
     }
 
     private static class ClockwiseSorter implements Comparator<Vector3> {

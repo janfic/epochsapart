@@ -504,6 +504,7 @@ public class Polyhedron implements RenderableProvider {
     }
 
     public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
+        System.out.println("MAKE CHUNK MESH");
         int edgeCount = 0, vertexCount = 0, triangleCount = 0;
         int indexCount = 0;
         for (Face face : faces) {
