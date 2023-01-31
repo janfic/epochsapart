@@ -35,7 +35,7 @@ public class Polyhedron implements RenderableProvider {
         transform = new Matrix4();
         calculateCenter();
         index();
-        renderType = GL20.GL_LINES;
+        renderType = GL20.GL_TRIANGLES;
     }
 
     public Polyhedron() {

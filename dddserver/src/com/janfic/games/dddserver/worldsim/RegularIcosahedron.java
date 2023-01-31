@@ -8,7 +8,6 @@ import java.util.List;
 
 public class RegularIcosahedron extends Polyhedron {
     public RegularIcosahedron(float height) {
-        renderType = GL20.GL_LINES;
         // Calc
         // Using https://personal.math.ubc.ca/~cass/courses/m308-03b/projects-03b/keating/projectweppage2.htm
         Vector3 b = new Vector3();

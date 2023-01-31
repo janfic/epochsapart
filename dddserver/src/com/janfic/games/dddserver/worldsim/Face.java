@@ -1,10 +1,8 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Vector3;
@@ -37,7 +35,7 @@ public class Face {
         for (Vertex v : this.vertices) {
             v.addFace(this);
         }
-        this.height = MathUtils.random(1.0f);
+        this.height = MathUtils.random(1f);
     }
 
     /**
@@ -185,9 +183,6 @@ public class Face {
 
     public int[] addToMesh(Mesh mesh, float[] vertices, short[] indices, int vertexOffset, int indexOffset, int renderType, Polyhedron polyhedron) {
         Vector3 center = polyhedron.center.cpy();
-        int posOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset / 4;
-        int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
-        int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
         int[] offsets = new int[2];
         // Top Face
         for (int i = 0; i < this.vertices.size(); i++) {
@@ -196,19 +191,11 @@ public class Face {
             Vector3 vNorm = v.cpy().sub(center).nor();
             v.add(vNorm.cpy().scl(height));
             int j = i * mesh.getVertexSize() / 4;
-            vertices[j + vertexOffset + posOffset] = v.x;
-            vertices[j + vertexOffset + posOffset + 1] = v.y;
-            vertices[j + vertexOffset + posOffset + 2] = v.z;
-            vertices[j + vertexOffset + norOffset] = norm.x;
-            vertices[j + vertexOffset + norOffset + 1] = norm.y;
-            vertices[j + vertexOffset + norOffset + 2] = norm.z;
-            vertices[j + vertexOffset + colOffset] = 1;
-            vertices[j + vertexOffset + colOffset + 1] = 1;
-            vertices[j + vertexOffset + colOffset + 2] = 1;
-            vertices[j + vertexOffset + colOffset + 3] = 1;
+            int offset = j + vertexOffset;
+            addVertex(mesh, vertices, offset, v, norm, Color.WHITE);
             offsets[0] += mesh.getVertexSize() / 4;
         }
-        if(renderType == GL20.GL_LINES) {
+        if (renderType == GL20.GL_LINES) {
             for (int i = 0; i < edges.size(); i++) {
                 Edge edge = edges.get(i);
                 int j = i * 2;
@@ -216,8 +203,7 @@ public class Face {
                 indices[indexOffset + j + 1] = (short) (this.vertices.indexOf(edge.b) + vertexOffset / (mesh.getVertexSize() / 4));
                 offsets[1] += 2;
             }
-        }
-        else if(renderType == GL20.GL_TRIANGLES) {
+        } else if (renderType == GL20.GL_TRIANGLES) {
             Vertex v = this.vertices.get(0);
             int index = 0;
             for (int j = 1; j < this.vertices.size() - 1; j++) {
@@ -226,18 +212,18 @@ public class Face {
                 Plane plane = new Plane(v, b, c);
                 if (!plane.isFrontFacing(this.center.cpy().sub(polyhedron.center))) {
                     indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
-                    indices[indexOffset + index+1] = (short) (vertexOffset / (mesh.getVertexSize() / 4)+ this.vertices.indexOf(b));
-                    indices[indexOffset + index+2] = (short) (vertexOffset / (mesh.getVertexSize() / 4)+ this.vertices.indexOf(c));
+                    indices[indexOffset + index + 1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
+                    indices[indexOffset + index + 2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
                 } else {
                     indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
-                    indices[indexOffset + index+1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
-                    indices[indexOffset + index+2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
+                    indices[indexOffset + index + 1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
+                    indices[indexOffset + index + 2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
                 }
                 index += 3;
             }
             offsets[1] += index;
         }
-        if(height == 0 ) return offsets;
+        if (height == 0) return offsets;
         // Side Faces
         // For each side face: ( edge )
         //      move vertexOffset to new offset
@@ -254,7 +240,7 @@ public class Face {
         //              add 4 verts ( two top, two bottom ) ( with new normal )
         //              get triangle index
         //              update offsets[]
-        if(GL20.GL_LINES == renderType) {
+        if (GL20.GL_LINES == renderType) {
             // Add top and bottom verts
             int faceVertOffset = offsets[0];
             int faceIndexOffset = offsets[1];
@@ -266,29 +252,11 @@ public class Face {
                 Vector3 top = v.cpy().add(vNorm.cpy().scl(height));
                 int j = i * (mesh.getVertexSize() / 4) * 2; // Adding 2 vertices
                 int offset = j + vertexOffset + faceVertOffset;
-                vertices[offset + posOffset] = top.x;
-                vertices[offset + posOffset + 1] = top.y;
-                vertices[offset + posOffset + 2] = top.z;
-                vertices[offset + norOffset] = norm.x;
-                vertices[offset + norOffset + 1] = norm.y;
-                vertices[offset + norOffset + 2] = norm.z;
-                vertices[offset + colOffset] = 1;
-                vertices[offset + colOffset + 1] = 1;
-                vertices[offset + colOffset + 2] = 1;
-                vertices[offset + colOffset + 3] = 1;
+                addVertex(mesh, vertices, offset, top, norm, Color.WHITE);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 short topIndex = (short) (offset / (mesh.getVertexSize() / 4));
                 offset += (mesh.getVertexSize() / 4);
-                vertices[offset + posOffset] = bottom.x;
-                vertices[offset + posOffset + 1] = bottom.y;
-                vertices[offset + posOffset + 2] = bottom.z;
-                vertices[offset + norOffset] = norm.x;
-                vertices[offset + norOffset + 1] = norm.y;
-                vertices[offset + norOffset + 2] = norm.z;
-                vertices[offset + colOffset] = 1;
-                vertices[offset + colOffset + 1] = 1;
-                vertices[offset + colOffset + 2] = 1;
-                vertices[offset + colOffset + 3] = 1;
+                addVertex(mesh, vertices, offset, bottom, norm, Color.WHITE);
                 offsets[0] += (mesh.getVertexSize() / 4);
                 short bottomIndex = (short) (offset / (mesh.getVertexSize() / 4));
 
@@ -297,27 +265,104 @@ public class Face {
                 indices[iOffset + faceIndexOffset + 1] = bottomIndex;
                 offsets[1] += 2;
             }
+        } else if (renderType == GL20.GL_TRIANGLES) {
+            int faceVertOffset = offsets[0];
+            int faceIndexOffset = offsets[1];
+            Vector3 topCenter = new Vector3();
+            for (int i = 0; i < this.vertices.size(); i++) {
+                Vertex v = this.vertices.get(i).cpy();
+                Vector3 vNorm = v.cpy().sub(center).nor();
+                v.add(vNorm.scl(height));
+                topCenter.add(v);
+            }
+            topCenter.scl(1f / this.vertices.size());
+            Vector3 middleCenter = new Vector3();
+            middleCenter.add(topCenter);
+            middleCenter.add(this.center);
+            middleCenter.scl(1 / 2f);
+            int index = 0;
+            for (int i = 0; i < this.edges.size(); i++) {
+                Edge edge = edges.get(i);
+                Vertex a = edge.a.cpy();
+                Vertex b = edge.b.cpy();
+                Vector3 aNorm = a.cpy().sub(center).nor();
+                Vector3 bNorm = b.cpy().sub(center).nor();
+                Vertex c = new Vertex(a.cpy().add(aNorm.scl(height)));
+                Vertex d = new Vertex(b.cpy().add(bNorm.scl(height)));
+                List<Vertex> sideVectors = new ArrayList<>();
+                sideVectors.add(a);
+                sideVectors.add(b);
+                sideVectors.add(c);
+                sideVectors.add(d);
+                Vector3 sideCenter = new Vector3();
+                sideCenter.add(a);
+                sideCenter.add(b);
+                sideCenter.add(c);
+                sideCenter.add(d);
+                sideCenter.scl(1 / 4f);
+                Vector3 norm = sideCenter.sub(middleCenter).nor();;
+                sortVerticesClockwise(sideVectors, norm);
+                int j = (index) * mesh.getVertexSize() / 4;
+                int offset = j + vertexOffset + faceVertOffset;
+                addVertex(mesh, vertices, offset, sideVectors.get(0), norm, Color.WHITE);
+                short aIndex = (short) (offset / (mesh.getVertexSize() / 4));
+                offsets[0] += (mesh.getVertexSize() / 4);
+                offset += (mesh.getVertexSize() / 4);
+                addVertex(mesh, vertices, offset, sideVectors.get(1), norm, Color.WHITE);
+                short bIndex = (short) (aIndex + 1);
+                offsets[0] += (mesh.getVertexSize() / 4);
+                offset += (mesh.getVertexSize() / 4);
+                addVertex(mesh, vertices, offset, sideVectors.get(2), norm, Color.WHITE);
+                short cIndex = (short) (bIndex + 1);
+                offsets[0] += (mesh.getVertexSize() / 4);
+                offset += (mesh.getVertexSize() / 4);
+                addVertex(mesh, vertices, offset, sideVectors.get(3), norm, Color.WHITE);
+                short dIndex = (short) (cIndex + 1);
+                offsets[0] += (mesh.getVertexSize() / 4);
+                index += 4;
 
+                int iOffset = i * 6 + indexOffset + faceIndexOffset;
+                indices[iOffset + 0] = aIndex;
+                indices[iOffset + 1] = bIndex;
+                indices[iOffset + 2] = cIndex;
+                indices[iOffset + 3] = aIndex;
+                indices[iOffset + 4] = cIndex;
+                indices[iOffset + 5] = dIndex;
+                offsets[1] += 6;
+            }
         }
-
         return offsets;
     }
 
+    public void addVertex(Mesh mesh, float[] vertices, int offset, Vector3 vertex, Vector3 normal, Color color) {
+        int posOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset / 4;
+        int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
+        int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
+        vertices[offset + posOffset] = vertex.x;
+        vertices[offset + posOffset + 1] = vertex.y;
+        vertices[offset + posOffset + 2] = vertex.z;
+        vertices[offset + norOffset] = normal.x;
+        vertices[offset + norOffset + 1] = normal.y;
+        vertices[offset + norOffset + 2] = normal.z;
+        vertices[offset + colOffset] = color.r;
+        vertices[offset + colOffset + 1] = color.g;
+        vertices[offset + colOffset + 2] = color.b;
+        vertices[offset + colOffset + 3] = color.a;
+    }
+
     public int getMeshVertexCount() {
-        if(height == 0) {
+        if (height == 0) {
             return vertices.size();
-        }
-        else {
+        } else {
             return vertices.size() + edges.size() * 4;
         }
     }
 
     public int getMeshIndexCount(int renderType) {
-        if(height == 0) {
+        if (height == 0) {
             return (renderType == GL20.GL_LINES ? edges.size() * 2 : (vertices.size() - 2) * 3);
-        }
-        else {
-            return (renderType == GL20.GL_LINES ? edges.size() * 2  + vertices.size() * 2: (vertices.size() - 2) * 3) + (edges.size() * 2) * 3;
+        } else {
+            return (renderType == GL20.GL_LINES ? edges.size() * 2 + vertices.size() * 2 : (vertices.size() - 2) * 3) + (edges.size() * 2) * 3;
         }
     }
 
@@ -329,14 +374,14 @@ public class Face {
         queue.add(this);
         distance.put(this, 0);
 
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             Face f = queue.poll();
-            if(marked.contains(f)) continue;
+            if (marked.contains(f)) continue;
             marked.add(f);
             faces.add(f);
-            if(distance.get(f) < radius) {
+            if (distance.get(f) < radius) {
                 for (Face neighbor : f.neighbors) {
-                    if(!distance.containsKey(neighbor))
+                    if (!distance.containsKey(neighbor))
                         distance.put(neighbor, distance.get(f) + 1);
                     queue.add(neighbor);
                 }

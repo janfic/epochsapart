@@ -33,7 +33,7 @@ public class WorldSimScreen implements Screen {
     PerspectiveCamera camera;
     float radius;
 
-    int renderType = GL20.GL_LINES;
+    int renderType = GL20.GL_TRIANGLES;
 
     ModelBatch batch;
     ModelInstance instance;
@@ -56,7 +56,7 @@ public class WorldSimScreen implements Screen {
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 1f;
-        camera.far = radius;
+        camera.far = radius * 2;
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f,0.4f,0.4f,1.0f));
         pointLight = new PointLight().set(0.8f, 0.8f, 0.8f, 15,0,15, 300);
