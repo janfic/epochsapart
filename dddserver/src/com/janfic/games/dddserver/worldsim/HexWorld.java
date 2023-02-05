@@ -6,6 +6,8 @@ import de.articdive.jnoise.generators.noise_parameters.interpolation.Interpolati
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
 import de.articdive.jnoise.pipeline.JNoise;
 
+import java.util.function.Function;
+
 public class HexWorld {
 
     public Polyhedron polyhedron;
@@ -20,7 +22,6 @@ public class HexWorld {
         this.height = height;
         this.level = level;
         polyhedron = new RegularIcosahedron(height);
-
     }
 
     public void dual() {
@@ -39,21 +40,38 @@ public class HexWorld {
         polyhedron = new RegularIcosahedron(height);
     }
 
-    public void generateTerrain() {
+    public void generateTerrain(float baseScale, Function<Float, Float> octaveFunction, int octaves) {
         PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(3301).setInterpolation(Interpolation.COSINE).build();
-        float scale = 1 / 4f;
+        float scale = baseScale;
+
+
+        int i = 0;
+        do {
+            for (Face face : polyhedron.faces) {
+                float f = (float) generator.evaluateNoise(face.center.x * scale, face.center.y * scale, face.center.z * scale);
+                f = (f + 1) / 2f;
+                face.setHeight(face.height + f);
+            }
+            scale = octaveFunction.apply(scale);
+            i++;
+        } while (i < octaves);
+
+
         for (Face face : polyhedron.faces) {
-            float f = (float) generator.evaluateNoise(face.center.x * scale, face.center.y * scale, face.center.z * scale);
-            f = (f + 1) / 2f;
-            face.setHeight(f);
-            if(f > 0.6f) {
+            face.setHeight(face.height / octaves);
+            if(face.height > 0.5f) {
                 face.setColor(Color.GREEN);
             }
-            else if (f > 0.5f) {
+            else if (face.height > 0.4f) {
                 face.setColor(Color.YELLOW);
+            }
+            else if (face.height > 0.3f) {
+                face.setColor(Color.SKY);
+                face.setHeight(0.4f);
             }
             else {
                 face.setColor(Color.BLUE);
+                face.setHeight(0.4f);
             }
         }
     }

@@ -4,17 +4,25 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.*;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.Vertex;
 import com.janfic.games.dddserver.worldsim.World;
+import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
+import com.janfic.games.library.ecs.components.rendering.PostProcessorsComponent;
+import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
+import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
 import org.lwjgl.opengl.GL20;
 
 import java.util.ArrayList;
@@ -35,22 +43,26 @@ public class WorldSimScreen implements Screen {
     int renderType = GL20.GL_TRIANGLES;
 
     ModelBatch batch;
+    SpriteBatch spriteBatch;
     ModelInstance instance;
     private Environment environment;
     private PointLight pointLight;
     private DirectionalLight directionalLight;
 
+    private FrameBuffer buffer;
+    private PostProcessorsComponent postProcessorsComponent;
+    private RenderContext context;
+    private OrthographicCamera orthographicCamera;
+
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
         hexWorld = new HexWorld(15, 0, 0, 0);
-        renderer = new ShapeRenderer();
         mesh = hexWorld.polyhedron.getFaces().get(0).makeMesh(renderType, hexWorld.polyhedron);
 
         radius = 15 * 2;
 //        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
-        batch = new ModelBatch();
         camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
@@ -62,6 +74,26 @@ public class WorldSimScreen implements Screen {
         directionalLight = new DirectionalLight().set(Color.WHITE.cpy().mul(0.5f), new Vector3(0,-1,0));
         //environment.add(pointLight);
         environment.add(directionalLight);
+
+
+        // Rendering
+        batch = new ModelBatch();
+        renderer = new ShapeRenderer();
+        spriteBatch = new SpriteBatch();
+        GLFrameBuffer.FrameBufferBuilder builder = new GLFrameBuffer.FrameBufferBuilder(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        builder.addColorTextureAttachment(GL30.GL_RGBA8, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE);
+        builder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT, GL30.GL_UNSIGNED_SHORT);
+        buffer = builder.build();
+        context = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.ROUNDROBIN));
+        orthographicCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        orthographicCamera.position.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, 0);
+        orthographicCamera.update();
+
+        postProcessorsComponent = new PostProcessorsComponent();
+        postProcessorsComponent.processors = new ArrayList<>();
+        postProcessorsComponent.processors.add(new DitherPostProcess(3));
+        postProcessorsComponent.processors.add(new PixelizePostProcess(3));
+
     }
 
     @Override
@@ -125,7 +157,7 @@ public class WorldSimScreen implements Screen {
             System.out.println(hexWorld.polyhedron.getFaces().size());
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            hexWorld.generateTerrain();
+            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 3);
             hexWorld.polyhedron.dirty();
         }
 
@@ -144,18 +176,39 @@ public class WorldSimScreen implements Screen {
 
         //pointLight.position.set(camera.position.cpy().add(camera.up.cpy().scl(20f)));
 
-        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+        context.begin();
+        buffer.begin();
 
-        //shaderProgram.bind();
-        //shaderProgram.setUniformMatrix("u_projViewTrans", camera.combined);
+        Gdx.gl.glEnable(GL30.GL_BLEND);
+        Gdx.gl.glEnable(GL30.GL_DEPTH_TEST);
+        Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT);
+        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
         Gdx.gl.glCullFace(GL20.GL_FRONT);
-//        Gdx.gl.glCullFace(GL20.GL_BACK);
         Gdx.gl.glCullFace(GL20.GL_CCW);
+
         batch.begin(camera);
         batch.render(hexWorld.polyhedron, environment);
         batch.end();
+
+        buffer.end();
+        context.end();
         //mesh.render(shaderProgram, renderType);
         //mesh.render(shaderProgram, GL20.GL_TRIANGLES);
+
+        Texture colorTexture = buffer.getTextureAttachments().get(FrameBufferComponent.DIFFUSE_ATTACHMENT);
+        if (postProcessorsComponent != null && postProcessorsComponent.processors != null) {
+            FrameBuffer current = buffer;
+            for (PostProcess processor : postProcessorsComponent.processors) {
+                processor.render(current, orthographicCamera, context);
+                current = processor.getFrameBuffer();
+                colorTexture = current.getTextureAttachments().get(FrameBufferComponent.DIFFUSE_ATTACHMENT);
+            }
+        }
+
+        spriteBatch.begin();
+        spriteBatch.setProjectionMatrix(orthographicCamera.combined);
+        spriteBatch.draw(colorTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
+        spriteBatch.end();
     }
 
     @Override
