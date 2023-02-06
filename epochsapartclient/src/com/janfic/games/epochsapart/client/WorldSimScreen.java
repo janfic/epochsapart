@@ -57,11 +57,11 @@ public class WorldSimScreen implements Screen {
         camera.near = 1f;
         camera.far = radius * 2;
         environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f,0.4f,0.4f,1.0f));
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,0.8f,0.8f,1.0f));
         pointLight = new PointLight().set(0.8f, 0.8f, 0.8f, 15,0,15, 300);
         directionalLight = new DirectionalLight().set(Color.WHITE.cpy().mul(0.5f), new Vector3(0,-1,0));
         //environment.add(pointLight);
-        environment.add(directionalLight);
+        //environment.add(directionalLight);
     }
 
     @Override
@@ -133,7 +133,8 @@ public class WorldSimScreen implements Screen {
         hexWorld.polyhedron.setRenderSettings(camera);
         hexWorld.polyhedron.setRenderType(renderType);
 //        directionalLight.setDirection(hexWorld.polyhedron.getCenter().cpy().sub(camera.position.cpy()).nor().rotate(Vector3.Y, 50));
-        directionalLight.setDirection(camera.up.cpy().scl(-1f).rotate(camera.up.cpy().crs(norm).nor(), 45));
+        //directionalLight.setDirection(camera.up.cpy().scl(-1f).rotate(camera.up.cpy().crs(norm).nor(), 45));
+        //directionalLight.setDirection(camera.up.cpy().nor());
 
         camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - (hexWorld.height / 2 + 5))* deltaTime)));
         norm = camera.position.cpy().sub(pos);

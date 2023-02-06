@@ -1,6 +1,7 @@
 package com.janfic.games.dddserver.worldsim;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.generators.noise_parameters.interpolation.Interpolation;
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
@@ -20,7 +21,18 @@ public class HexWorld {
         this.height = height;
         this.level = level;
         polyhedron = new RegularIcosahedron(height);
+        polyhedron = Polyhedron.uniformTruncate(polyhedron);
+        polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
 
+        System.out.println("generating");
+        for (int i = 0; i < 7; i++) {
+            polyhedron = Polyhedron.dual(polyhedron);
+            polyhedron = Polyhedron.uniformTruncate(polyhedron);
+            if(i == 3) polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
+        }
+
+        generateTerrain();
+        System.out.println("complete");
     }
 
     public void dual() {
@@ -39,21 +51,25 @@ public class HexWorld {
         polyhedron = new RegularIcosahedron(height);
     }
 
+
+
     public void generateTerrain() {
-        PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(3301).setInterpolation(Interpolation.COSINE).build();
-        float scale = 1 / 4f;
+        PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(MathUtils.random(10000)).setInterpolation(Interpolation.COSINE).build();
+        float scale = 1 / 2f;
+        float steps = 10;
         for (Face face : polyhedron.faces) {
             float f = (float) generator.evaluateNoise(face.center.x * scale, face.center.y * scale, face.center.z * scale);
             f = (f + 1) / 2f;
+            f = MathUtils.ceil(f * steps) / steps;
             face.setHeight(f);
             if(f > 0.6f) {
-                face.setColor(Color.GREEN);
+                face.setColor(new Color(0, f + 0.1f,0,1));
             }
             else if (f > 0.5f) {
                 face.setColor(Color.YELLOW);
             }
             else {
-                face.setColor(Color.BLUE);
+                face.setColor(new Color(0,0,1,1));
             }
         }
     }
