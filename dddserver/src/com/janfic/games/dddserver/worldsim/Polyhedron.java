@@ -544,4 +544,20 @@ public class Polyhedron implements RenderableProvider {
     public void dirty() {
         meshMap.clear();
     }
+
+    public float getMinHeight() {
+        float minHeight = Float.MAX_VALUE;
+        for (Face face : faces) {
+            if(minHeight > face.height) minHeight = face.height;
+        }
+        return minHeight;
+    }
+
+    public float getMaxHeight() {
+        float maxHeight = Float.MIN_VALUE;
+        for (Face face : faces) {
+            if(maxHeight < face.height) maxHeight = face.height;
+        }
+        return maxHeight;
+    }
 }

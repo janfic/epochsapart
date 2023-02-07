@@ -158,7 +158,7 @@ public class WorldSimScreen implements Screen {
             System.out.println(hexWorld.polyhedron.getFaces().size());
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 4, 1, 20);
+            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 7, 1);
             hexWorld.polyhedron.dirty();
             Thread t = new Thread(()->{
                 hexWorld.polyhedron.makeMeshes();
