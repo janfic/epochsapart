@@ -25,8 +25,8 @@ public class Polyhedron implements RenderableProvider {
     Camera camera;
     Map<Vector3, Mesh> meshMap;
     Map<Vector3, List<Face>> chunks;
-    List<Vector3> chunkVertices;
-    private int chunkSize = 2;
+    final List<Vector3> chunkVertices;
+    private int chunkSize = 3;
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
@@ -36,6 +36,8 @@ public class Polyhedron implements RenderableProvider {
         calculateCenter();
         index();
         renderType = GL20.GL_TRIANGLES;
+        chunkVertices = new ArrayList<>();
+        meshes = new ArrayList<>();
     }
 
     public Polyhedron() {
@@ -43,6 +45,8 @@ public class Polyhedron implements RenderableProvider {
         edges = new ArrayList<>();
         faces = new ArrayList<>();
         transform = new Matrix4();
+        chunkVertices = new ArrayList<>();
+        meshes = new ArrayList<>();
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
@@ -444,7 +448,7 @@ public class Polyhedron implements RenderableProvider {
         System.out.println("making chunks");
 
         chunks = new HashMap<>();
-        chunkVertices = new ArrayList<>();
+        chunkVertices.clear();
         meshMap = new HashMap<>();
 
         float deltaDivisions = chunkSize;
@@ -478,11 +482,18 @@ public class Polyhedron implements RenderableProvider {
         }
     }
 
-    Mesh test;
+    List<Mesh> meshes;
+
+    public synchronized void makeMeshes() {
+        synchronized (chunkVertices) {
+            for (Vector3 chunkVertex : chunkVertices) {
+
+            }
+        }
+    }
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-
         for (int i = 0; i < chunkVertices.size(); i++) {
             Vector3 chunkVector = chunkVertices.get(i);
             if (camera.position.dst(chunkVector) > camera.far) continue;
@@ -501,16 +512,14 @@ public class Polyhedron implements RenderableProvider {
             renderable.worldTransform.set(transform);
             renderables.add(renderable);
         }
+        renderables.addAll();
     }
 
     public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
-        int edgeCount = 0, vertexCount = 0, triangleCount = 0;
-        int indexCount = 0;
+        int vertexCount = 0, indexCount = 0;
         for (Face face : faces) {
-            edgeCount += face.edges.size();
             indexCount += face.getMeshIndexCount(renderType);
             vertexCount += face.getMeshVertexCount();
-            triangleCount += face.vertices.size() - 2;
         }
         Mesh mesh = new Mesh(false, vertexCount , indexCount,
                 new VertexAttributes(

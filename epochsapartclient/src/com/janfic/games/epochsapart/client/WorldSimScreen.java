@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.janfic.games.dddserver.worldsim.HexWorld;
-import com.janfic.games.dddserver.worldsim.Vertex;
 import com.janfic.games.dddserver.worldsim.World;
 import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
 import com.janfic.games.library.ecs.components.rendering.PostProcessorsComponent;
@@ -159,8 +158,12 @@ public class WorldSimScreen implements Screen {
             System.out.println(hexWorld.polyhedron.getFaces().size());
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 3);
+            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 4, 1, 20);
             hexWorld.polyhedron.dirty();
+            Thread t = new Thread(()->{
+                hexWorld.polyhedron.makeMeshes();
+            });
+            t.start();
         }
 
 
