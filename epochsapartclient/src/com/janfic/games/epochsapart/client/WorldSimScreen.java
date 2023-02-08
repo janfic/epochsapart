@@ -64,10 +64,10 @@ public class WorldSimScreen implements Screen {
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
         batch = new ModelBatch();
         camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
+        camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius * 2));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 0.5f;
-        camera.far = radius * 2;
+        camera.far = radius * 3;
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,0.8f,0.8f,1.0f));
         pointLight = new PointLight().set(0.8f, 0.8f, 0.8f, 15,0,15, 300);

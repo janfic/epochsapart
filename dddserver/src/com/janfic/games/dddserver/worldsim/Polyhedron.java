@@ -35,6 +35,7 @@ public class Polyhedron implements RenderableProvider {
     private final Queue<PolyhedronChunk> dirtyChunks;
 
     Thread thread;
+    int maxChunksProcessed = 5;
 
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
@@ -50,14 +51,16 @@ public class Polyhedron implements RenderableProvider {
         thread = new Thread(()->{
             while(true) {
                 synchronized (dirtyChunks) {
-                    if(dirtyChunks.isEmpty()) continue;
-                    PolyhedronChunk chunk = dirtyChunks.poll();
-                    chunk.clean();
-                    System.out.println(dirtyChunks.size());
+                    for (int i = 0; i < maxChunksProcessed; i++) {
+                        if(dirtyChunks.isEmpty()) continue;
+                        PolyhedronChunk chunk = dirtyChunks.poll();
+                        chunk.clean();
+                    }
                 }
                 try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ex) {
+                    Thread.sleep(10);
+                }
+                catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -522,15 +525,19 @@ public class Polyhedron implements RenderableProvider {
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        //if(!thread.isAlive()) thread.start();
+        if(!thread.isAlive()) thread.start();
         for (int i = 0; i < chunks.size(); i++) {
             PolyhedronChunk chunk = chunks.get(i);
             Vector3 chunkVector = chunks.get(i).getChunkPoint();
             if (camera.position.dst(chunkVector) > camera.far) continue;
             Renderable renderable = pool.obtain();
-            if(chunk.isDirty()) {
-                chunk.setRenderType(renderType);
-                chunk.clean();
+            synchronized (dirtyChunks) {
+                if(dirtyChunks.contains(chunk)) continue;
+                if(chunk.isDirty()) {
+                    chunk.setRenderType(renderType);
+                    dirtyChunks.add(chunk);
+                    continue;
+                }
             }
             renderable.meshPart.mesh = chunk.getMesh();
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));

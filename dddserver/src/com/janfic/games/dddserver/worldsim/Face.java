@@ -201,26 +201,27 @@ public class Face {
         return mesh;
     }
 
-    public int[] addToMesh(Mesh mesh, float[] vertices, short[] indices, int vertexOffset, int indexOffset, int renderType, Polyhedron polyhedron) {
+    public int[] addToMesh(VertexAttributes attributes, float[] vertices, short[] indices, int vertexOffset, int indexOffset, int renderType, Polyhedron polyhedron) {
         Vector3 center = polyhedron.center.cpy();
         int[] offsets = new int[2];
+        int vertexSize = attributes.vertexSize / 4;
         // Top Face
         for (int i = 0; i < this.vertices.size(); i++) {
             Vertex v = this.vertices.get(i).cpy();
             Vector3 norm = this.center.cpy().sub(center).nor();
             Vector3 vNorm = v.cpy().sub(center).nor();
             v.add(vNorm.cpy().scl(height));
-            int j = i * mesh.getVertexSize() / 4;
+            int j = i * vertexSize;
             int offset = j + vertexOffset;
-            addVertex(mesh, vertices, offset, v, norm, color == null ? Color.WHITE : color);
-            offsets[0] += mesh.getVertexSize() / 4;
+            addVertex(attributes, vertices, offset, v, norm, color == null ? Color.WHITE : color);
+            offsets[0] += vertexSize;
         }
         if (renderType == GL20.GL_LINES) {
             for (int i = 0; i < edges.size(); i++) {
                 Edge edge = edges.get(i);
                 int j = i * 2;
-                indices[indexOffset + j] = (short) (this.vertices.indexOf(edge.a) + vertexOffset / (mesh.getVertexSize() / 4));
-                indices[indexOffset + j + 1] = (short) (this.vertices.indexOf(edge.b) + vertexOffset / (mesh.getVertexSize() / 4));
+                indices[indexOffset + j] = (short) (this.vertices.indexOf(edge.a) + vertexOffset / (vertexSize));
+                indices[indexOffset + j + 1] = (short) (this.vertices.indexOf(edge.b) + vertexOffset / (vertexSize));
                 offsets[1] += 2;
             }
         } else if (renderType == GL20.GL_TRIANGLES) {
@@ -231,13 +232,13 @@ public class Face {
                 Vertex c = this.vertices.get(j + 1);
                 Plane plane = new Plane(v, b, c);
                 if (!plane.isFrontFacing(this.center.cpy().sub(polyhedron.center))) {
-                    indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
-                    indices[indexOffset + index + 1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
-                    indices[indexOffset + index + 2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
+                    indices[indexOffset + index] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(v));
+                    indices[indexOffset + index + 1] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(b));
+                    indices[indexOffset + index + 2] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(c));
                 } else {
-                    indices[indexOffset + index] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(v));
-                    indices[indexOffset + index + 1] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(c));
-                    indices[indexOffset + index + 2] = (short) (vertexOffset / (mesh.getVertexSize() / 4) + this.vertices.indexOf(b));
+                    indices[indexOffset + index] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(v));
+                    indices[indexOffset + index + 1] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(c));
+                    indices[indexOffset + index + 2] = (short) (vertexOffset / (vertexSize) + this.vertices.indexOf(b));
                 }
                 index += 3;
             }
@@ -270,15 +271,15 @@ public class Face {
                 Vector3 vNorm = v.cpy().sub(center).nor();
                 Vector3 bottom = v.cpy();
                 Vector3 top = v.cpy().add(vNorm.cpy().scl(height));
-                int j = i * (mesh.getVertexSize() / 4) * 2; // Adding 2 vertices
+                int j = i * (vertexSize) * 2; // Adding 2 vertices
                 int offset = j + vertexOffset + faceVertOffset;
-                addVertex(mesh, vertices, offset, top, norm,  color == null ? Color.WHITE : color);
-                offsets[0] += (mesh.getVertexSize() / 4);
-                short topIndex = (short) (offset / (mesh.getVertexSize() / 4));
-                offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, bottom, norm,  color == null ? Color.WHITE : color);
-                offsets[0] += (mesh.getVertexSize() / 4);
-                short bottomIndex = (short) (offset / (mesh.getVertexSize() / 4));
+                addVertex(attributes, vertices, offset, top, norm,  color == null ? Color.WHITE : color);
+                offsets[0] += (vertexSize);
+                short topIndex = (short) (offset / (vertexSize));
+                offset += (vertexSize);
+                addVertex(attributes, vertices, offset, bottom, norm,  color == null ? Color.WHITE : color);
+                offsets[0] += (vertexSize);
+                short bottomIndex = (short) (offset / (vertexSize));
 
                 int iOffset = i * 2 + indexOffset;
                 indices[iOffset + faceIndexOffset] = topIndex;
@@ -322,23 +323,23 @@ public class Face {
                 sideCenter.scl(1 / 4f);
                 Vector3 norm = sideCenter.sub(middleCenter).nor();;
                 sortVerticesClockwise(sideVectors, norm);
-                int j = (index) * mesh.getVertexSize() / 4;
+                int j = (index) * vertexSize;
                 int offset = j + vertexOffset + faceVertOffset;
-                addVertex(mesh, vertices, offset, sideVectors.get(0), norm,  color == null ? Color.WHITE : color);
-                short aIndex = (short) (offset / (mesh.getVertexSize() / 4));
-                offsets[0] += (mesh.getVertexSize() / 4);
-                offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(1), norm,  color == null ? Color.WHITE : color);
+                addVertex(attributes, vertices, offset, sideVectors.get(0), norm,  color == null ? Color.WHITE : color);
+                short aIndex = (short) (offset / (vertexSize));
+                offsets[0] += (vertexSize);
+                offset += (vertexSize);
+                addVertex(attributes, vertices, offset, sideVectors.get(1), norm,  color == null ? Color.WHITE : color);
                 short bIndex = (short) (aIndex + 1);
-                offsets[0] += (mesh.getVertexSize() / 4);
-                offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(2), norm,  color == null ? Color.WHITE : color);
+                offsets[0] += (vertexSize);
+                offset += (vertexSize);
+                addVertex(attributes, vertices, offset, sideVectors.get(2), norm,  color == null ? Color.WHITE : color);
                 short cIndex = (short) (bIndex + 1);
-                offsets[0] += (mesh.getVertexSize() / 4);
-                offset += (mesh.getVertexSize() / 4);
-                addVertex(mesh, vertices, offset, sideVectors.get(3), norm, color == null ? Color.WHITE : color);
+                offsets[0] += (vertexSize);
+                offset += (vertexSize);
+                addVertex(attributes, vertices, offset, sideVectors.get(3), norm, color == null ? Color.WHITE : color);
                 short dIndex = (short) (cIndex + 1);
-                offsets[0] += (mesh.getVertexSize() / 4);
+                offsets[0] += (vertexSize);
                 index += 4;
 
                 int iOffset = i * 6 + indexOffset + faceIndexOffset;
@@ -354,10 +355,10 @@ public class Face {
         return offsets;
     }
 
-    public void addVertex(Mesh mesh, float[] vertices, int offset, Vector3 vertex, Vector3 normal, Color color) {
-        int posOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Position).offset / 4;
-        int norOffset = mesh.getVertexAttribute(VertexAttributes.Usage.Normal).offset / 4;
-        int colOffset = mesh.getVertexAttribute(VertexAttributes.Usage.ColorUnpacked).offset / 4;
+    public void addVertex(VertexAttributes attributes, float[] vertices, int offset, Vector3 vertex, Vector3 normal, Color color) {
+        int posOffset = attributes.getOffset(VertexAttributes.Usage.Position);
+        int norOffset = attributes.getOffset(VertexAttributes.Usage.Normal);
+        int colOffset = attributes.getOffset(VertexAttributes.Usage.ColorUnpacked);
         vertices[offset + posOffset] = vertex.x;
         vertices[offset + posOffset + 1] = vertex.y;
         vertices[offset + posOffset + 2] = vertex.z;

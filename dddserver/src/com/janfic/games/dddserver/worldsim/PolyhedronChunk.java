@@ -62,7 +62,7 @@ public class PolyhedronChunk {
     }
 
     public void clean() {
-        mesh = mesh();
+        mesh();
         this.isDirty = false;
     }
 
@@ -78,60 +78,32 @@ public class PolyhedronChunk {
     }
 
     public Mesh getMesh() {
-        //buildMesh();
+        if(mesh == null || mesh.getNumVertices() != vertexCount || mesh.getNumIndices() != indexCount) buildMesh();
         return mesh;
     }
 
-    public Mesh mesh() {
+    private void mesh() {
         int vertexCount = 0, indexCount = 0;
         for (Face face : faces) {
             indexCount += face.getMeshIndexCount(renderType);
             vertexCount += face.getMeshVertexCount();
         }
-        Mesh mesh = new Mesh(false, vertexCount , indexCount,
-                new VertexAttributes(
-                        new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
-                )
+        VertexAttributes attributes = new VertexAttributes(
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
         );
-        float[] vertices = new float[vertexCount * mesh.getVertexSize() / 4];
+        float[] vertices = new float[vertexCount * attributes.vertexSize / 4];
         int vertexOffset = 0, indexOffset = 0;
         short[] indices = new short[indexCount];
         for(Face face : faces) {
-            int[] offsets = face.addToMesh(mesh, vertices, indices, vertexOffset, indexOffset, renderType, polyhedron);
-            vertexOffset += offsets[0];
-            indexOffset += offsets[1];
-        }
-        mesh.setVertices(vertices, 0, vertices.length);
-        mesh.setIndices(indices, 0, indices.length);
-        return mesh;
-    }
-
-    /*
-    private void makeMeshWithFaces() {
-        int vertexCount = 0, indexCount = 0;
-        for (Face face : faces) {
-            indexCount += face.getMeshIndexCount(renderType);
-            vertexCount += face.getMeshVertexCount();
-        }
-        VertexAttributes vertexAttributes = new VertexAttributes(
-                        new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
-                );
-        float[] vertices = new float[vertexCount * vertexAttributes.vertexSize / 4];
-        int vertexOffset = 0, indexOffset = 0;
-        short[] indices = new short[indexCount];
-        for (Face face : faces) {
-            int[] offsets = face.addToMesh(vertexAttributes, vertices, indices, vertexOffset, indexOffset, renderType, polyhedron);
+            int[] offsets = face.addToMesh(attributes, vertices, indices, vertexOffset, indexOffset, renderType, polyhedron);
             vertexOffset += offsets[0];
             indexOffset += offsets[1];
         }
         this.vertices = vertices;
         this.indices = indices;
-        this.vertexCount = vertexCount;
         this.indexCount = indexCount;
+        this.vertexCount = vertexCount;
     }
-     */
 }
