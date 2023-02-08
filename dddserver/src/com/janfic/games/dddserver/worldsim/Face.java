@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Vector3;
 import java.util.*;
 
 public class Face {
+
+    private PolyhedronChunk chunk;
     List<Vertex> vertices;
     List<Edge> edges;
     Set<Edge> edgesSet;
@@ -17,6 +19,7 @@ public class Face {
     List<Face> neighbors;
     float height;
     Color color;
+    private boolean isDirty;
 
     public Face(List<Vertex> vertices, List<Edge> edges) {
         this(vertices, edges, 0);
@@ -407,6 +410,21 @@ public class Face {
 
         return faces;
     }
+
+
+    public void setChunk(PolyhedronChunk chunk) {
+        this.chunk = chunk;
+    }
+
+    public void setDirty() {
+        isDirty = true;
+        chunk.setDirty();
+    }
+
+    public void clean() {
+        isDirty = false;
+    }
+
 
     private static class ClockwiseSorter implements Comparator<Vector3> {
 

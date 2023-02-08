@@ -23,7 +23,7 @@ public class HexWorld {
         this.level = level;
         polyhedron = new RegularIcosahedron(height);
         polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 6; i++) {
             polyhedron = Polyhedron.dual(polyhedron);
             polyhedron = Polyhedron.uniformTruncate(polyhedron);
             if (i == 3) {

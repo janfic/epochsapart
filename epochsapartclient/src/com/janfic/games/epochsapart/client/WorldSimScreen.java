@@ -53,7 +53,6 @@ public class WorldSimScreen implements Screen {
     private RenderContext context;
     private OrthographicCamera orthographicCamera;
 
-
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
         hexWorld = new HexWorld(30, 0, 0, 0);
@@ -110,7 +109,6 @@ public class WorldSimScreen implements Screen {
 
         hexWorld.polyhedron.renderType = renderType;
 
-
         if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
             radius += 10 * deltaTime;
         }
@@ -144,7 +142,6 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             renderType = renderType == GL20.GL_LINES ? GL20.GL_TRIANGLES : GL20.GL_LINES;
             hexWorld.polyhedron.setRenderType(renderType);
-            hexWorld.polyhedron.dirty();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
             camera.far += deltaTime;
@@ -156,14 +153,6 @@ public class WorldSimScreen implements Screen {
         }
         if(Gdx.input.isKeyPressed(Input.Keys.I)) {
             System.out.println(hexWorld.polyhedron.getFaces().size());
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            hexWorld.generateTerrain(1/ 8f, f -> f * 2f, 7, 1);
-            hexWorld.polyhedron.dirty();
-            Thread t = new Thread(()->{
-                hexWorld.polyhedron.makeMeshes();
-            });
-            t.start();
         }
 
 

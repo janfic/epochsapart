@@ -1,16 +1,20 @@
 package com.janfic.games.dddserver.worldsim;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Plane;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.GLContext;
 
 import java.util.*;
 
@@ -23,10 +27,15 @@ public class Polyhedron implements RenderableProvider {
     Vector3 up;
     Matrix4 transform;
     Camera camera;
-    Map<Vector3, Mesh> meshMap;
-    Map<Vector3, List<Face>> chunks;
-    final List<Vector3> chunkVertices;
+
+
+    private List<PolyhedronChunk> chunks;
+    private Map<Vector3, PolyhedronChunk> chunkMap;
     private int chunkSize = 3;
+    private final Queue<PolyhedronChunk> dirtyChunks;
+
+    Thread thread;
+
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
         vertices = new ArrayList<>(v);
@@ -36,8 +45,23 @@ public class Polyhedron implements RenderableProvider {
         calculateCenter();
         index();
         renderType = GL20.GL_TRIANGLES;
-        chunkVertices = new ArrayList<>();
-        meshes = new ArrayList<>();
+        chunks = new ArrayList<>();
+        dirtyChunks = new LinkedList<>();
+        thread = new Thread(()->{
+            while(true) {
+                synchronized (dirtyChunks) {
+                    if(dirtyChunks.isEmpty()) continue;
+                    PolyhedronChunk chunk = dirtyChunks.poll();
+                    chunk.clean();
+                    System.out.println(dirtyChunks.size());
+                }
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     public Polyhedron() {
@@ -45,8 +69,22 @@ public class Polyhedron implements RenderableProvider {
         edges = new ArrayList<>();
         faces = new ArrayList<>();
         transform = new Matrix4();
-        chunkVertices = new ArrayList<>();
-        meshes = new ArrayList<>();
+        chunks = new ArrayList<>();
+        dirtyChunks = new LinkedList<>();
+        thread = new Thread(()->{
+            while(true) {
+                synchronized (dirtyChunks) {
+                    if(dirtyChunks.isEmpty()) continue;
+                    PolyhedronChunk chunk = dirtyChunks.poll();
+                    chunk.clean();
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
@@ -403,11 +441,6 @@ public class Polyhedron implements RenderableProvider {
         }
     }
 
-    public void calculateFaces() {
-        faces.clear();
-
-    }
-
     public void index() {
         for (int i = 0; i < vertices.size(); i++) {
             Vertex vertex = vertices.get(i);
@@ -447,9 +480,8 @@ public class Polyhedron implements RenderableProvider {
         float radius = center.cpy().dst(vertices.get(0));
         System.out.println("making chunks");
 
-        chunks = new HashMap<>();
-        chunkVertices.clear();
-        meshMap = new HashMap<>();
+        chunks.clear();
+        chunkMap = new HashMap<>();
 
         if(chunkSize % 2 == 1) chunkSize += 1;
         float deltaDivisions = chunkSize;
@@ -463,50 +495,44 @@ public class Polyhedron implements RenderableProvider {
                         (float) (radius * Math.sin(theta) * Math.sin(delta)),
                         (float) (radius * Math.cos(delta)));
                 vector3.add(center);
-                chunks.put(vector3, new ArrayList<>());
-                chunkVertices.add(vector3);
+                PolyhedronChunk chunk = new PolyhedronChunk(this, vector3);
+                chunk.setDirty();
+                chunks.add(chunk);
+                chunkMap.put(vector3, chunk);
             }
             deltaI++;
         }
 
         for (int i = 0; i < faces.size(); i++) {
             Face face = faces.get(i);
-            float dist = chunkVertices.get(0).dst2(face.center);
-            Vector3 closest = chunkVertices.get(0);
-            for (Vector3 vector3 : chunks.keySet()) {
+            float dist = chunks.get(0).getChunkPoint().dst2(face.center);
+            Vector3 closest = chunks.get(0).getChunkPoint();
+            for (PolyhedronChunk chunk : chunks) {
+                Vector3 vector3 = chunk.getChunkPoint();
                 float d = vector3.dst2(face.center);
                 if (dist > d) {
                     closest = vector3;
                     dist = d;
                 }
             }
-            chunks.get(closest).add(face);
+            chunkMap.get(closest).addFace(face);
         }
     }
 
-    List<Mesh> meshes;
-
-    public synchronized void makeMeshes() {
-        synchronized (chunkVertices) {
-            for (Vector3 chunkVertex : chunkVertices) {
-
-            }
-        }
-    }
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        for (int i = 0; i < chunkVertices.size(); i++) {
-            Vector3 chunkVector = chunkVertices.get(i);
+        //if(!thread.isAlive()) thread.start();
+        for (int i = 0; i < chunks.size(); i++) {
+            PolyhedronChunk chunk = chunks.get(i);
+            Vector3 chunkVector = chunks.get(i).getChunkPoint();
             if (camera.position.dst(chunkVector) > camera.far) continue;
             Renderable renderable = pool.obtain();
-            if (!meshMap.containsKey(chunkVector)) {
-                List<Face> faceList = chunks.get(chunkVector);
-                renderable.meshPart.mesh = makeMeshWithFaces(faceList, renderType);
-                meshMap.put(chunkVector, renderable.meshPart.mesh);
-            } else {
-                renderable.meshPart.mesh = meshMap.get(chunkVector);
+            if(chunk.isDirty()) {
+                chunk.setRenderType(renderType);
+                chunk.clean();
             }
+            renderable.meshPart.mesh = chunk.getMesh();
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
             renderable.meshPart.offset = 0;
             renderable.meshPart.primitiveType = renderType;
@@ -517,35 +543,7 @@ public class Polyhedron implements RenderableProvider {
         renderables.addAll();
     }
 
-    public Mesh makeMeshWithFaces(List<Face> faces, int renderType) {
-        int vertexCount = 0, indexCount = 0;
-        for (Face face : faces) {
-            indexCount += face.getMeshIndexCount(renderType);
-            vertexCount += face.getMeshVertexCount();
-        }
-        Mesh mesh = new Mesh(false, vertexCount , indexCount,
-                new VertexAttributes(
-                        new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.Normal, 3, ShaderProgram.NORMAL_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
-                )
-        );
-        float[] vertices = new float[vertexCount * mesh.getVertexSize() / 4];
-        int vertexOffset = 0, indexOffset = 0;
-        short[] indices = new short[indexCount];
-        for(Face face : faces) {
-            int[] offsets = face.addToMesh(mesh, vertices, indices, vertexOffset, indexOffset, renderType, this);
-            vertexOffset += offsets[0];
-            indexOffset += offsets[1];
-        }
-        mesh.setVertices(vertices, 0, vertices.length);
-        mesh.setIndices(indices, 0, indices.length);
-        return mesh;
-    }
 
-    public void dirty() {
-        meshMap.clear();
-    }
 
     public float getMinHeight() {
         float minHeight = Float.MAX_VALUE;
