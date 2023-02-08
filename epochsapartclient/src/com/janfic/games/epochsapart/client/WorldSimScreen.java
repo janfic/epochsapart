@@ -67,7 +67,6 @@ public class WorldSimScreen implements Screen {
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius * 2));
         camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 0.5f;
-        camera.far = radius * 3;
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,0.8f,0.8f,1.0f));
         pointLight = new PointLight().set(0.8f, 0.8f, 0.8f, 15,0,15, 300);
@@ -151,13 +150,9 @@ public class WorldSimScreen implements Screen {
             camera.far -= deltaTime;
             camera.update();
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.I)) {
-            System.out.println(hexWorld.polyhedron.getFaces().size());
-        }
 
 
-        hexWorld.polyhedron.setRenderSettings(camera);
-        hexWorld.polyhedron.setRenderType(renderType);
+
 //        directionalLight.setDirection(hexWorld.polyhedron.getCenter().cpy().sub(camera.position.cpy()).nor().rotate(Vector3.Y, 50));
         //directionalLight.setDirection(camera.up.cpy().scl(-1f).rotate(camera.up.cpy().crs(norm).nor(), 45));
         //directionalLight.setDirection(camera.up.cpy().nor());
@@ -167,8 +162,12 @@ public class WorldSimScreen implements Screen {
         norm.scl(radius / norm.len());
         camera.position.set(pos.cpy().add(norm));
         camera.lookAt(hexWorld.polyhedron.getCenter());
+        camera.far = camera.position.dst(hexWorld.polyhedron.getCenter()) + radius / 8;
         camera.update();
 
+        float dst = camera.position.dst(hexWorld.polyhedron.getCenter());
+        hexWorld.getPolyhedronFromDistance(dst).setRenderSettings(camera);
+        hexWorld.getPolyhedronFromDistance(dst).setRenderType(renderType);
         //pointLight.position.set(camera.position.cpy().add(camera.up.cpy().scl(20f)));
 
         context.begin();
@@ -182,7 +181,7 @@ public class WorldSimScreen implements Screen {
         Gdx.gl.glCullFace(GL20.GL_CCW);
 
         batch.begin(camera);
-        batch.render(hexWorld.polyhedron, environment);
+        batch.render(hexWorld.getPolyhedronFromDistance(camera.position.dst(hexWorld.polyhedron.getCenter())), environment);
         batch.end();
 
         buffer.end();

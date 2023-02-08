@@ -6,11 +6,14 @@ import com.janfic.games.library.utils.ColorRamp;
 import de.articdive.jnoise.generators.noise_parameters.interpolation.Interpolation;
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class HexWorld {
 
     public Polyhedron polyhedron;
+    public List<Polyhedron> polyhedra;
     public float height;
     float posX, posY;
     int level;
@@ -21,15 +24,7 @@ public class HexWorld {
         posY = sy;
         this.height = height;
         this.level = level;
-        polyhedron = new RegularIcosahedron(height);
-        polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        for (int i = 0; i < 8; i++) {
-            polyhedron = Polyhedron.dual(polyhedron);
-            polyhedron = Polyhedron.uniformTruncate(polyhedron);
-            if (i == 3) {
-                polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
-            }
-        }
+
         ramp = new ColorRamp();
         float max = 4;
         float steps = 10;
@@ -41,13 +36,46 @@ public class HexWorld {
         ramp.addColor(0.70f * max, Color.OLIVE);
         ramp.addColor(0.85f * max, Color.SLATE);
         ramp.addColor(0.95f * max, Color.WHITE);
-        generateTerrain(1 / 6f, f -> f * 2, 4, 1);
-        normalizeTerrain(polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
-        colorTerrain(0.45f * max);
+
+        polyhedra = new ArrayList<>();
+        polyhedron = new RegularIcosahedron(height);
+        polyhedron = Polyhedron.uniformTruncate(polyhedron);
+        polyhedra.add(polyhedron);
+        for (int i = 0; i < 8; i++) {
+            polyhedron = Polyhedron.dual(polyhedron);
+            polyhedron = Polyhedron.uniformTruncate(polyhedron);
+            if (i == 3) {
+                polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
+            }
+            if(i > 3) {
+                generateTerrain(polyhedron, 1, 1 / 6f, f -> f * 2, 4, 1);
+                normalizeTerrain(polyhedron, polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
+                colorTerrain(polyhedron, 0.45f * max);
+                polyhedra.add(polyhedron);
+            }
+        }
     }
 
+    public Polyhedron getPolyhedronFromDistance(float distanceToCenter) {
+        float rad = height / 2;
+        float dif = (distanceToCenter - rad) - rad;
+        float init = 3;
+        int d = (int) init;
+        System.out.println(polyhedra.size());
+        int index = polyhedra.size() - 1;
+        while(index < polyhedra.size() && index >= 0) {
+            if(d * 3 > dif) {
+                d *= 3;
+                index--;
+            }
+            else {
+                break;
+            }
+        }
+        return polyhedra.get(index+1);
+    }
 
-    private void normalizeTerrain(float minHeight, float maxHeight, float newMin, float newMax, int steps) {
+    private void normalizeTerrain(Polyhedron polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
         float stepSize = 1f / steps;
         Function<Float, Float> transform = h -> ((h - minHeight) * (newMax - newMin)) / (maxHeight - minHeight) + newMin;
         for (Face face : polyhedron.faces) {
@@ -61,7 +89,7 @@ public class HexWorld {
         }
     }
 
-    private void colorTerrain(float waterLevel) {
+    private void colorTerrain(Polyhedron polyhedron, float waterLevel) {
         for (Face face : polyhedron.faces) {
             face.setColor(ramp.getColor(face.height));
             if (face.height <= waterLevel) {
@@ -87,8 +115,8 @@ public class HexWorld {
     }
 
 
-    public void generateTerrain(float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
-        PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(MathUtils.random(Integer.MAX_VALUE - 1)).setInterpolation(Interpolation.COSINE).build();
+    public void generateTerrain(Polyhedron polyhedron, int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
+        PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(seed).setInterpolation(Interpolation.COSINE).build();
         float noiseScale = baseScale;
         float minHeight = 0;
         float maxHeight = Float.MAX_VALUE;
