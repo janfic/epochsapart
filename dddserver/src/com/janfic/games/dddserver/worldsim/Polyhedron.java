@@ -451,11 +451,13 @@ public class Polyhedron implements RenderableProvider {
         chunkVertices.clear();
         meshMap = new HashMap<>();
 
+        if(chunkSize % 2 == 1) chunkSize += 1;
         float deltaDivisions = chunkSize;
-        float thetaDivisions = chunkSize;
-
-        for (float theta = 0; theta < Math.PI * 2; theta += 2 * Math.PI / thetaDivisions) {
-            for (float delta = 0; delta < Math.PI * 2; delta += 2 * Math.PI / deltaDivisions) {
+        int deltaI = 0;
+        for (float delta = 0; delta < Math.PI * 2; delta += 2 * Math.PI / deltaDivisions) {
+            int d = (int) Math.min(Math.abs(deltaI - chunkSize / 4), Math.abs(deltaI - 3 * chunkSize / 4));
+            float thetaDivisions = chunkSize - d * 3;
+            for (float theta = 0; theta < Math.PI * 2; theta += 2 * Math.PI / thetaDivisions) {
                 Vector3 vector3 = new Vector3(
                         (float) (radius * Math.cos(theta) * Math.sin(delta)),
                         (float) (radius * Math.sin(theta) * Math.sin(delta)),
@@ -463,8 +465,8 @@ public class Polyhedron implements RenderableProvider {
                 vector3.add(center);
                 chunks.put(vector3, new ArrayList<>());
                 chunkVertices.add(vector3);
-
             }
+            deltaI++;
         }
 
         for (int i = 0; i < faces.size(); i++) {
@@ -479,10 +481,6 @@ public class Polyhedron implements RenderableProvider {
                 }
             }
             chunks.get(closest).add(face);
-        }
-
-        for (Vector3 vector3 : chunks.keySet()) {
-            System.out.println(chunks.get(vector3).size());
         }
     }
 
