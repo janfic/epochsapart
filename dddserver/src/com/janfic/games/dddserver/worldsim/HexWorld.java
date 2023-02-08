@@ -40,15 +40,14 @@ public class HexWorld {
         polyhedra = new ArrayList<>();
         polyhedron = new RegularIcosahedron(height);
         polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        polyhedra.add(polyhedron);
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             polyhedron = Polyhedron.dual(polyhedron);
             polyhedron = Polyhedron.uniformTruncate(polyhedron);
             if (i == 3) {
                 polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
             }
-            if(i > 3) {
-                generateTerrain(polyhedron, 1, 1 / 6f, f -> f * 2, 4, 1);
+            if( i > 3) {
+                generateTerrain(polyhedron, 1, 1 / 8f, f -> f * 2, 4, 1);
                 normalizeTerrain(polyhedron, polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
                 colorTerrain(polyhedron, 0.45f * max);
                 polyhedra.add(polyhedron);
@@ -61,18 +60,17 @@ public class HexWorld {
         float dif = (distanceToCenter - rad) - rad;
         float init = 3;
         int d = (int) init;
-        System.out.println(polyhedra.size());
         int index = polyhedra.size() - 1;
         while(index < polyhedra.size() && index >= 0) {
-            if(d * 3 > dif) {
-                d *= 3;
-                index--;
-            }
-            else {
+            if(d * 2 > dif || index == 0) {
                 break;
             }
+            else {
+                d *= 2;
+                index--;
+            }
         }
-        return polyhedra.get(index+1);
+        return polyhedra.get(index);
     }
 
     private void normalizeTerrain(Polyhedron polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
