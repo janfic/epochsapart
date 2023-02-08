@@ -185,7 +185,7 @@ public class Polyhedron implements RenderableProvider {
         Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
         r.setUp(copy.up.cpy());
         r.calculateCenter();
-        r.setChunkSize(polyhedron.chunkSize + 2);
+        r.setChunkSize(polyhedron.chunkSize + 3);
         r.calculateNeighbors();
         r.makeChunks();
         return r;
@@ -479,6 +479,10 @@ public class Polyhedron implements RenderableProvider {
                 }
             }
             chunks.get(closest).add(face);
+        }
+
+        for (Vector3 vector3 : chunks.keySet()) {
+            System.out.println(chunks.get(vector3).size());
         }
     }
 

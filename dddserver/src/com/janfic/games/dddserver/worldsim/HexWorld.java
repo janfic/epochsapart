@@ -29,7 +29,7 @@ public class HexWorld {
         this.level = level;
         polyhedron = new RegularIcosahedron(height);
         polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             polyhedron = Polyhedron.dual(polyhedron);
             polyhedron = Polyhedron.uniformTruncate(polyhedron);
             if(i==3) {
@@ -45,7 +45,7 @@ public class HexWorld {
         ramp.addColor(14 / 20f, Color.OLIVE);
         ramp.addColor(17 / 20f, Color.GRAY);
         ramp.addColor(19 / 20f, Color.WHITE);
-        generateTerrain(1/ 4f, f -> f + 1 / 8f, 32, 1);
+        generateTerrain(1/ 4f, f -> f * 2, 4, 1);
         normalizeTerrain(polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, 1, 20);
         colorTerrain();
     }

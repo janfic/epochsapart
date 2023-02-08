@@ -56,7 +56,7 @@ public class WorldSimScreen implements Screen {
 
     public WorldSimScreen(EpochsApartDriver game) {
         world = new World(1);
-        hexWorld = new HexWorld(15, 0, 0, 0);
+        hexWorld = new HexWorld(30, 0, 0, 0);
         renderer = new ShapeRenderer();
         mesh = hexWorld.polyhedron.getFaces().get(0).makeMesh(renderType, hexWorld.polyhedron);
 
@@ -67,7 +67,7 @@ public class WorldSimScreen implements Screen {
         camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius));
         camera.lookAt(hexWorld.polyhedron.getCenter());
-        camera.near = 1f;
+        camera.near = 0.5f;
         camera.far = radius * 2;
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,0.8f,0.8f,1.0f));
