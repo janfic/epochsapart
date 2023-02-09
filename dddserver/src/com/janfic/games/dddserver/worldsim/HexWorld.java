@@ -40,10 +40,10 @@ public class HexWorld {
         polyhedra = new ArrayList<>();
         polyhedron = new RegularIcosahedron(height);
         polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 8; i++) {
             polyhedron = Polyhedron.dual(polyhedron);
             polyhedron = Polyhedron.uniformTruncate(polyhedron);
-            if (i == 3) {
+            if (i == 4) {
                 polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
             }
             if( i > 3) {

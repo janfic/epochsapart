@@ -32,7 +32,7 @@ public class Polyhedron implements RenderableProvider {
     private List<PolyhedronChunk> chunks;
     private Map<Vector3, PolyhedronChunk> chunkMap;
     private int chunkSize = 3;
-    private final Queue<PolyhedronChunk> dirtyChunks;
+    private final PriorityQueue<PolyhedronChunk> dirtyChunks;
 
     Thread thread;
     int maxChunksProcessed = 5;
@@ -49,14 +49,15 @@ public class Polyhedron implements RenderableProvider {
         renderType = GL20.GL_TRIANGLES;
         chunks = new ArrayList<>();
         chunkSorter = new ChunkSorter(new Vector3());
-        dirtyChunks = new LinkedList<>();
-        thread = new Thread(()->{
-            while(true) {
+        dirtyChunks = new PriorityQueue<>(chunkSorter);
+        thread = new Thread(() -> {
+            while (true) {
                 synchronized (dirtyChunks) {
                     for (int i = 0; i < maxChunksProcessed; i++) {
-                        if(dirtyChunks.isEmpty()) break;
+                        if (dirtyChunks.isEmpty()) break;
                         PolyhedronChunk chunk = dirtyChunks.poll();
-                        chunk.clean();
+                        if (chunk != null)
+                            chunk.clean();
                     }
                 }
                 try {
@@ -74,8 +75,8 @@ public class Polyhedron implements RenderableProvider {
         faces = new ArrayList<>();
         transform = new Matrix4();
         chunks = new ArrayList<>();
-        dirtyChunks = new LinkedList<>();
         chunkSorter = new ChunkSorter(new Vector3());
+        dirtyChunks = new PriorityQueue<>(chunkSorter);
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
@@ -474,7 +475,7 @@ public class Polyhedron implements RenderableProvider {
         chunks.clear();
         chunkMap = new HashMap<>();
 
-        if(chunkSize % 2 == 1) chunkSize += 1;
+        if (chunkSize % 2 == 1) chunkSize += 1;
         float deltaDivisions = chunkSize;
         int deltaI = 0;
         for (float delta = 0; delta < Math.PI * 2; delta += 2 * Math.PI / deltaDivisions) {
@@ -513,20 +514,21 @@ public class Polyhedron implements RenderableProvider {
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        if(!thread.isAlive()) thread.start();
+        if (!thread.isAlive()) thread.start();
+        chunkSorter.setCameraPosition(camera.position.cpy());
         int renderedChunks = 0;
         for (int i = 0; i < chunks.size(); i++) {
             PolyhedronChunk chunk = chunks.get(i);
             Vector3 chunkVector = chunks.get(i).getChunkPoint();
 //            synchronized (dirtyChunks) {
-                if(dirtyChunks.contains(chunk)) continue;
-                if(chunk.isDirty()) {
-                    chunk.setRenderType(renderType);
-                    dirtyChunks.add(chunk);
-                    continue;
-                }
-//            }
             if (camera.position.dst(chunkVector) > camera.far) continue;
+            if (dirtyChunks.contains(chunk)) continue;
+            if (chunk.isDirty()) {
+                chunk.setRenderType(renderType);
+                dirtyChunks.add(chunk);
+                continue;
+            }
+//            }
             Renderable renderable = pool.obtain();
             renderable.meshPart.mesh = chunk.getMesh();
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
@@ -540,11 +542,10 @@ public class Polyhedron implements RenderableProvider {
     }
 
 
-
     public float getMinHeight() {
         float minHeight = Float.MAX_VALUE;
         for (Face face : faces) {
-            if(minHeight > face.height) minHeight = face.height;
+            if (minHeight > face.height) minHeight = face.height;
         }
         return minHeight;
     }
@@ -552,7 +553,7 @@ public class Polyhedron implements RenderableProvider {
     public float getMaxHeight() {
         float maxHeight = Float.MIN_VALUE;
         for (Face face : faces) {
-            if(maxHeight < face.height) maxHeight = face.height;
+            if (maxHeight < face.height) maxHeight = face.height;
         }
         return maxHeight;
     }
@@ -567,7 +568,11 @@ public class Polyhedron implements RenderableProvider {
 
         @Override
         public int compare(PolyhedronChunk o1, PolyhedronChunk o2) {
-            return (int) Math.signum(o1.getChunkPoint().dst2(cameraPosition) - o2.getChunkPoint().dst2(cameraPosition));
+            if (o1 != null && o2 != null)
+                return (int) Math.signum(o1.getChunkPoint().dst2(cameraPosition) - o2.getChunkPoint().dst2(cameraPosition));
+            if (o1 != null) return -1;
+            if (o2 != null) return 1;
+            return 0;
         }
 
         public void setCameraPosition(Vector3 cameraPosition) {
