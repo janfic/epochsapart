@@ -47,7 +47,7 @@ public class HexWorld {
                 polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
             }
             if( i > 3) {
-                generateTerrain(polyhedron, 1, 1 / 8f, f -> f * 2, 4, 1);
+                generateTerrain(polyhedron, 1, 1 / 20f, f -> f * 2, 6, 1);
                 normalizeTerrain(polyhedron, polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
                 colorTerrain(polyhedron, 0.45f * max);
                 polyhedra.add(polyhedron);
@@ -58,15 +58,15 @@ public class HexWorld {
     public Polyhedron getPolyhedronFromDistance(float distanceToCenter) {
         float rad = height / 2;
         float dif = (distanceToCenter - rad) - rad;
-        float init = 3;
+        float init = 2;
         int d = (int) init;
         int index = polyhedra.size() - 1;
         while(index < polyhedra.size() && index >= 0) {
-            if(d * 2 > dif || index == 0) {
+            if(d * 3 > dif || index == 0) {
                 break;
             }
             else {
-                d *= 2;
+                d *= 3;
                 index--;
             }
         }

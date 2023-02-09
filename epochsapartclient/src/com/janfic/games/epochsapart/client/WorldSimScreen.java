@@ -151,8 +151,9 @@ public class WorldSimScreen implements Screen {
             camera.update();
         }
 
-
-
+        if(Gdx.input.isKeyPressed(Input.Keys.K)) {
+            hexWorld.polyhedron.getFaces().get(MathUtils.random(hexWorld.polyhedron.getFaces().size())).setDirty();
+        }
 //        directionalLight.setDirection(hexWorld.polyhedron.getCenter().cpy().sub(camera.position.cpy()).nor().rotate(Vector3.Y, 50));
         //directionalLight.setDirection(camera.up.cpy().scl(-1f).rotate(camera.up.cpy().crs(norm).nor(), 45));
         //directionalLight.setDirection(camera.up.cpy().nor());

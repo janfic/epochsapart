@@ -36,6 +36,7 @@ public class Polyhedron implements RenderableProvider {
 
     Thread thread;
     int maxChunksProcessed = 5;
+    ChunkSorter chunkSorter;
 
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
@@ -47,21 +48,21 @@ public class Polyhedron implements RenderableProvider {
         index();
         renderType = GL20.GL_TRIANGLES;
         chunks = new ArrayList<>();
+        chunkSorter = new ChunkSorter(new Vector3());
         dirtyChunks = new LinkedList<>();
         thread = new Thread(()->{
             while(true) {
                 synchronized (dirtyChunks) {
                     for (int i = 0; i < maxChunksProcessed; i++) {
-                        if(dirtyChunks.isEmpty()) continue;
+                        if(dirtyChunks.isEmpty()) break;
                         PolyhedronChunk chunk = dirtyChunks.poll();
                         chunk.clean();
                     }
                 }
                 try {
-                    Thread.sleep(10);
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
+                    Thread.sleep(20);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -74,20 +75,7 @@ public class Polyhedron implements RenderableProvider {
         transform = new Matrix4();
         chunks = new ArrayList<>();
         dirtyChunks = new LinkedList<>();
-        thread = new Thread(()->{
-            while(true) {
-                synchronized (dirtyChunks) {
-                    if(dirtyChunks.isEmpty()) continue;
-                    PolyhedronChunk chunk = dirtyChunks.poll();
-                    chunk.clean();
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+        chunkSorter = new ChunkSorter(new Vector3());
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
@@ -526,19 +514,20 @@ public class Polyhedron implements RenderableProvider {
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
         if(!thread.isAlive()) thread.start();
+        int renderedChunks = 0;
         for (int i = 0; i < chunks.size(); i++) {
             PolyhedronChunk chunk = chunks.get(i);
             Vector3 chunkVector = chunks.get(i).getChunkPoint();
-            if (camera.position.dst(chunkVector) > camera.far) continue;
-            Renderable renderable = pool.obtain();
-            synchronized (dirtyChunks) {
+//            synchronized (dirtyChunks) {
                 if(dirtyChunks.contains(chunk)) continue;
                 if(chunk.isDirty()) {
                     chunk.setRenderType(renderType);
                     dirtyChunks.add(chunk);
                     continue;
                 }
-            }
+//            }
+            if (camera.position.dst(chunkVector) > camera.far) continue;
+            Renderable renderable = pool.obtain();
             renderable.meshPart.mesh = chunk.getMesh();
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
             renderable.meshPart.offset = 0;
@@ -546,8 +535,8 @@ public class Polyhedron implements RenderableProvider {
             renderable.meshPart.size = renderable.meshPart.mesh.getNumIndices();
             renderable.worldTransform.set(transform);
             renderables.add(renderable);
+            renderedChunks++;
         }
-        renderables.addAll();
     }
 
 
@@ -566,5 +555,23 @@ public class Polyhedron implements RenderableProvider {
             if(maxHeight < face.height) maxHeight = face.height;
         }
         return maxHeight;
+    }
+
+    public static class ChunkSorter implements Comparator<PolyhedronChunk> {
+
+        Vector3 cameraPosition;
+
+        public ChunkSorter(Vector3 cameraPosition) {
+            this.cameraPosition = cameraPosition;
+        }
+
+        @Override
+        public int compare(PolyhedronChunk o1, PolyhedronChunk o2) {
+            return (int) Math.signum(o1.getChunkPoint().dst2(cameraPosition) - o2.getChunkPoint().dst2(cameraPosition));
+        }
+
+        public void setCameraPosition(Vector3 cameraPosition) {
+            this.cameraPosition = cameraPosition;
+        }
     }
 }
