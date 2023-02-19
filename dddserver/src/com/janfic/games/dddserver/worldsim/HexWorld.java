@@ -26,17 +26,18 @@ public class HexWorld {
         this.level = level;
 
         ramp = new ColorRamp();
-        float max = 4;
-        float steps = 10;
-        ramp.addColor(0 * max, Color.BLUE);
+        float max = 2;
+        float steps = 20;
+        ramp.addColor(0 * max, Color.NAVY);
         ramp.addColor(0.25f * max, Color.BLUE);
-        ramp.addColor(0.45f * max, Color.SKY);
+        ramp.addColor(0.49f * max, Color.SKY);
         ramp.addColor(0.50f * max, Color.YELLOW);
         ramp.addColor(0.55f * max, Color.FOREST);
         ramp.addColor(0.70f * max, Color.OLIVE);
         ramp.addColor(0.85f * max, Color.SLATE);
         ramp.addColor(0.95f * max, Color.WHITE);
 
+        int seed = MathUtils.random(100000);
         polyhedra = new ArrayList<>();
         polyhedron = new RegularIcosahedron(height);
         polyhedron = Polyhedron.uniformTruncate(polyhedron);
@@ -47,7 +48,7 @@ public class HexWorld {
                 polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
             }
             if( i > 3) {
-                generateTerrain(polyhedron, 1, 1 / 20f, f -> f * 2, 6, 1);
+                generateTerrain(polyhedron, seed, 1 / 20f, f -> f * 2, 7, 1);
                 normalizeTerrain(polyhedron, polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
                 colorTerrain(polyhedron, 0.45f * max);
                 polyhedra.add(polyhedron);

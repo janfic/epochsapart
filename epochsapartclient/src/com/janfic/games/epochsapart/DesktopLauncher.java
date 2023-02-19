@@ -10,7 +10,7 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setForegroundFPS(60);
         config.setTitle("JanFixelsLibrary");
-//        config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode(Lwjgl3ApplicationConfiguration.getMonitors()[1]));
+        config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode(Lwjgl3ApplicationConfiguration.getMonitors()[1]));
 //        config.setWindowSizeLimits(1920, 1080, 1920, 1080);
         config.setWindowedMode(1000, 1000);
         config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 3, 2);

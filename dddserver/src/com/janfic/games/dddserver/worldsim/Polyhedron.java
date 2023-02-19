@@ -56,8 +56,10 @@ public class Polyhedron implements RenderableProvider {
                     for (int i = 0; i < maxChunksProcessed; i++) {
                         if (dirtyChunks.isEmpty()) break;
                         PolyhedronChunk chunk = dirtyChunks.poll();
-                        if (chunk != null)
+                        if (chunk != null) {
+                            if(camera.position.dst(chunk.getChunkPoint()) > camera.far && dirtyChunks.size() > maxChunksProcessed) continue;
                             chunk.clean();
+                        }
                     }
                 }
                 try {
