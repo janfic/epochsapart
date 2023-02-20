@@ -17,43 +17,12 @@ public class HexWorld {
     public float height;
     float posX, posY;
     int level;
-    ColorRamp ramp;
 
     public HexWorld(float height, float sx, float sy, int level) {
         posX = sx;
         posY = sy;
         this.height = height;
         this.level = level;
-
-        ramp = new ColorRamp();
-        float max = 2;
-        float steps = 20;
-        ramp.addColor(0 * max, Color.NAVY);
-        ramp.addColor(0.25f * max, Color.BLUE);
-        ramp.addColor(0.49f * max, Color.SKY);
-        ramp.addColor(0.50f * max, Color.YELLOW);
-        ramp.addColor(0.55f * max, Color.FOREST);
-        ramp.addColor(0.70f * max, Color.OLIVE);
-        ramp.addColor(0.85f * max, Color.SLATE);
-        ramp.addColor(0.95f * max, Color.WHITE);
-
-        int seed = MathUtils.random(100000);
-        polyhedra = new ArrayList<>();
-        polyhedron = new RegularIcosahedron(height);
-        polyhedron = Polyhedron.uniformTruncate(polyhedron);
-        for (int i = 0; i < 8; i++) {
-            polyhedron = Polyhedron.dual(polyhedron);
-            polyhedron = Polyhedron.uniformTruncate(polyhedron);
-            if (i == 4) {
-                polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
-            }
-            if( i > 3) {
-                generateTerrain(polyhedron, seed, 1 / 20f, f -> f * 2, 7, 1);
-                normalizeTerrain(polyhedron, polyhedron.getMinHeight(), polyhedron.getMaxHeight(), 0, max, (int) steps);
-                colorTerrain(polyhedron, 0.45f * max);
-                polyhedra.add(polyhedron);
-            }
-        }
     }
 
     public Polyhedron getPolyhedronFromDistance(float distanceToCenter) {
@@ -74,7 +43,7 @@ public class HexWorld {
         return polyhedra.get(index);
     }
 
-    private void normalizeTerrain(Polyhedron polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
+    public void normalizeTerrain(Polyhedron polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
         float stepSize = 1f / steps;
         Function<Float, Float> transform = h -> ((h - minHeight) * (newMax - newMin)) / (maxHeight - minHeight) + newMin;
         for (Face face : polyhedron.faces) {
@@ -88,7 +57,7 @@ public class HexWorld {
         }
     }
 
-    private void colorTerrain(Polyhedron polyhedron, float waterLevel) {
+    public void colorTerrain(Polyhedron polyhedron, float waterLevel, ColorRamp ramp) {
         for (Face face : polyhedron.faces) {
             face.setColor(ramp.getColor(face.height));
             if (face.height <= waterLevel) {
@@ -109,7 +78,12 @@ public class HexWorld {
         polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
     }
 
+    public void save() {
+        polyhedra.add(polyhedron);
+    }
+
     public void reset() {
+        polyhedra = new ArrayList<>();
         polyhedron = new RegularIcosahedron(height);
     }
 

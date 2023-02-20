@@ -17,11 +17,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.World;
+import com.janfic.games.dddserver.worldsim.tasks.MakeWorldTask;
 import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
 import com.janfic.games.library.ecs.components.rendering.PostProcessorsComponent;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PixelizePostProcess;
 import com.janfic.games.library.graphics.shaders.postprocess.PostProcess;
+import com.janfic.games.library.utils.ColorRamp;
+import com.janfic.games.library.utils.multithreading.OngoingTask;
+import com.janfic.games.library.utils.multithreading.TaskManager;
 import org.lwjgl.opengl.GL20;
 
 import java.util.ArrayList;
@@ -30,12 +34,9 @@ import java.util.List;
 public class WorldSimScreen implements Screen {
 
     ShapeRenderer renderer;
-    World world;
     HexWorld hexWorld;
-    Mesh mesh;
     ShaderProgram shaderProgram;
 
-    FirstPersonCameraController controller;
     PerspectiveCamera camera;
     float radius;
 
@@ -43,10 +44,7 @@ public class WorldSimScreen implements Screen {
 
     ModelBatch batch;
     SpriteBatch spriteBatch;
-    ModelInstance instance;
     private Environment environment;
-    private PointLight pointLight;
-    private DirectionalLight directionalLight;
 
     private FrameBuffer buffer;
     private PostProcessorsComponent postProcessorsComponent;
@@ -54,26 +52,14 @@ public class WorldSimScreen implements Screen {
     private OrthographicCamera orthographicCamera;
 
     public WorldSimScreen(EpochsApartDriver game) {
-        world = new World(1);
-        hexWorld = new HexWorld(30, 0, 0, 0);
         renderer = new ShapeRenderer();
-        mesh = hexWorld.polyhedron.getFaces().get(0).makeMesh(renderType, hexWorld.polyhedron);
-
         radius = 15 * 2;
-//        shaderProgram = new ShaderProgram(DefaultShader.getDefaultVertexShader(), DefaultShader.getDefaultFragmentShader());
+
         shaderProgram = new ShaderProgram(Gdx.files.internal("shaders/basicShader.vertex.glsl"), Gdx.files.internal("shaders/basicShader.fragment.glsl"));
-        batch = new ModelBatch();
         camera = new PerspectiveCamera(30, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.position.set(hexWorld.polyhedron.getCenter().cpy().add(0, 0, radius * 2));
-        camera.lookAt(hexWorld.polyhedron.getCenter());
         camera.near = 0.5f;
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,0.8f,0.8f,1.0f));
-        pointLight = new PointLight().set(0.8f, 0.8f, 0.8f, 15,0,15, 300);
-        directionalLight = new DirectionalLight().set(Color.WHITE.cpy().mul(0.5f), new Vector3(0,-1,0));
-        //environment.add(pointLight);
-        //.add(directionalLight);
-
 
         // Rendering
         batch = new ModelBatch();
@@ -92,28 +78,42 @@ public class WorldSimScreen implements Screen {
         postProcessorsComponent.processors = new ArrayList<>();
         postProcessorsComponent.processors.add(new DitherPostProcess(3));
         postProcessorsComponent.processors.add(new PixelizePostProcess(3));
-
     }
+
+    MakeWorldTask worldTask;
 
     @Override
     public void show() {
         Gdx.input.setInputProcessor(null);
+        TaskManager taskManager = TaskManager.getSingleton();
+        hexWorld = new HexWorld(30, 0, 0, 0);
+        ColorRamp ramp = new ColorRamp();
+        float max = 2;
+        float steps = 20;
+        ramp.addColor(0 * max, Color.NAVY);
+        ramp.addColor(0.25f * max, Color.BLUE);
+        ramp.addColor(0.49f * max, Color.SKY);
+        ramp.addColor(0.50f * max, Color.YELLOW);
+        ramp.addColor(0.55f * max, Color.FOREST);
+        ramp.addColor(0.70f * max, Color.OLIVE);
+        ramp.addColor(0.85f * max, Color.SLATE);
+        ramp.addColor(0.95f * max, Color.WHITE);
+        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 8);
+        taskManager.addTask(worldTask);
     }
 
     @Override
     public void render(float deltaTime) {
+
+        TaskManager.getSingleton().update();
+
+        if(!worldTask.isComplete()) return;
+
         Vector3 pos = hexWorld.polyhedron.getCenter().cpy();
         Vector3 norm = camera.position.cpy().sub(pos);
         Vector3 delta = new Vector3();
 
-        hexWorld.polyhedron.renderType = renderType;
-
-        if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            radius += 10 * deltaTime;
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.E)) {
-            radius -= 10 * deltaTime;
-        }
+        processInput(deltaTime);
         if(Gdx.input.isKeyPressed(Input.Keys.W)) {
             delta.add(camera.up.cpy().nor());
         }
@@ -126,37 +126,7 @@ public class WorldSimScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
             delta.add(camera.up.cpy().crs(norm).nor());
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            hexWorld.truncate();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-            hexWorld.dual();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            hexWorld.sphere();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            hexWorld.reset();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            renderType = renderType == GL20.GL_LINES ? GL20.GL_TRIANGLES : GL20.GL_LINES;
-            hexWorld.polyhedron.setRenderType(renderType);
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
-            camera.far += deltaTime;
-            camera.update();
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.X)) {
-            camera.far -= deltaTime;
-            camera.update();
-        }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.K)) {
-            hexWorld.polyhedron.getFaces().get(MathUtils.random(hexWorld.polyhedron.getFaces().size())).setDirty();
-        }
-//        directionalLight.setDirection(hexWorld.polyhedron.getCenter().cpy().sub(camera.position.cpy()).nor().rotate(Vector3.Y, 50));
-        //directionalLight.setDirection(camera.up.cpy().scl(-1f).rotate(camera.up.cpy().crs(norm).nor(), 45));
-        //directionalLight.setDirection(camera.up.cpy().nor());
 
         camera.position.set(camera.position.cpy().add(delta.scl(Math.abs(radius - (hexWorld.height / 2 + 5))* deltaTime)));
         norm = camera.position.cpy().sub(pos);
@@ -169,8 +139,8 @@ public class WorldSimScreen implements Screen {
         float dst = camera.position.dst(hexWorld.polyhedron.getCenter());
         hexWorld.getPolyhedronFromDistance(dst).setRenderSettings(camera);
         hexWorld.getPolyhedronFromDistance(dst).setRenderType(renderType);
-        //pointLight.position.set(camera.position.cpy().add(camera.up.cpy().scl(20f)));
 
+        //Rendering
         context.begin();
         buffer.begin();
 
@@ -187,9 +157,8 @@ public class WorldSimScreen implements Screen {
 
         buffer.end();
         context.end();
-        //mesh.render(shaderProgram, renderType);
-        //mesh.render(shaderProgram, GL20.GL_TRIANGLES);
 
+        // Post Processing Shaders
         Texture colorTexture = buffer.getTextureAttachments().get(FrameBufferComponent.DIFFUSE_ATTACHMENT);
         if (postProcessorsComponent != null && postProcessorsComponent.processors != null) {
             FrameBuffer current = buffer;
@@ -204,6 +173,32 @@ public class WorldSimScreen implements Screen {
         spriteBatch.setProjectionMatrix(orthographicCamera.combined);
         spriteBatch.draw(colorTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
         spriteBatch.end();
+    }
+
+    public void processInput(float deltaTime) {
+        if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            radius += 10 * deltaTime;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.E)) {
+            radius -= 10 * deltaTime;
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            hexWorld.truncate();
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            hexWorld.dual();
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            hexWorld.sphere();
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
+            camera.far += deltaTime;
+            camera.update();
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.X)) {
+            camera.far -= deltaTime;
+            camera.update();
+        }
     }
 
     @Override
