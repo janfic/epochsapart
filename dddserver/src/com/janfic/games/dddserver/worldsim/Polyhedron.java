@@ -28,15 +28,9 @@ public class Polyhedron implements RenderableProvider {
     Matrix4 transform;
     Camera camera;
 
-
     private List<PolyhedronChunk> chunks;
     private Map<Vector3, PolyhedronChunk> chunkMap;
     private int chunkSize = 3;
-    private final PriorityQueue<PolyhedronChunk> dirtyChunks;
-
-    Thread thread;
-    int maxChunksProcessed = 5;
-    ChunkSorter chunkSorter;
 
 
     public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
@@ -48,27 +42,6 @@ public class Polyhedron implements RenderableProvider {
         index();
         renderType = GL20.GL_TRIANGLES;
         chunks = new ArrayList<>();
-        chunkSorter = new ChunkSorter(new Vector3());
-        dirtyChunks = new PriorityQueue<>(chunkSorter);
-        thread = new Thread(() -> {
-            while (true) {
-                synchronized (dirtyChunks) {
-                    for (int i = 0; i < maxChunksProcessed; i++) {
-                        if (dirtyChunks.isEmpty()) break;
-                        PolyhedronChunk chunk = dirtyChunks.poll();
-                        if (chunk != null) {
-                            if(camera.position.dst(chunk.getChunkPoint()) > camera.far && dirtyChunks.size() > maxChunksProcessed) continue;
-                            chunk.clean();
-                        }
-                    }
-                }
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
     }
 
     public Polyhedron() {
@@ -77,8 +50,6 @@ public class Polyhedron implements RenderableProvider {
         faces = new ArrayList<>();
         transform = new Matrix4();
         chunks = new ArrayList<>();
-        chunkSorter = new ChunkSorter(new Vector3());
-        dirtyChunks = new PriorityQueue<>(chunkSorter);
     }
 
     public static Polyhedron dual(Polyhedron polyhedron) {
@@ -274,69 +245,6 @@ public class Polyhedron implements RenderableProvider {
         this.chunkSize = chunkSize;
     }
 
-    public Mesh makeMesh(Color color, int renderType) {
-        Mesh mesh = new Mesh(true, true, vertices.size(), edges.size() * 6,
-                new VertexAttributes(
-                        new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-                        new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE)
-                )
-        );
-        float[] verts = new float[vertices.size() * mesh.getVertexSize() / 4];
-
-        for (int i = 0; i < vertices.size(); i++) {
-            int j = i * 7;
-            verts[j] = vertices.get(i).x;
-            verts[j + 1] = vertices.get(i).y;
-            verts[j + 2] = vertices.get(i).z;
-            verts[j + 3] = color.r;
-            verts[j + 4] = color.g;
-            verts[j + 5] = color.b;
-            verts[j + 6] = color.a;
-        }
-        mesh.setVertices(verts, 0, vertices.size() * (3 + 4));
-
-        if (renderType == GL20.GL_LINES) {
-            short[] indices = new short[edges.size() * 2];
-            for (int i = 0; i < edges.size(); i++) {
-                Edge edge = edges.get(i);
-                int a = edge.a.getIndex();
-                int b = edge.b.getIndex();
-                int j = i * 2;
-                indices[j] = (short) a;
-                indices[j + 1] = (short) b;
-            }
-            mesh.setIndices(indices);
-        } else if (renderType == GL20.GL_TRIANGLES) {
-            int amount = 0;
-            for (Face face : faces) {
-                amount += (face.vertices.size() - 2);
-            }
-            short[] indices = new short[amount * 3];
-            int index = 0;
-            for (int i = 0; i < faces.size(); i++) {
-                Face face = faces.get(i);
-                Vertex a = face.vertices.get(0);
-                for (int j = 1; j < face.vertices.size() - 1; j++) {
-                    Vertex b = face.vertices.get(j);
-                    Vertex c = face.vertices.get(j + 1);
-                    Plane plane = new Plane(a, b, c);
-                    if (!plane.isFrontFacing(face.center.cpy().sub(this.center))) {
-                        indices[index++] = a.getIndex();
-                        indices[index++] = b.getIndex();
-                        indices[index++] = c.getIndex();
-                    } else {
-                        indices[index++] = a.getIndex();
-                        indices[index++] = c.getIndex();
-                        indices[index++] = b.getIndex();
-                    }
-                }
-            }
-            mesh.setIndices(indices);
-        }
-        mesh.transform(transform);
-        return mesh;
-    }
-
     public List<Edge> getEdges() {
         return edges;
     }
@@ -513,24 +421,21 @@ public class Polyhedron implements RenderableProvider {
         }
     }
 
+    public List<PolyhedronChunk> getChunks() {
+        return chunks;
+    }
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        if (!thread.isAlive()) thread.start();
-        chunkSorter.setCameraPosition(camera.position.cpy());
         int renderedChunks = 0;
         for (int i = 0; i < chunks.size(); i++) {
             PolyhedronChunk chunk = chunks.get(i);
             Vector3 chunkVector = chunks.get(i).getChunkPoint();
-//            synchronized (dirtyChunks) {
-            if (camera.position.dst(chunkVector) > camera.far) continue;
-            if (dirtyChunks.contains(chunk)) continue;
             if (chunk.isDirty()) {
                 chunk.setRenderType(renderType);
-                dirtyChunks.add(chunk);
                 continue;
             }
-//            }
+            if (camera.position.dst(chunkVector) > camera.far) continue;
             Renderable renderable = pool.obtain();
             renderable.meshPart.mesh = chunk.getMesh();
             renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));

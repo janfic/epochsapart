@@ -5,6 +5,7 @@ import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.Polyhedron;
 import com.janfic.games.library.utils.ColorRamp;
 import com.janfic.games.library.utils.multithreading.Task;
+import com.janfic.games.library.utils.multithreading.TaskManager;
 
 public class MakeWorldTask extends Task {
 

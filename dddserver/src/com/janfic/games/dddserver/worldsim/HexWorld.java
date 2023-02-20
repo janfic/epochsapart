@@ -15,14 +15,9 @@ public class HexWorld {
     public Polyhedron polyhedron;
     public List<Polyhedron> polyhedra;
     public float height;
-    float posX, posY;
-    int level;
 
-    public HexWorld(float height, float sx, float sy, int level) {
-        posX = sx;
-        posY = sy;
+    public HexWorld(float height) {
         this.height = height;
-        this.level = level;
     }
 
     public Polyhedron getPolyhedronFromDistance(float distanceToCenter) {
@@ -86,7 +81,6 @@ public class HexWorld {
         polyhedra = new ArrayList<>();
         polyhedron = new RegularIcosahedron(height);
     }
-
 
     public void generateTerrain(Polyhedron polyhedron, int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
         PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(seed).setInterpolation(Interpolation.COSINE).build();

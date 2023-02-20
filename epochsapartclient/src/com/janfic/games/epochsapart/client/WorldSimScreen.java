@@ -16,8 +16,10 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.janfic.games.dddserver.worldsim.HexWorld;
+import com.janfic.games.dddserver.worldsim.Polyhedron;
 import com.janfic.games.dddserver.worldsim.World;
 import com.janfic.games.dddserver.worldsim.tasks.MakeWorldTask;
+import com.janfic.games.dddserver.worldsim.tasks.WorldCleanerTask;
 import com.janfic.games.library.ecs.components.rendering.FrameBufferComponent;
 import com.janfic.games.library.ecs.components.rendering.PostProcessorsComponent;
 import com.janfic.games.library.graphics.shaders.postprocess.DitherPostProcess;
@@ -81,12 +83,13 @@ public class WorldSimScreen implements Screen {
     }
 
     MakeWorldTask worldTask;
+    Polyhedron.ChunkSorter sorter;
 
     @Override
     public void show() {
         Gdx.input.setInputProcessor(null);
         TaskManager taskManager = TaskManager.getSingleton();
-        hexWorld = new HexWorld(30, 0, 0, 0);
+        hexWorld = new HexWorld(30);
         ColorRamp ramp = new ColorRamp();
         float max = 2;
         float steps = 20;
@@ -98,8 +101,11 @@ public class WorldSimScreen implements Screen {
         ramp.addColor(0.70f * max, Color.OLIVE);
         ramp.addColor(0.85f * max, Color.SLATE);
         ramp.addColor(0.95f * max, Color.WHITE);
-        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 8);
+        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 9);
         taskManager.addTask(worldTask);
+        WorldCleanerTask worldCleanerTask = new WorldCleanerTask(hexWorld, 10, sorter = new Polyhedron.ChunkSorter(camera.position));
+        worldCleanerTask.addDependency(worldTask);
+        TaskManager.getSingleton().addTask(worldCleanerTask);
     }
 
     @Override
@@ -136,6 +142,8 @@ public class WorldSimScreen implements Screen {
         camera.far = camera.position.dst(hexWorld.polyhedron.getCenter()) + radius / 8;
         camera.update();
 
+        sorter.setCameraPosition(camera.position.cpy());
+
         float dst = camera.position.dst(hexWorld.polyhedron.getCenter());
         hexWorld.getPolyhedronFromDistance(dst).setRenderSettings(camera);
         hexWorld.getPolyhedronFromDistance(dst).setRenderType(renderType);
@@ -152,7 +160,8 @@ public class WorldSimScreen implements Screen {
         Gdx.gl.glCullFace(GL20.GL_CCW);
 
         batch.begin(camera);
-        batch.render(hexWorld.getPolyhedronFromDistance(camera.position.dst(hexWorld.polyhedron.getCenter())), environment);
+        batch.render(hexWorld.polyhedron, environment);
+//        batch.render(hexWorld.getPolyhedronFromDistance(camera.position.dst(hexWorld.polyhedron.getCenter())), environment);
         batch.end();
 
         buffer.end();

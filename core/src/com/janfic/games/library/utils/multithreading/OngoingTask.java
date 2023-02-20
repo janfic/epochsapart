@@ -9,7 +9,6 @@ public class OngoingTask extends Task {
     }
 
     public void repeatedLogic() {
-        System.out.println("repeat");
     }
 
     @Override
