@@ -101,7 +101,7 @@ public class WorldSimScreen implements Screen {
         ramp.addColor(0.70f * max, Color.OLIVE);
         ramp.addColor(0.85f * max, Color.SLATE);
         ramp.addColor(0.95f * max, Color.WHITE);
-        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 9);
+        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 7);
         taskManager.addTask(worldTask);
         WorldCleanerTask worldCleanerTask = new WorldCleanerTask(hexWorld, 10, sorter = new Polyhedron.ChunkSorter(camera.position));
         worldCleanerTask.addDependency(worldTask);
