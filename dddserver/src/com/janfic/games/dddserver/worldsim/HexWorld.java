@@ -12,15 +12,15 @@ import java.util.function.Function;
 
 public class HexWorld {
 
-    public Polyhedron polyhedron;
-    public List<Polyhedron> polyhedra;
+    public Polyhedron<Tile> polyhedron;
+    public List<Polyhedron<Tile>> polyhedra;
     public float height;
 
     public HexWorld(float height) {
         this.height = height;
     }
 
-    public Polyhedron getPolyhedronFromDistance(float distanceToCenter) {
+    public Polyhedron<Tile>  getPolyhedronFromDistance(float distanceToCenter) {
         float rad = height / 2;
         float dif = (distanceToCenter - rad) - rad;
         float init = 2;
@@ -38,7 +38,7 @@ public class HexWorld {
         return polyhedra.get(index);
     }
 
-    public void normalizeTerrain(Polyhedron polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
+    public void normalizeTerrain(Polyhedron<Tile> polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
         float stepSize = 1f / steps;
         Function<Float, Float> transform = h -> ((h - minHeight) * (newMax - newMin)) / (maxHeight - minHeight) + newMin;
         for (Face face : polyhedron.faces) {
@@ -52,7 +52,7 @@ public class HexWorld {
         }
     }
 
-    public void colorTerrain(Polyhedron polyhedron, float waterLevel, ColorRamp ramp) {
+    public void colorTerrain(Polyhedron<Tile>  polyhedron, float waterLevel, ColorRamp ramp) {
         for (Face face : polyhedron.faces) {
             face.setColor(ramp.getColor(face.height));
             if (face.height <= waterLevel) {
@@ -82,7 +82,7 @@ public class HexWorld {
         polyhedron = new RegularIcosahedron(height);
     }
 
-    public void generateTerrain(Polyhedron polyhedron, int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
+    public void generateTerrain(Polyhedron<Tile> polyhedron, int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
         PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(seed).setInterpolation(Interpolation.COSINE).build();
         float noiseScale = baseScale;
         float minHeight = 0;

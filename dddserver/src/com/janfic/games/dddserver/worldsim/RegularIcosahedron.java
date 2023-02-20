@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegularIcosahedron extends Polyhedron {
+public class RegularIcosahedron<T extends Face> extends Polyhedron<T> {
     public RegularIcosahedron(float height) {
         // Calc
         // Using https://personal.math.ubc.ca/~cass/courses/m308-03b/projects-03b/keating/projectweppage2.htm
@@ -94,7 +94,7 @@ public class RegularIcosahedron extends Polyhedron {
             fVertices.add(f1);
             fVertices.add(f2);
             Face f = new Face(fVertices, fEdges);
-            faces.add(f);
+            faces.add((T)f);
         }
 
         calculateNeighbors();

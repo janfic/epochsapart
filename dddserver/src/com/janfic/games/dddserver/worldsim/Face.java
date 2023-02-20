@@ -25,6 +25,10 @@ public class Face {
         this(vertices, edges, 0);
     }
 
+    public static Face makeFace(List<Vertex> vertices, List<Edge> edges) {
+        return new Face(vertices, edges, 0);
+    }
+
     public void setColor(Color color) {
         this.color = color;
     }

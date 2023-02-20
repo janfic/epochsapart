@@ -93,8 +93,8 @@ public class WorldSimScreen implements Screen {
         ColorRamp ramp = new ColorRamp();
         float max = 2;
         float steps = 20;
-        ramp.addColor(0 * max, Color.NAVY);
-        ramp.addColor(0.25f * max, Color.BLUE);
+        ramp.addColor(0 * max, Color.BLUE);
+        ramp.addColor(0.35f * max, Color.BLUE);
         ramp.addColor(0.49f * max, Color.SKY);
         ramp.addColor(0.50f * max, Color.YELLOW);
         ramp.addColor(0.55f * max, Color.FOREST);

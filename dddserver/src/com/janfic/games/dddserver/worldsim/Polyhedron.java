@@ -18,11 +18,11 @@ import org.lwjgl.opengl.GLContext;
 
 import java.util.*;
 
-public class Polyhedron implements RenderableProvider {
+public class Polyhedron<T extends Face> implements RenderableProvider {
     public int renderType;
     List<Vertex> vertices;
     List<Edge> edges;
-    List<Face> faces;
+    List<T> faces;
     Vertex center;
     Vector3 up;
     Matrix4 transform;
@@ -33,7 +33,7 @@ public class Polyhedron implements RenderableProvider {
     private int chunkSize = 3;
 
 
-    public Polyhedron(List<Vertex> v, List<Edge> e, List<Face> f) {
+    public Polyhedron(List<Vertex> v, List<Edge> e, List<T> f) {
         vertices = new ArrayList<>(v);
         edges = new ArrayList<>(e);
         faces = new ArrayList<>(f);
@@ -52,19 +52,19 @@ public class Polyhedron implements RenderableProvider {
         chunks = new ArrayList<>();
     }
 
-    public static Polyhedron dual(Polyhedron polyhedron) {
+    public static <T extends Face> Polyhedron<T> dual(Polyhedron<T> polyhedron) {
         System.out.println("DUAL");
 
-        Polyhedron copy = polyhedron.copy();
+        Polyhedron<T> copy = polyhedron.copy();
 
         List<Vertex> vs = new ArrayList<>();
-        List<Face> fs = new ArrayList<>();
+        List<T> fs = new ArrayList<>();
 
         Map<Edge, Edge> edgeMap = new HashMap<>();
         Map<Vector3, Set<Vertex>> map = new HashMap<>();
         Map<Vertex, Integer> indexMap = new HashMap<>();
 
-        for (Face face : copy.faces) {
+        for (T face : copy.faces) {
             Vertex v = new Vertex(face.center);
             indexMap.put(v, vs.size());
             vs.add(v);
@@ -95,13 +95,13 @@ public class Polyhedron implements RenderableProvider {
                 if (!edgeMap.containsKey(edge))
                     edgeMap.put(edge, edge);
             }
-            fs.add(face);
+            fs.add((T)face);
         }
         long tEnd = System.currentTimeMillis();
 
         System.out.println("total: " + (tEnd - tStart) / 1000f);
 
-        Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
+        Polyhedron<T> r = new Polyhedron<T>(vs, new ArrayList<>(edgeMap.values()), fs);
         r.calculateCenter();
         r.calculateNeighbors();
         r.setChunkSize(copy.chunkSize);
@@ -110,13 +110,13 @@ public class Polyhedron implements RenderableProvider {
         return r;
     }
 
-    public static Polyhedron uniformTruncate(Polyhedron polyhedron) {
-        Polyhedron copy = polyhedron.copy();
+    public static <T extends Face> Polyhedron<T>  uniformTruncate(Polyhedron<T> polyhedron) {
+        Polyhedron<T> copy = polyhedron.copy();
 
         List<Vertex> vs = new ArrayList<>();
         List<Edge> es = new ArrayList<>();
         Map<Edge, Edge> edgeMap = new HashMap<>();
-        List<Face> fs = new ArrayList<>();
+        List<T> fs = new ArrayList<>();
 
         Map<Vector3, Set<Vertex>> map = new HashMap<>();
 
@@ -178,14 +178,14 @@ public class Polyhedron implements RenderableProvider {
                 if (!edgeMap.containsKey(edge))
                     edgeMap.put(edge, edge);
             }
-            fs.add(face);
+            fs.add((T)face);
         }
         long tEnd = System.currentTimeMillis();
 
         System.out.println("sorting: " + timeSorting / 1000f + "| creating: " + timeCreating / 1000f);
         System.out.println("total:" + (tEnd - tStart) / 1000f);
 
-        Polyhedron r = new Polyhedron(vs, new ArrayList<>(edgeMap.values()), fs);
+        Polyhedron<T> r = new Polyhedron<T>(vs, new ArrayList<>(edgeMap.values()), fs);
         r.setUp(copy.up.cpy());
         r.calculateCenter();
         r.setChunkSize(polyhedron.chunkSize + 3);
@@ -194,14 +194,14 @@ public class Polyhedron implements RenderableProvider {
         return r;
     }
 
-    public static Polyhedron sphereProject(Polyhedron polyhedron, float radius) {
-        Polyhedron copy = polyhedron.copy();
+    public static <T extends Face> Polyhedron<T>  sphereProject(Polyhedron<T> polyhedron, float radius) {
+        Polyhedron<T> copy = polyhedron.copy();
 
         Map<Vertex, Vertex> map = new HashMap<>();
 
         List<Vertex> vertexList = new ArrayList<>();
         List<Edge> edgeList = new ArrayList<>();
-        List<Face> faceList = new ArrayList<>();
+        List<T> faceList = new ArrayList<>();
 
         Vector3 center = copy.center;
         for (Vertex vertex : copy.vertices) {
@@ -228,11 +228,11 @@ public class Polyhedron implements RenderableProvider {
                 edges.add(e);
             }
 
-            faceList.add(new Face(verts, edges));
+            faceList.add((T)new Face(verts, edges));
         }
 
 
-        Polyhedron r = new Polyhedron(vertexList, edgeList, faceList);
+        Polyhedron<T> r = new Polyhedron<T>(vertexList, edgeList, faceList);
         r.calculateCenter();
         r.calculateNeighbors();
         r.setChunkSize(polyhedron.chunkSize);
@@ -249,7 +249,7 @@ public class Polyhedron implements RenderableProvider {
         return edges;
     }
 
-    public List<Face> getFaces() {
+    public List<T> getFaces() {
         return faces;
     }
 
@@ -265,11 +265,11 @@ public class Polyhedron implements RenderableProvider {
         this.renderType = renderType;
     }
 
-    public Polyhedron copy() {
+    public Polyhedron<T> copy() {
         long start = System.currentTimeMillis();
         List<Vertex> vs = new ArrayList<>(vertices);
         List<Edge> es = new ArrayList<>(edges);
-        List<Face> fs = new ArrayList<>(faces);
+        List<T> fs = new ArrayList<>(faces);
 
         /**
          for (Vertex vertex : vertices) {
@@ -299,7 +299,7 @@ public class Polyhedron implements RenderableProvider {
          }
          **/
 
-        Polyhedron polyhedron = new Polyhedron(vs, es, fs);
+        Polyhedron<T> polyhedron = new Polyhedron<T>(vs, es, fs);
         polyhedron.calculateCenter();
         polyhedron.setUp(this.up.cpy());
         polyhedron.calculateNeighbors();
@@ -328,7 +328,7 @@ public class Polyhedron implements RenderableProvider {
     }
 
     public void sortReferences() {
-        for (Face face : faces) {
+        for (T face : faces) {
             Vector3 norm = face.center.cpy().sub(this.center).nor();
             Face.sortVerticesClockwise(face.vertices, norm);
             float[] vers = new float[face.vertices.size() * 3];
@@ -385,7 +385,7 @@ public class Polyhedron implements RenderableProvider {
         chunks.clear();
         chunkMap = new HashMap<>();
 
-        if (chunkSize % 2 == 1) chunkSize += 1;
+        if (chunkSize % 2 == 0) chunkSize += 1;
         float deltaDivisions = chunkSize;
         int deltaI = 0;
         for (float delta = 0; delta < Math.PI * 2; delta += 2 * Math.PI / deltaDivisions) {
