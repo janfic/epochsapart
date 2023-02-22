@@ -30,8 +30,7 @@ public class WorldCleanerTask extends OngoingTask {
     @Override
     public void repeatedLogic() {
 
-
-        for (PolyhedronChunk chunk : world.polyhedron.getChunks()) {
+        for (PolyhedronChunk chunk : world.getChunks()) {
             if(!inQueue.contains(chunk) && chunk.isDirty()) {
                 chunkQueue.add(chunk);
                 inQueue.add(chunk);

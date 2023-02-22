@@ -1,11 +1,15 @@
 package com.janfic.games.dddserver.worldsim.tasks;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.janfic.games.dddserver.worldsim.Face;
 import com.janfic.games.dddserver.worldsim.HexWorld;
 import com.janfic.games.dddserver.worldsim.Polyhedron;
+import com.janfic.games.dddserver.worldsim.Tile;
 import com.janfic.games.library.utils.ColorRamp;
 import com.janfic.games.library.utils.multithreading.Task;
 import com.janfic.games.library.utils.multithreading.TaskManager;
+
+import java.util.function.Function;
 
 public class MakeWorldTask extends Task {
 
@@ -26,22 +30,26 @@ public class MakeWorldTask extends Task {
 
     @Override
     public void start() {
-        world.reset();
-        world.truncate();
+        world.uniformTruncate();
+        world.setFaceCreator(face -> {
+            Tile t = new Tile(face.getVertices(), face.getEdges());
+            t.setHeight(face.getHeight());
+            return t;
+        });
 
         int seed = MathUtils.random(100000);
         for (int i = 0; i < detailLevel; i++) {
-            System.out.println(i);
             world.dual();
-            world.truncate();
+            world.uniformTruncate();
             if (i == 4) {
-                world.sphere();
+                world.sphereProject(world.height / 2);
             }
             if( i > 3) {
-                world.generateTerrain(world.polyhedron, seed, 1 / 20f, f -> f * 2, 7, 1);
-                world.normalizeTerrain(world.polyhedron, world.polyhedron.getMinHeight(), world.polyhedron.getMaxHeight(), 0, max, steps);
-                world.colorTerrain(world.polyhedron, 0.45f * max, ramp);
-                world.save();
+                world.transformFaces();
+                world.generateTerrain( seed, 1 / 20f, f -> f * 2, 7, 1);
+                world.normalizeTerrain(world.getMinHeight(), world.getMaxHeight(), 0, max, steps);
+                world.colorTerrain( 0.45f * max, ramp);
+                world.makeChunks();
             }
         }
 

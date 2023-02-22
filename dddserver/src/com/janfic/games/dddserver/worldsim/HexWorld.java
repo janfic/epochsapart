@@ -1,7 +1,7 @@
 package com.janfic.games.dddserver.worldsim;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
+import com.janfic.games.dddserver.worldsim.materials.Obsidian;
+import com.janfic.games.dddserver.worldsim.materials.Stone;
 import com.janfic.games.library.utils.ColorRamp;
 import de.articdive.jnoise.generators.noise_parameters.interpolation.Interpolation;
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator;
@@ -10,14 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class HexWorld {
+public class HexWorld extends RegularIcosahedron<Tile> {
 
-    public Polyhedron<Tile> polyhedron;
     public List<Polyhedron<Tile>> polyhedra;
     public float height;
 
     public HexWorld(float height) {
+        super(height);
         this.height = height;
+        polyhedra = new ArrayList<>();
     }
 
     public Polyhedron<Tile>  getPolyhedronFromDistance(float distanceToCenter) {
@@ -38,10 +39,10 @@ public class HexWorld {
         return polyhedra.get(index);
     }
 
-    public void normalizeTerrain(Polyhedron<Tile> polyhedron, float minHeight, float maxHeight, float newMin, float newMax, int steps) {
+    public void normalizeTerrain( float minHeight, float maxHeight, float newMin, float newMax, int steps) {
         float stepSize = 1f / steps;
         Function<Float, Float> transform = h -> ((h - minHeight) * (newMax - newMin)) / (maxHeight - minHeight) + newMin;
-        for (Face face : polyhedron.faces) {
+        for (Face face : faces) {
             face.height = transform.apply(face.height);
             float r = face.height % stepSize;
             if (r - stepSize / 2 > 0) {
@@ -52,8 +53,8 @@ public class HexWorld {
         }
     }
 
-    public void colorTerrain(Polyhedron<Tile>  polyhedron, float waterLevel, ColorRamp ramp) {
-        for (Face face : polyhedron.faces) {
+    public void colorTerrain( float waterLevel, ColorRamp ramp) {
+        for (Tile face : faces) {
             face.setColor(ramp.getColor(face.height));
             if (face.height <= waterLevel) {
                 face.setHeight(waterLevel);
@@ -61,34 +62,17 @@ public class HexWorld {
         }
     }
 
-    public void dual() {
-        polyhedron = Polyhedron.dual(polyhedron);
-    }
-
-    public void truncate() {
-        polyhedron = Polyhedron.uniformTruncate(polyhedron);
-    }
-
-    public void sphere() {
-        polyhedron = Polyhedron.sphereProject(polyhedron, height / 2);
-    }
-
     public void save() {
-        polyhedra.add(polyhedron);
+        polyhedra.add(copy());
     }
 
-    public void reset() {
-        polyhedra = new ArrayList<>();
-        polyhedron = new RegularIcosahedron(height);
-    }
-
-    public void generateTerrain(Polyhedron<Tile> polyhedron, int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
+    public void generateTerrain(int seed, float baseScale, Function<Float, Float> octaveFunction, int octaves, float amplitude) {
         PerlinNoiseGenerator generator = PerlinNoiseGenerator.newBuilder().setSeed(seed).setInterpolation(Interpolation.COSINE).build();
         float noiseScale = baseScale;
         float minHeight = 0;
         float maxHeight = Float.MAX_VALUE;
         float average = 0;
-        for (Face face : polyhedron.faces) {
+        for (Tile face : faces) {
             float height = 0;
             noiseScale = baseScale;
             for (int i = 0; i < octaves; i++) {
@@ -99,11 +83,12 @@ public class HexWorld {
                 noiseScale = octaveFunction.apply(noiseScale);
             }
 
-            face.setHeight(height);
+            face.addMaterial(new Stone(height));
+            face.addMaterial(new Obsidian(0.05f));
             if (minHeight > height) minHeight = height;
             if (maxHeight < height) maxHeight = height;
             average += height;
         }
-        average /= polyhedron.faces.size();
+        average /= faces.size();
     }
 }

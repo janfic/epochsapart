@@ -101,7 +101,7 @@ public class WorldSimScreen implements Screen {
         ramp.addColor(0.70f * max, Color.OLIVE);
         ramp.addColor(0.85f * max, Color.SLATE);
         ramp.addColor(0.95f * max, Color.WHITE);
-        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 7);
+        worldTask = new MakeWorldTask(hexWorld, ramp, (int) steps, max, 5);
         taskManager.addTask(worldTask);
         WorldCleanerTask worldCleanerTask = new WorldCleanerTask(hexWorld, 10, sorter = new Polyhedron.ChunkSorter(camera.position));
         worldCleanerTask.addDependency(worldTask);
@@ -115,7 +115,7 @@ public class WorldSimScreen implements Screen {
 
         if(!worldTask.isComplete()) return;
 
-        Vector3 pos = hexWorld.polyhedron.getCenter().cpy();
+        Vector3 pos = hexWorld.getCenter().cpy();
         Vector3 norm = camera.position.cpy().sub(pos);
         Vector3 delta = new Vector3();
 
@@ -138,15 +138,15 @@ public class WorldSimScreen implements Screen {
         norm = camera.position.cpy().sub(pos);
         norm.scl(radius / norm.len());
         camera.position.set(pos.cpy().add(norm));
-        camera.lookAt(hexWorld.polyhedron.getCenter());
-        camera.far = camera.position.dst(hexWorld.polyhedron.getCenter()) + radius / 8;
+        camera.lookAt(hexWorld.getCenter());
+        camera.far = camera.position.dst(hexWorld.getCenter()) + radius / 8;
         camera.update();
 
         sorter.setCameraPosition(camera.position.cpy());
 
-        float dst = camera.position.dst(hexWorld.polyhedron.getCenter());
-        hexWorld.getPolyhedronFromDistance(dst).setRenderSettings(camera);
-        hexWorld.getPolyhedronFromDistance(dst).setRenderType(renderType);
+        float dst = camera.position.dst(hexWorld.getCenter());
+        hexWorld.setRenderSettings(camera);
+        hexWorld.setRenderType(renderType);
 
         //Rendering
         context.begin();
@@ -160,7 +160,7 @@ public class WorldSimScreen implements Screen {
         Gdx.gl.glCullFace(GL20.GL_CCW);
 
         batch.begin(camera);
-        batch.render(hexWorld.polyhedron, environment);
+        batch.render(hexWorld, environment);
 //        batch.render(hexWorld.getPolyhedronFromDistance(camera.position.dst(hexWorld.polyhedron.getCenter())), environment);
         batch.end();
 
@@ -190,15 +190,6 @@ public class WorldSimScreen implements Screen {
         }
         if(Gdx.input.isKeyPressed(Input.Keys.E)) {
             radius -= 10 * deltaTime;
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            hexWorld.truncate();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-            hexWorld.dual();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            hexWorld.sphere();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
             camera.far += deltaTime;

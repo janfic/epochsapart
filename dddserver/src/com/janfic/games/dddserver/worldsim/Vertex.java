@@ -1,5 +1,7 @@
 package com.janfic.games.dddserver.worldsim;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -77,5 +79,21 @@ public class Vertex extends Vector3 {
     @Override
     public int hashCode() {
         return super.hashCode();
+    }
+
+    public static void addVertexToMesh(VertexAttributes attributes, float[] vertices, int offset, Vector3 vertex, Vector3 normal, Color color) {
+        int posOffset = attributes.getOffset(VertexAttributes.Usage.Position);
+        int norOffset = attributes.getOffset(VertexAttributes.Usage.Normal);
+        int colOffset = attributes.getOffset(VertexAttributes.Usage.ColorUnpacked);
+        vertices[offset + posOffset] = vertex.x;
+        vertices[offset + posOffset + 1] = vertex.y;
+        vertices[offset + posOffset + 2] = vertex.z;
+        vertices[offset + norOffset] = normal.x;
+        vertices[offset + norOffset + 1] = normal.y;
+        vertices[offset + norOffset + 2] = normal.z;
+        vertices[offset + colOffset] = color.r;
+        vertices[offset + colOffset + 1] = color.g;
+        vertices[offset + colOffset + 2] = color.b;
+        vertices[offset + colOffset + 3] = color.a;
     }
 }
